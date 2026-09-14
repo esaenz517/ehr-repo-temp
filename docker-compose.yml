@@ -1,0 +1,124 @@
+version: "3.9"
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: app-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+      - ./db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - app-net
+
+  # One-shot job that waits for SQL Server to be healthy, then runs init.sql
+  # to create the database/table/seed data (SQL Server doesn't auto-run
+  # initdb.d scripts the way Postgres/MySQL images do).
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: app-db-init
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./db/init:/init
+    entrypoint: >
+      bash -c "
+      /opt/mssql-tools18/bin/sqlcmd -S db -U sa -P 'YourStrong!Passw0rd' -C -i /init/init.sql
+      "
+    networks:
+      - app-net
+
+  backend:
+    build:
+      context: ./backend
+    container_name: app-backend
+    environment:
+      DB_SERVER: "db"
+      DB_PORT: "1433"
+      DB_NAME: "AppDb"
+      DB_USER: "dev"
+      DB_PASSWORD: "dev123"
+      CORS_ORIGINS: "http://localhost:3000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-net
+    restart: on-failure
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: app-frontend
+    environment:
+      VITE_API_URL: "http://localhost:8000"
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - app-net
+
+  # Web-based GUI for browsing the SQL Server database at http://localhost:8081.
+  # On first visit it walks you through creating an admin account, then add a
+  # connection to server "db", port 1433, user "dev" (see README for password).
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: app-cloudbeaver
+    ports:
+      - "8081:8978"
+    volumes:
+      - cloudbeaver-data:/opt/cloudbeaver/workspace
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-net
+
+  # One-shot job that just prints out where everything is running once the
+  # other services have started. Purely informational - safe to ignore its
+  # exit.
+  urls:
+    image: alpine:3.20
+    container_name: app-urls
+    depends_on:
+      backend:
+        condition: service_started
+      frontend:
+        condition: service_started
+      cloudbeaver:
+        condition: service_started
+    entrypoint: >
+      sh -c "
+      echo '';
+      echo '--- App is up ---';
+      echo 'Frontend:    http://localhost:3000';
+      echo 'Backend:     http://localhost:8000';
+      echo 'API docs:    http://localhost:8000/docs';
+      echo 'CloudBeaver: http://localhost:8081';
+      echo '';
+      "
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge
+
+volumes:
+  mssql-data:
+  cloudbeaver-data:
