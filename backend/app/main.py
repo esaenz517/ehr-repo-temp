@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import items
+from app.routers import items, patients
 
 app = FastAPI(title="Simple Items API")
 
@@ -16,8 +16,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-#Add router Eg. app.include_router(patients.router)
 app.include_router(items.router)
+app.include_router(patients.router)
 
 
 @app.get("/health")
