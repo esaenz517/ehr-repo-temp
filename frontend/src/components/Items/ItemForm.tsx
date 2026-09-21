@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import type { CreateItemInput } from "../api/items";
+import type { CreateItemInput } from "../../api/items";
 
 interface ItemFormProps {
   onSubmit: (input: CreateItemInput) => void;
