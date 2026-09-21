@@ -1,39 +1,21 @@
-import { ItemForm } from "./components/ItemForm";
-import { ItemList } from "./components/ItemList";
-import { PatientForm } from "./components/Patients/PatientForm";
-import { PatientList } from "./components/Patients/PatientList";
-import { useItems } from "./hooks/useItems";
-import { usePatients } from "./hooks/usePatients";
+import { useState } from "react";
+import { Home } from "./components/Home";
+import { ItemsPage } from "./components/ItemsPage";
+import { PatientsPage } from "./components/PatientsPage";
+import { Sidebar, View } from "./components/Sidebar";
 
 function App() {
-  const { items, loading, error, create, remove } = useItems();
-  const {
-    patients,
-    loading: patientsLoading,
-    error: patientsError,
-    create: createPatient,
-    remove: removePatient,
-  } = usePatients();
+  const [view, setView] = useState<View>("home");
 
   return (
-    <div style={{ maxWidth: 720, margin: "40px auto", fontFamily: "sans-serif" }}>
-      <h1>Items</h1>
+    <div className="app-layout"> 
+      <Sidebar active={view} onNavigate={setView} />
 
-      <ItemForm onSubmit={create} />
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {loading ? <p>Loading...</p> : <ItemList items={items} onDelete={remove} />}
-
-      <h1>Patients</h1>
-
-      <PatientForm onSubmit={createPatient} />
-
-      {patientsError && <p style={{ color: "red" }}>{patientsError}</p>}
-      {patientsLoading ? (
-        <p>Loading...</p>
-      ) : (
-        <PatientList patients={patients} onDelete={removePatient} />
-      )}
+      <main className="app-main">
+        {view === "home" && <Home />}
+        {view === "items" && <ItemsPage />}
+        {view === "patients" && <PatientsPage />}
+      </main>
     </div>
   );
 }
