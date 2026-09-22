@@ -48,8 +48,129 @@ BEGIN
 END
 GO
 
+<<<<<<< HEAD
 -- PROVIDERS TABLE (a patient's medical provider)
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Providers')
+=======
+-- USERS
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Users')
+BEGIN
+    CREATE TABLE dbo.Users (
+        UserId INT IDENTITY(1,1) PRIMARY KEY,
+        Name NVARCHAR(200) NOT NULL,
+        Email NVARCHAR(320) NOT NULL UNIQUE,
+        PasswordHash NVARCHAR(500) NULL,
+        AccountStatus NVARCHAR(20) NOT NULL DEFAULT 'active',
+        Discipline NVARCHAR(100) NULL,
+        CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+
+        CONSTRAINT CK_Users_AccountStatus
+            CHECK (AccountStatus IN ('active', 'disabled', 'locked'))
+    );
+END
+GO
+
+
+-- ROLES
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Roles')
+BEGIN
+    CREATE TABLE dbo.Roles (
+        RoleId INT IDENTITY(1,1) PRIMARY KEY,
+        RoleName NVARCHAR(100) NOT NULL UNIQUE,
+        DisplayName NVARCHAR(150) NOT NULL,
+        Discipline NVARCHAR(100) NULL,
+        IsActive BIT NOT NULL DEFAULT 1
+    );
+END
+GO
+
+
+-- PERMISSIONS
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Permissions')
+BEGIN
+    CREATE TABLE dbo.Permissions (
+        PermissionId INT IDENTITY(1,1) PRIMARY KEY,
+        PermissionCode NVARCHAR(150) NOT NULL UNIQUE,
+
+        ResourceType NVARCHAR(100) NOT NULL,
+        Action NVARCHAR(50) NOT NULL,
+
+        RequiredDiscipline NVARCHAR(100) NULL,
+        SensitivityLevel NVARCHAR(100) NULL,
+        NoteTypeRestriction NVARCHAR(100) NULL,
+        CareContext NVARCHAR(50) NULL,
+
+        IsActive BIT NOT NULL DEFAULT 1
+    );
+END
+GO
+
+
+-- USER <-> ROLE
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'UserRoles')
+BEGIN
+    CREATE TABLE dbo.UserRoles (
+        UserId INT NOT NULL,
+        RoleId INT NOT NULL,
+
+        CONSTRAINT PK_UserRoles PRIMARY KEY (UserId, RoleId),
+
+        CONSTRAINT FK_UserRoles_User
+            FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId),
+
+        CONSTRAINT FK_UserRoles_Role
+            FOREIGN KEY (RoleId) REFERENCES dbo.Roles(RoleId)
+    );
+END
+GO
+
+
+-- ROLE <-> PERMISSION
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'RolePermissions')
+BEGIN
+    CREATE TABLE dbo.RolePermissions (
+        RoleId INT NOT NULL,
+        PermissionId INT NOT NULL,
+
+        CONSTRAINT PK_RolePermissions
+            PRIMARY KEY (RoleId, PermissionId),
+
+        CONSTRAINT FK_RolePermissions_Role
+            FOREIGN KEY (RoleId) REFERENCES dbo.Roles(RoleId),
+
+        CONSTRAINT FK_RolePermissions_Permission
+            FOREIGN KEY (PermissionId)
+            REFERENCES dbo.Permissions(PermissionId)
+    );
+END
+GO
+
+MERGE dbo.Roles AS target
+USING (
+    VALUES
+        ('ADMIN',              'Admin',                NULL),
+        ('FACULTY_INSTRUCTOR', 'Faculty / Instructor', NULL),
+        ('PHYSICIAN',          'Physician',            NULL),
+        ('NURSE',              'Nurse',                'Nursing'),
+        ('PSYCHIATRY',         'Psychiatry',           'Psychiatry'),
+        ('PHYSICAL_THERAPY',   'Physical Therapy',     'Physical Therapy'),
+        ('ALLIED_HEALTH',      'Other Allied Health',  NULL)
+) AS source (RoleName, DisplayName, Discipline)
+
+ON target.RoleName = source.RoleName
+
+WHEN NOT MATCHED THEN
+    INSERT (RoleName, DisplayName, Discipline)
+    VALUES (
+        source.RoleName,
+        source.DisplayName,
+        source.Discipline
+    );
+GO
+
+-- PATIENTS TABLE
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Patients')
+>>>>>>> 65e4a01 (Work done towards roles, permissions, and users)
 BEGIN
     CREATE TABLE dbo.Providers (
         ProviderId INT IDENTITY(1,1) PRIMARY KEY,
