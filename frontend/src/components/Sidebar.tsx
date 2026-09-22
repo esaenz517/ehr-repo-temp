@@ -1,4 +1,4 @@
-export type View = "home" | "items" | "patients";
+export type View = "home" | "items" | "patients" | "staff";
 
 interface SidebarProps {
   active: View;
@@ -9,6 +9,7 @@ const NAV_ITEMS: { view: View; label: string }[] = [
   { view: "home", label: "Home" },
   { view: "items", label: "Items" },
   { view: "patients", label: "Patients" },
+  { view: "staff", label: "Staff" },
 ];
 
 export function Sidebar({ active, onNavigate }: SidebarProps) {
