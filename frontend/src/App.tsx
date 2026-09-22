@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Home } from "./components/Home";
 import { ItemsPage } from "./components/ItemsPage";
 import { PatientsPage } from "./components/PatientsPage";
+import { StaffPage } from "./components/StaffPage";
 import { Sidebar, View } from "./components/Sidebar";
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         {view === "home" && <Home />}
         {view === "items" && <ItemsPage />}
         {view === "patients" && <PatientsPage />}
+        {view === "staff" && <StaffPage />}
       </main>
     </div>
   );
