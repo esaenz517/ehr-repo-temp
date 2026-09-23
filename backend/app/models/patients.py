@@ -3,9 +3,19 @@ Patients Model
 SQLAlchemy ORM class mapped to the dbo.Patients table.
 '''
 
-from sqlalchemy import Column, Date, Integer, String
+from sqlalchemy import Column, Date, ForeignKey, Integer, String, Table
+from sqlalchemy.orm import relationship
 
 from app.database import Base
+
+# Association table for the Patients <-> Drugs many-to-many relationship (dbo.PatientDrugs).
+patient_drugs = Table(
+    "PatientDrugs",
+    Base.metadata,
+    Column("PatientId", Integer, ForeignKey("dbo.Patients.PatientId"), primary_key=True),
+    Column("DrugId", Integer, ForeignKey("dbo.Drugs.DrugId"), primary_key=True),
+    schema="dbo",
+)
 
 
 class Patient(Base):
@@ -20,3 +30,9 @@ class Patient(Base):
     date_of_birth = Column("DateOfBirth", Date, nullable=False)
     gender = Column("Gender", String(20), nullable=True)
     status = Column("Status", String(20), nullable=False, default="outpatient")
+    provider_id = Column("ProviderId", Integer, ForeignKey("dbo.Providers.ProviderId"), nullable=True)
+
+    # Many-to-one: the patient's medical provider.
+    provider = relationship("Provider")
+    # Many-to-many: the drugs a patient may take.
+    drugs = relationship("Drug", secondary=patient_drugs)

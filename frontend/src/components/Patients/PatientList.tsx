@@ -31,6 +31,15 @@ export function PatientList({ patients, onDelete }: PatientListProps) {
               {" · "}
               {patient.status}
             </div>
+            <div style={{ fontSize: 14, color: "#555" }}>
+              Provider:{" "}
+              {patient.provider
+                ? `Dr. ${patient.provider.first_name} ${patient.provider.last_name}`
+                : "None"}
+            </div>
+            <div style={{ fontSize: 14, color: "#555" }}>
+              Drugs: {patient.drugs.length > 0 ? patient.drugs.map((d) => d.name).join(", ") : "None"}
+            </div>
           </div>
           <button onClick={() => onDelete(patient.patient_id)}>Delete</button>
         </li>
