@@ -3,6 +3,7 @@ import { DrugsPage } from "./components/DrugsPage";
 import { Home } from "./components/Home";
 import { ItemsPage } from "./components/ItemsPage";
 import { PatientsPage } from "./components/PatientsPage";
+import { StaffPage } from "./components/StaffPage";
 import { ProvidersPage } from "./components/ProvidersPage";
 import { Sidebar, View } from "./components/Sidebar";
 
@@ -17,6 +18,7 @@ function App() {
         {view === "home" && <Home />}
         {view === "items" && <ItemsPage />}
         {view === "patients" && <PatientsPage />}
+        {view === "staff" && <StaffPage />}
         {view === "providers" && <ProvidersPage />}
         {view === "drugs" && <DrugsPage />}
       </main>

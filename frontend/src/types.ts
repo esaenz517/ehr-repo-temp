@@ -33,3 +33,13 @@ export interface Patient {
   provider: Provider | null;
   drugs: Drug[];
 }
+
+export interface Staff {
+  staffid: number;
+  first_name: string;
+  middle_name: string | null;
+  last_name: string;
+  specialization: string;
+  student: boolean;
+  admin: boolean;
+}

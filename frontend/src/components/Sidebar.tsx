@@ -1,4 +1,4 @@
-export type View = "home" | "items" | "patients" | "providers" | "drugs";
+export type View = "home" | "items" | "patients" | "staff" | "providers" | "drugs";
 
 interface SidebarProps {
   active: View;
@@ -9,6 +9,7 @@ const NAV_ITEMS: { view: View; label: string }[] = [
   { view: "home", label: "Home" },
   { view: "items", label: "Items" },
   { view: "patients", label: "Patients" },
+  { view: "staff", label: "Staff" },
   { view: "providers", label: "Providers" },
   { view: "drugs", label: "Drugs" },
 ];
