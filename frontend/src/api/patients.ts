@@ -9,6 +9,8 @@ export interface CreatePatientInput {
   date_of_birth: string;
   gender: string | null;
   status: string;
+  provider_id: number | null;
+  drug_ids: number[];
 }
 
 export const patientsApi = {

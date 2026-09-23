@@ -48,6 +48,51 @@ BEGIN
 END
 GO
 
+-- PROVIDERS TABLE (a patient's medical provider)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Providers')
+BEGIN
+    CREATE TABLE dbo.Providers (
+        ProviderId INT IDENTITY(1,1) PRIMARY KEY,
+        FirstName  NVARCHAR(100) NOT NULL,
+        LastName   NVARCHAR(100) NOT NULL,
+        Specialty  NVARCHAR(100) NULL,
+        Phone      NVARCHAR(20)  NULL,
+        Email      NVARCHAR(200) NULL
+    );
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM dbo.Providers)
+BEGIN
+    INSERT INTO dbo.Providers (FirstName, LastName, Specialty, Phone, Email) VALUES
+        ('Susan', 'Lee',     'Cardiology',        '555-0101', 'susan.lee@clinic.example'),
+        ('Mark',  'Feldman', 'Internal Medicine', '555-0102', 'mark.feldman@clinic.example'),
+        ('Priya', 'Rao',     'Pediatrics',        '555-0103', 'priya.rao@clinic.example');
+END
+GO
+
+-- DRUGS TABLE (catalog of drugs that can be prescribed to patients)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Drugs')
+BEGIN
+    CREATE TABLE dbo.Drugs (
+        DrugId      INT IDENTITY(1,1) PRIMARY KEY,
+        Name        NVARCHAR(200) NOT NULL,
+        Description NVARCHAR(1000) NULL
+    );
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM dbo.Drugs)
+BEGIN
+    INSERT INTO dbo.Drugs (Name, Description) VALUES
+        (N'Lisinopril',   N'ACE inhibitor used to treat high blood pressure'),
+        (N'Metformin',    N'Used to control blood sugar in type 2 diabetes'),
+        (N'Atorvastatin', N'Statin used to lower cholesterol'),
+        (N'Albuterol',    N'Bronchodilator used to treat asthma'),
+        (N'Amoxicillin',  N'Penicillin-type antibiotic');
+END
+GO
+
 -- PATIENTS TABLE
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Patients')
 BEGIN
@@ -60,19 +105,60 @@ BEGIN
         DateOfBirth  DATE          NOT NULL,
         Gender       NVARCHAR(20)  NULL,
         Status       NVARCHAR(20)  NOT NULL DEFAULT 'outpatient'
-                     CHECK (Status IN ('outpatient', 'inpatient'))
+                     CHECK (Status IN ('outpatient', 'inpatient')),
+        ProviderId   INT           NULL REFERENCES dbo.Providers(ProviderId) -- patient's medical provider
     );
+END
+GO
+
+-- Add ProviderId (and its FK) to a Patients table created before this relationship existed.
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Patients') AND name = 'ProviderId')
+BEGIN
+    ALTER TABLE dbo.Patients ADD ProviderId INT NULL;
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_Patients_Providers')
+BEGIN
+    ALTER TABLE dbo.Patients
+        ADD CONSTRAINT FK_Patients_Providers FOREIGN KEY (ProviderId) REFERENCES dbo.Providers(ProviderId);
 END
 GO
 
 IF NOT EXISTS (SELECT * FROM dbo.Patients)
 BEGIN
-    INSERT INTO dbo.Patients (Mrn, FirstName, MiddleName, LastName, DateOfBirth, Gender, Status) VALUES
-        ('MRN000001', 'James',    'Robert',   'Carter',     '1984-03-12', 'Male',        'outpatient'),
-        ('MRN000002', 'Maria',    'Elena',    'Gonzalez',   '1992-07-25', 'Female',      'inpatient'),
-        ('MRN000003', 'David',    NULL,       'Nguyen',     '1978-11-02', 'Male',        'outpatient'),
-        ('MRN000004', 'Sarah',    'Jane',     'Thompson',   '2001-01-19', 'Female',      'outpatient'),
-        ('MRN000005', 'Michael',  'A',        'Johnson',    '1965-09-30', 'Male',        'inpatient'),
-        ('MRN000006', 'Aisha',    NULL,       'Patel',      '1989-05-14', 'Female',      'outpatient');
+    INSERT INTO dbo.Patients (Mrn, FirstName, MiddleName, LastName, DateOfBirth, Gender, Status, ProviderId) VALUES
+        ('MRN000001', 'James',    'Robert',   'Carter',     '1984-03-12', 'Male',        'outpatient', 1),
+        ('MRN000002', 'Maria',    'Elena',    'Gonzalez',   '1992-07-25', 'Female',      'inpatient',  2),
+        ('MRN000003', 'David',    NULL,       'Nguyen',     '1978-11-02', 'Male',        'outpatient', 1),
+        ('MRN000004', 'Sarah',    'Jane',     'Thompson',   '2001-01-19', 'Female',      'outpatient', 3),
+        ('MRN000005', 'Michael',  'A',        'Johnson',    '1965-09-30', 'Male',        'inpatient',  2),
+        ('MRN000006', 'Aisha',    NULL,       'Patel',      '1989-05-14', 'Female',      'outpatient', 3);
+END
+GO
+
+-- PATIENT DRUGS TABLE (many-to-many: the drugs a patient may take)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'PatientDrugs')
+BEGIN
+    CREATE TABLE dbo.PatientDrugs (
+        PatientId INT NOT NULL REFERENCES dbo.Patients(PatientId) ON DELETE CASCADE,
+        DrugId    INT NOT NULL REFERENCES dbo.Drugs(DrugId) ON DELETE CASCADE,
+        Dosage    NVARCHAR(100) NULL,
+        CONSTRAINT PK_PatientDrugs PRIMARY KEY (PatientId, DrugId)
+    );
+END
+GO
+
+-- Seed data below assumes a fresh database where the patients/drugs above got ids 1-6 / 1-5.
+IF NOT EXISTS (SELECT * FROM dbo.PatientDrugs)
+BEGIN
+    INSERT INTO dbo.PatientDrugs (PatientId, DrugId, Dosage) VALUES
+        (1, 1, N'10mg daily'),
+        (1, 3, N'20mg nightly'),
+        (2, 2, N'500mg twice daily'),
+        (4, 4, N'2 puffs as needed'),
+        (5, 1, N'10mg daily'),
+        (5, 2, N'500mg twice daily'),
+        (6, 3, N'20mg nightly');
 END
 GO
