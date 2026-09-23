@@ -5,6 +5,7 @@ import { ItemsPage } from "./components/ItemsPage";
 import { PatientsPage } from "./components/PatientsPage";
 import { StaffPage } from "./components/StaffPage";
 import { ProvidersPage } from "./components/ProvidersPage";
+import { RoomsPage } from "./components/RoomsPage";
 import { Sidebar, View } from "./components/Sidebar";
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         {view === "staff" && <StaffPage />}
         {view === "providers" && <ProvidersPage />}
         {view === "drugs" && <DrugsPage />}
+        {view === "rooms" && <RoomsPage />}
       </main>
     </div>
   );
