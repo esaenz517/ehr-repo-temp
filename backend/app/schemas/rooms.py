@@ -24,15 +24,14 @@ class Room(RoomBase):
 
 class RoomCreate(RoomBase):
     pass
-    
-class RoomAssign(BaseModel):
-    room_id: int
+
+
+
+#Assigning Rooms
+class AssignRoom(BaseModel):
     patient_id: int
-    assigned_at: datetime | None = None
+
+
     
-class RoomUnassign(BaseModel):
-    room_id: int
-    patient_id: int
-    unassigned_at: datetime | None = None
     
     

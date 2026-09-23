@@ -5,6 +5,8 @@ interface RoomFormProps {
   onSubmit: (input: CreateRoomInput) => void;
 }
 
+// Form for creating a new room. Just collects input and hands it up to
+// whatever onSubmit was passed in (RoomsPage wires this to useRooms().create).
 export function RoomForm({ onSubmit }: RoomFormProps) {
   const [roomNumber, setRoomNumber] = useState("");
   const [unit, setUnit] = useState("");
@@ -12,8 +14,9 @@ export function RoomForm({ onSubmit }: RoomFormProps) {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!roomNumber.trim()) return;
+    if (!roomNumber.trim()) return; // require a room number before submitting
     onSubmit({ room_number: Number(roomNumber), unit, status });
+    // clear the form for the next entry
     setRoomNumber("");
     setUnit("");
     setStatus("available");
