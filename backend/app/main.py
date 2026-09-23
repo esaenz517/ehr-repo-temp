@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import drugs, items, patients, providers, staff
+from app.routers import drugs, items, patients, providers, staff, rooms
 
 app = FastAPI(title="Simple Items API")
 
@@ -21,6 +21,7 @@ app.include_router(patients.router)
 app.include_router(providers.router)
 app.include_router(drugs.router)
 app.include_router(staff.router)
+app.include_router(rooms.router)
 
 
 @app.get("/health")

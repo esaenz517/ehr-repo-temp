@@ -43,3 +43,10 @@ export interface Staff {
   student: boolean;
   admin: boolean;
 }
+
+export interface Room {
+  room_id: number;
+  room_number: number;
+  unit: string;
+  status: string;
+}
