@@ -1,11 +1,21 @@
-import type { Room } from "../../types";
+import { useState } from "react";
+import type { Patient, Room } from "../../types";
 
 interface RoomListProps {
-    rooms: Room[];
-    onDelete: (roomId: number) => void;
+  rooms: Room[];
+  availablePatients: Patient[];
+  onDelete: (roomId: number) => void;
+  onAssign: (roomId: number, patientId: number) => void;
+  onUnassign: (roomId: number) => void;
 }
 
-export function RoomList({ rooms, onDelete }: RoomListProps) {
+// Displays every room. Available rooms get a patient dropdown + "Assign"
+// button; occupied rooms get an "Unassign" button instead.
+export function RoomList({ rooms, availablePatients, onDelete, onAssign, onUnassign }: RoomListProps) {
+  // Tracks which patient is currently selected in each room's dropdown,
+  // keyed by room_id (since every room has its own independent dropdown).
+  const [selected, setSelected] = useState<Record<number, string>>({});
+
   return (
     <ul style={{ listStyle: "none", padding: 0 }}>
       {rooms.map((room) => (
@@ -29,7 +39,37 @@ export function RoomList({ rooms, onDelete }: RoomListProps) {
               Status: {room.status}
             </div>
           </div>
-          <button onClick={() => onDelete(room.room_id)}>Delete</button>
+
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {/* Only show the assign dropdown for rooms that are actually free */}
+            {room.status === "available" ? (
+              <>
+                <select
+                  value={selected[room.room_id] ?? ""}
+                  onChange={(e) =>
+                    setSelected((prev) => ({ ...prev, [room.room_id]: e.target.value }))
+                  }
+                >
+                  <option value="">Select patient</option>
+                  {availablePatients.map((patient) => (
+                    <option key={patient.patient_id} value={patient.patient_id}>
+                      {patient.first_name} {patient.last_name}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  disabled={!selected[room.room_id]} // can't assign until a patient is picked
+                  onClick={() => onAssign(room.room_id, Number(selected[room.room_id]))}
+                >
+                  Assign
+                </button>
+              </>
+            ) : (
+              // Room is occupied - only option is to discharge the current patient
+              <button onClick={() => onUnassign(room.room_id)}>Unassign</button>
+            )}
+            <button onClick={() => onDelete(room.room_id)}>Delete</button>
+          </div>
         </li>
       ))}
     </ul>

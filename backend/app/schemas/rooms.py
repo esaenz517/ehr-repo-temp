@@ -27,19 +27,10 @@ class RoomCreate(RoomBase):
 
 
 
-#Assigning and Unassigning Rooms
+#Assigning Rooms
 class AssignRoom(BaseModel):
-    room_id: int
-    
-class UnassignRoom(BaseModel):
-    assignment_id: int
-    room_id: int
     patient_id: int
-    assigned_at: datetime
-    discharged_at: datetime | None = None
-    
-    class Config:
-        from_attributes = True
+
 
     
     
