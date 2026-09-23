@@ -1,14 +1,13 @@
-# Node
-node_modules/
-dist/
+#macOS files
+.DS_Store
 
 # Python
 __pycache__/
 *.pyc
 .venv/
 
-# Env
-.env
+# Node
+node_modules/
 
-# OS
-.DS_Store
+# Build output
+dist/

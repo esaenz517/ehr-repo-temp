@@ -5,6 +5,7 @@ DB access functions for patients - list, get, create, delete.
 
 from sqlalchemy.orm import Session
 
+from app.models.drugs import Drug as DrugModel
 from app.models.patients import Patient as PatientModel
 from app.schemas.patients import PatientCreate
 
@@ -29,7 +30,10 @@ def create_patient(db: Session, patient: PatientCreate):
         date_of_birth=patient.date_of_birth,
         gender=patient.gender,
         status=patient.status,
+        provider_id=patient.provider_id,
     )
+    if patient.drug_ids:
+        db_patient.drugs = db.query(DrugModel).filter(DrugModel.drug_id.in_(patient.drug_ids)).all()
     db.add(db_patient)
     db.commit()
     db.refresh(db_patient)
