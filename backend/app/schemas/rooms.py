@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 #Fields shared by every Room
 class RoomBase(BaseModel):
-    room_number: str
+    room_number: int
     unit: str | None = None
     status: str = "available"
     

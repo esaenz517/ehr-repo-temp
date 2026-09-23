@@ -26,6 +26,6 @@ def get_room(room_id: int, db: Session = Depends(get_db)):
 def create_room(room: RoomCreate, db: Session = Depends(get_db)):
     return crud.create_room(db, room)
 
-@router.delete("/{room_id}", response_model=Room)
+@router.delete("/{room_id}")
 def delete_room(room_id: int, db: Session = Depends(get_db)):
     return crud.delete_room(db, room_id)
