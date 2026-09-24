@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CreateCasePage } from "./components/CreateCasePage";
 import { DrugsPage } from "./components/DrugsPage";
 import { Home } from "./components/Home";
 import { ItemsPage } from "./components/ItemsPage";
@@ -23,6 +24,7 @@ function App() {
         {view === "providers" && <ProvidersPage />}
         {view === "drugs" && <DrugsPage />}
         {view === "rooms" && <RoomsPage />}
+        {view === "createCase" && <CreateCasePage />}
       </main>
     </div>
   );
