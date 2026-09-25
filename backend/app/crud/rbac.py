@@ -19,11 +19,9 @@ def user_has_permission(
 ) -> bool:
     """
     Checks whether a user has a general permission through any active role.
-
     General permissions are permissions that do not contain contextual
     restrictions for discipline, sensitivity, note type, or care context.
     """
-
     permission = (
         db.query(Permission.permission_id)
         .join(
@@ -38,10 +36,12 @@ def user_has_permission(
             UserRole,
             UserRole.role_id == Role.role_id,
         )
+        # SQL Server BIT columns need equality comparisons here.
+        # Using .is_(True) can compile to "IS 1" and cause a SQL syntax error.
         .filter(
             UserRole.user_id == user_id,
-            Role.is_active.is_(True),
-            Permission.is_active.is_(True),
+            Role.is_active == True,
+            Permission.is_active == True,
             Permission.resource_type == resource_type,
             Permission.action == action,
             Permission.required_discipline.is_(None),
@@ -55,6 +55,8 @@ def user_has_permission(
     return permission is not None
 
 
+# Contextual permissions must match their restrictions exactly so a general
+# permission does not automatically grant access to sensitive records.
 def user_has_contextual_permission(
     db: Session,
     user_id: int,
@@ -68,12 +70,10 @@ def user_has_contextual_permission(
     """
     Checks whether a user has a permission matching the supplied
     authorization context.
-
     Contextual values are matched exactly. This prevents an unrestricted
     permission such as note.read from automatically granting access to
     restricted records such as psychiatry notes.
     """
-
     query = (
         db.query(Permission.permission_id)
         .join(
@@ -88,10 +88,12 @@ def user_has_contextual_permission(
             UserRole,
             UserRole.role_id == Role.role_id,
         )
+        # SQL Server BIT columns need equality comparisons here.
+        # Using .is_(True) can compile to "IS 1" and cause a SQL syntax error.
         .filter(
             UserRole.user_id == user_id,
-            Role.is_active.is_(True),
-            Permission.is_active.is_(True),
+            Role.is_active == True,
+            Permission.is_active == True,
             Permission.resource_type == resource_type,
             Permission.action == action,
         )
