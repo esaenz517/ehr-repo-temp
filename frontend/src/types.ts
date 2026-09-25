@@ -73,9 +73,26 @@ export interface Staff {
   admin: boolean;
 }
 
+<<<<<<< HEAD
 export interface Room {
   room_id: number;
   room_number: number;
   unit: string;
   status: string;
+=======
+export interface MedicalHistory {
+  medical_history_id: number;
+  patient_id: number;
+  condition: string;
+  diagnosis_date: string | null;
+  notes: string | null;
+}
+
+export interface FamilyHistory {
+  family_history_id: number;
+  patient_id: number;
+  relationship: string;
+  condition: string;
+  notes: string | null;
+>>>>>>> 3e7527a (Complete medical and family history feature)
 }

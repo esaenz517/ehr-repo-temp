@@ -488,6 +488,7 @@ BEGIN
 END
 GO
 
+<<<<<<< HEAD
 -- ROOMS TABLE
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Rooms')
 BEGIN
@@ -498,10 +499,27 @@ BEGIN
         --RoomType    NVARCHAR(100)  NULL, --Verify requirements to see how to label rooms types based on inpatient or outpatient
         Status       NVARCHAR(20)  NOT NULL DEFAULT 'available'
                      CHECK (Status IN ('available', 'occupied'))
+=======
+-- MEDICAL HISTORY TABLE
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'MedicalHistory')
+BEGIN
+    CREATE TABLE dbo.MedicalHistory (
+        MedicalHistoryId INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId        INT NOT NULL,
+        Condition        NVARCHAR(200) NOT NULL,
+        DiagnosisDate    DATE NULL,
+        Notes            NVARCHAR(1000) NULL,
+
+        CONSTRAINT FK_MedicalHistory_Patients
+            FOREIGN KEY (PatientId)
+            REFERENCES dbo.Patients(PatientId)
+            ON DELETE CASCADE
+>>>>>>> 3e7527a (Complete medical and family history feature)
     );
 END
 GO
 
+<<<<<<< HEAD
 -- ROOMS DATA
 IF NOT EXISTS (SELECT * FROM dbo.Rooms)
 BEGIN
@@ -560,3 +578,23 @@ BEGIN
         (N'Alex',   NULL, N'Morgan', N'Administration',    0, 1);
 END
 GO
+=======
+
+-- FAMILY HISTORY TABLE
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'FamilyHistory')
+BEGIN
+    CREATE TABLE dbo.FamilyHistory (
+        FamilyHistoryId INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId       INT NOT NULL,
+        Relationship    NVARCHAR(100) NOT NULL,
+        Condition       NVARCHAR(200) NOT NULL,
+        Notes           NVARCHAR(1000) NULL,
+
+        CONSTRAINT FK_FamilyHistory_Patients
+            FOREIGN KEY (PatientId)
+            REFERENCES dbo.Patients(PatientId)
+            ON DELETE CASCADE
+    );
+END
+GO
+>>>>>>> 3e7527a (Complete medical and family history feature)
