@@ -102,7 +102,6 @@ BEGIN
 END
 GO
 
-
 -- DRUGS TABLE (catalog of drugs that can be prescribed to patients)
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Drugs')
 BEGIN
@@ -440,16 +439,33 @@ BEGIN
 END
 GO
 
+
+-- FAMILY HISTORY TABLE
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'FamilyHistory')
+BEGIN
+    CREATE TABLE dbo.FamilyHistory (
+        FamilyHistoryId INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId       INT NOT NULL,
+        Relationship    NVARCHAR(100) NOT NULL,
+        Condition       NVARCHAR(200) NOT NULL,
+        Notes           NVARCHAR(1000) NULL,
+
+        CONSTRAINT FK_FamilyHistory_Patients
+            FOREIGN KEY (PatientId)
+            REFERENCES dbo.Patients(PatientId)
+            ON DELETE CASCADE
+    );
+END
 -- ROOMS DATA
 IF NOT EXISTS (SELECT * FROM dbo.Rooms)
 BEGIN
     INSERT INTO dbo.Rooms (RoomNumber, Unit, Status) VALUES
-        ('100', 'General',    'available'),
-        ('101', 'General',    'available'),
-        ('102', 'ICU',        'available'),
-        ('103', 'ICU',        'available'),
-        ('104', 'Pediatrics', 'available'),
-        ('105', 'Pediatrics', 'available');
+        (100, 'General',    'available'),
+        (101, 'General',    'available'),
+        (102, 'ICU',        'available'),
+        (103, 'ICU',        'available'),
+        (104, 'Pediatrics', 'available'),
+        (105, 'Pediatrics', 'available');
 END
 GO
 
@@ -461,7 +477,7 @@ BEGIN
         RoomId       INT NOT NULL REFERENCES dbo.Rooms(RoomId), --Foreign key to Rooms table
         PatientId    INT NOT NULL REFERENCES dbo.Patients(PatientId), --Foreign key to Patients table
         AssignedAt   DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-        DischargedAt DATETIME2 NULL, --NULL means patient is still assigned to the room
+        DischargedAt DATETIME2 NULL --NULL means patient is still assigned to the room
     );
 END 
 GO
@@ -506,24 +522,6 @@ BEGIN
         username      NVARCHAR(254) NOT NULL PRIMARY KEY,
         password_hash NVARCHAR(100) NOT NULL, -- bcrypt hash
         staffid       INT NOT NULL REFERENCES dbo.Staff(StaffId)
-    );
-END
-GO
-
--- FAMILY HISTORY TABLE
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'FamilyHistory')
-BEGIN
-    CREATE TABLE dbo.FamilyHistory (
-        FamilyHistoryId INT IDENTITY(1,1) PRIMARY KEY,
-        PatientId       INT NOT NULL,
-        Relationship    NVARCHAR(100) NOT NULL,
-        Condition       NVARCHAR(200) NOT NULL,
-        Notes           NVARCHAR(1000) NULL,
-
-        CONSTRAINT FK_FamilyHistory_Patients
-            FOREIGN KEY (PatientId)
-            REFERENCES dbo.Patients(PatientId)
-            ON DELETE CASCADE
     );
 END
 GO
