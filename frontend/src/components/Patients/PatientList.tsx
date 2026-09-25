@@ -1,4 +1,6 @@
+import { useState } from "react";
 import type { Patient } from "../../types";
+import { MedicalHistoryPanel } from "../MedicalHistory/MedicalHistoryPanel";
 
 interface PatientListProps {
   patients: Patient[];
@@ -6,6 +8,8 @@ interface PatientListProps {
 }
 
 export function PatientList({ patients, onDelete }: PatientListProps) {
+  const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
+
   return (
     <ul style={{ listStyle: "none", padding: 0 }}>
       {patients.map((patient) => (
@@ -15,6 +19,7 @@ export function PatientList({ patients, onDelete }: PatientListProps) {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            flexWrap: "wrap",
             padding: "8px 0",
             borderBottom: "1px solid #eee",
           }}
@@ -41,7 +46,30 @@ export function PatientList({ patients, onDelete }: PatientListProps) {
               Drugs: {patient.drugs.length > 0 ? patient.drugs.map((d) => d.name).join(", ") : "None"}
             </div>
           </div>
-          <button onClick={() => onDelete(patient.patient_id)}>Delete</button>
+
+          <div>
+            <button
+              onClick={() =>
+                setSelectedPatientId(
+                  selectedPatientId === patient.patient_id ? null : patient.patient_id
+                )
+              }
+            >
+              {selectedPatientId === patient.patient_id ? "Hide History" : "View History"}
+            </button>
+
+            <button
+              onClick={() => onDelete(patient.patient_id)}
+               style={{ marginLeft: 8 }}
+            >
+               Delete
+            </button>
+          </div>
+          {selectedPatientId === patient.patient_id && (
+            <div style={{ width: "100%" }}>
+              <MedicalHistoryPanel patientId={patient.patient_id} />
+            </div>
+          )}
         </li>
       ))}
     </ul>
