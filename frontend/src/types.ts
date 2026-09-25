@@ -1,3 +1,32 @@
+export interface Role {
+  role_id: number;
+  role_name: string;
+  display_name: string;
+  discipline: string | null;
+  is_active: boolean;
+}
+
+export interface Permission {
+  permission_id: number;
+  permission_code: string;
+  resource_type: string;
+  action: string;
+  required_discipline: string | null;
+  sensitivity_level: string | null;
+  note_type_restriction: string | null;
+  care_context: string | null;
+  is_active: boolean;
+}
+
+export interface User {
+  user_id: number;
+  name: string;
+  email: string;
+  discipline: string | null;
+  account_status: string;
+  created_at: string;
+}
+
 export interface Item {
   id: number;
   name: string;
@@ -47,4 +76,27 @@ export interface Staff {
 export interface LoginResponse {
   username: string;
   staffid: number;
+}
+
+export interface MedicalHistory {
+  medical_history_id: number;
+  patient_id: number;
+  condition: string;
+  diagnosis_date: string | null;
+  notes: string | null;
+}
+
+export interface FamilyHistory {
+  family_history_id: number;
+  patient_id: number;
+  relationship: string;
+  condition: string;
+  notes: string | null;
+}
+
+export interface Room {
+  room_id: number;
+  room_number: number;
+  unit: string;
+  status: string;
 }
