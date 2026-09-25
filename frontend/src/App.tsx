@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { CreateCasePage } from "./components/CreateCasePage";
 import { DrugsPage } from "./components/DrugsPage";
 import { Home } from "./components/Home";
 import { ItemsPage } from "./components/ItemsPage";
 import { PatientsPage } from "./components/PatientsPage";
 import { StaffPage } from "./components/StaffPage";
 import { ProvidersPage } from "./components/ProvidersPage";
+import { RoomsPage } from "./components/RoomsPage";
 import { Sidebar, View } from "./components/Sidebar";
 
 function App() {
@@ -21,6 +23,8 @@ function App() {
         {view === "staff" && <StaffPage />}
         {view === "providers" && <ProvidersPage />}
         {view === "drugs" && <DrugsPage />}
+        {view === "rooms" && <RoomsPage />}
+        {view === "createCase" && <CreateCasePage />}
       </main>
     </div>
   );
