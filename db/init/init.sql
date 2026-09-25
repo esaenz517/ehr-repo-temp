@@ -48,10 +48,6 @@ BEGIN
 END
 GO
 
-<<<<<<< HEAD
--- PROVIDERS TABLE (a patient's medical provider)
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Providers')
-=======
 -- USERS
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Users')
 BEGIN
@@ -170,7 +166,6 @@ GO
 
 -- PATIENTS TABLE
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Patients')
->>>>>>> 65e4a01 (Work done towards roles, permissions, and users)
 BEGIN
     CREATE TABLE dbo.Providers (
         ProviderId INT IDENTITY(1,1) PRIMARY KEY,
