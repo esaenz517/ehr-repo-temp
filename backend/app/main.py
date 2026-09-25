@@ -31,6 +31,7 @@ app.include_router(patients.router)
 app.include_router(providers.router)
 app.include_router(drugs.router)
 app.include_router(staff.router)
+app.include_router(medical_history.router)
 app.include_router(rooms.router)
 
 app.include_router(users.router)
