@@ -66,6 +66,19 @@ BEGIN
 END
 GO
 
+-- PROVIDERS TABLE (a patient's medical provider)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Providers')
+BEGIN
+    CREATE TABLE dbo.Providers (
+        ProviderId INT IDENTITY(1,1) PRIMARY KEY,
+        FirstName  NVARCHAR(100) NOT NULL,
+        LastName   NVARCHAR(100) NOT NULL,
+        Specialty  NVARCHAR(100) NULL,
+        Phone      NVARCHAR(20) NULL,
+        Email      NVARCHAR(200) NULL
+    );
+END
+GO
 
 -- ROLES
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Roles')
@@ -80,8 +93,79 @@ BEGIN
 END
 GO
 
+IF NOT EXISTS (SELECT * FROM dbo.Providers)
+BEGIN
+    INSERT INTO dbo.Providers (FirstName, LastName, Specialty, Phone, Email) VALUES
+        ('Susan', 'Lee',     'Cardiology',        '555-0101', 'susan.lee@clinic.example'),
+        ('Mark',  'Feldman', 'Internal Medicine', '555-0102', 'mark.feldman@clinic.example'),
+        ('Priya', 'Rao',     'Pediatrics',        '555-0103', 'priya.rao@clinic.example');
+END
+GO
+
+-- PERMISSIONS DATA
+MERGE dbo.Permissions AS target
+USING (
+    VALUES
+        ('patient.read',   'patient',   'read'),
+        ('patient.create', 'patient',   'create'),
+        ('patient.delete', 'patient',   'delete'),
+
+        ('staff.read',     'staff',     'read'),
+        ('staff.create',   'staff',     'create'),
+        ('staff.delete',   'staff',     'delete'),
+
+        ('provider.read',   'provider',   'read'),
+        ('provider.create', 'provider',   'create'),
+        ('provider.delete', 'provider',   'delete'),
+
+        ('drug.read',   'drug',   'read'),
+        ('drug.create', 'drug',   'create'),
+        ('drug.delete', 'drug',   'delete'),
+
+        ('room.read',   'room',   'read'),
+        ('room.create', 'room',   'create'),
+        ('room.update', 'room',   'update'),
+        ('room.delete', 'room',   'delete'),
+
+        ('user.read',         'user', 'read'),
+        ('user.create',       'user', 'create'),
+        ('user.manage_roles', 'user', 'manage_roles'),
+
+        ('role.read',               'role', 'read'),
+        ('role.manage_permissions', 'role', 'manage_permissions'),
+
+        ('permission.read', 'permission', 'read')
+) AS source (PermissionCode, ResourceType, Action)
+
+ON target.PermissionCode = source.PermissionCode
+
+WHEN NOT MATCHED THEN
+    INSERT (
+        PermissionCode,
+        ResourceType,
+        Action
+    )
+    VALUES (
+        source.PermissionCode,
+        source.ResourceType,
+        source.Action
+    );
+GO
+
+-- DRUGS TABLE (catalog of drugs that can be prescribed to patients)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Drugs')
+BEGIN
+    CREATE TABLE dbo.Drugs (
+        DrugId      INT IDENTITY(1,1) PRIMARY KEY,
+        Name        NVARCHAR(200) NOT NULL,
+        Description NVARCHAR(1000) NULL
+    );
+END
+GO
 
 -- PERMISSIONS
+-- Permission definitions are seeded here so all development environments
+-- use the same permission codes. Role assignments can be changed separately.
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Permissions')
 BEGIN
     CREATE TABLE dbo.Permissions (
@@ -176,6 +260,83 @@ BEGIN
         Email      NVARCHAR(200) NULL
     );
 END
+-- PERMISSIONS DATA
+MERGE dbo.Permissions AS target
+USING (
+    VALUES
+        ('patient.read',   'patient',   'read'),
+        ('patient.create', 'patient',   'create'),
+        ('patient.delete', 'patient',   'delete'),
+
+        ('staff.read',     'staff',     'read'),
+        ('staff.create',   'staff',     'create'),
+        ('staff.delete',   'staff',     'delete'),
+
+        ('provider.read',   'provider',   'read'),
+        ('provider.create', 'provider',   'create'),
+        ('provider.delete', 'provider',   'delete'),
+
+        ('drug.read',   'drug',   'read'),
+        ('drug.create', 'drug',   'create'),
+        ('drug.delete', 'drug',   'delete'),
+
+        ('room.read',   'room',   'read'),
+        ('room.create', 'room',   'create'),
+        ('room.update', 'room',   'update'),
+        ('room.delete', 'room',   'delete'),
+
+        ('user.read',         'user', 'read'),
+        ('user.create',       'user', 'create'),
+        ('user.manage_roles', 'user', 'manage_roles'),
+
+        ('role.read',               'role', 'read'),
+        ('role.manage_permissions', 'role', 'manage_permissions'),
+
+        ('permission.read', 'permission', 'read')
+) AS source (
+    PermissionCode,
+    ResourceType,
+    Action
+)
+ON target.PermissionCode = source.PermissionCode
+
+WHEN NOT MATCHED THEN
+    INSERT (
+        PermissionCode,
+        ResourceType,
+        Action
+    )
+    VALUES (
+        source.PermissionCode,
+        source.ResourceType,
+        source.Action
+    );
+GO
+
+-- DEVELOPMENT USER FOR RBAC TESTING
+-- Development-only user for testing RBAC. Replace with normal authentication
+-- and user provisioning before production use.
+IF NOT EXISTS (
+    SELECT 1
+    FROM dbo.Users
+    WHERE Email = 'dev.admin@example.local'
+)
+BEGIN
+    INSERT INTO dbo.Users (
+        Name,
+        Email,
+        PasswordHash,
+        AccountStatus,
+        Discipline
+    )
+    VALUES (
+        'Development Admin',
+        'dev.admin@example.local',
+        NULL,
+        'active',
+        NULL
+    );
+END
 GO
 
 IF NOT EXISTS (SELECT * FROM dbo.Providers)
@@ -196,6 +357,50 @@ BEGIN
         Description NVARCHAR(1000) NULL
     );
 END
+-- ASSIGN DEVELOPMENT USER TO ADMIN ROLE
+-- Development-only bootstrap access.
+-- ADMIN receives all currently defined permissions so RBAC can be tested.
+INSERT INTO dbo.UserRoles (
+    UserId,
+    RoleId
+)
+SELECT
+    u.UserId,
+    r.RoleId
+FROM dbo.Users u
+CROSS JOIN dbo.Roles r
+WHERE
+    u.Email = 'dev.admin@example.local'
+    AND r.RoleName = 'ADMIN'
+    AND NOT EXISTS (
+        SELECT 1
+        FROM dbo.UserRoles ur
+        WHERE
+            ur.UserId = u.UserId
+            AND ur.RoleId = r.RoleId
+    );
+GO
+
+
+-- DEVELOPMENT ADMIN RECEIVES ALL CURRENT PERMISSIONS
+INSERT INTO dbo.RolePermissions (
+    RoleId,
+    PermissionId
+)
+SELECT
+    r.RoleId,
+    p.PermissionId
+FROM dbo.Roles r
+CROSS JOIN dbo.Permissions p
+WHERE
+    r.RoleName = 'ADMIN'
+    AND NOT EXISTS (
+        SELECT 1
+        FROM dbo.RolePermissions rp
+        WHERE
+            rp.RoleId = r.RoleId
+            AND rp.PermissionId = p.PermissionId
+    );
 GO
 
 IF NOT EXISTS (SELECT * FROM dbo.Drugs)
