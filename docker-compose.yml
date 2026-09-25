@@ -35,7 +35,7 @@ services:
       - ./db/init:/init
     entrypoint: >
       bash -c "
-      /opt/mssql-tools18/bin/sqlcmd -S db -U sa -P 'YourStrong!Passw0rd' -C -i /init/init.sql
+      /opt/mssql-tools18/bin/sqlcmd -S db -U sa -P 'YourStrong!Passw0rd' -C -b -i /init/init.sql
       "
     networks:
       - app-net
@@ -63,6 +63,10 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        VITE_API_URL: "http://localhost:8000"
+        # Development user used by the temporary X-User-Id authentication flow.
+        VITE_DEV_USER_ID: "1"
     container_name: app-frontend
     environment:
       VITE_API_URL: "http://localhost:8000"
