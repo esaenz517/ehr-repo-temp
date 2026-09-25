@@ -19,7 +19,9 @@ class PatientBase(BaseModel):
     middle_name: str | None = None
     last_name: str
     date_of_birth: date
-    gender: str | None = None
+    gender_at_birth: str
+    gender_identity: str
+    pronouns: str
     status: str = "outpatient"
     provider_id: int | None = None
 

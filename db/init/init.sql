@@ -97,16 +97,19 @@ GO
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Patients')
 BEGIN
     CREATE TABLE dbo.Patients (
-        PatientId    INT IDENTITY(1,1) PRIMARY KEY,
-        Mrn          NVARCHAR(20)  NULL UNIQUE, -- medical record number
-        FirstName    NVARCHAR(100) NOT NULL,
-        MiddleName   NVARCHAR(100) NULL,
-        LastName     NVARCHAR(100) NOT NULL,
-        DateOfBirth  DATE          NOT NULL,
-        Gender       NVARCHAR(20)  NULL,
-        Status       NVARCHAR(20)  NOT NULL DEFAULT 'outpatient'
-                     CHECK (Status IN ('outpatient', 'inpatient')),
-        ProviderId   INT           NULL REFERENCES dbo.Providers(ProviderId) -- patient's medical provider
+        PatientId           INT IDENTITY(1,1) PRIMARY KEY,
+        Mrn                 NVARCHAR(20)  NULL UNIQUE, -- medical record number
+        FirstName           NVARCHAR(100) NOT NULL,
+        MiddleName          NVARCHAR(100) NULL,
+        LastName            NVARCHAR(100) NOT NULL,
+        PreferredName       NVARCHAR(50)  NULL,
+        DateOfBirth         DATE          NOT NULL,
+        GenderAtBirth       NVARCHAR(20)  NOT NULL,
+        GenderIdentity      NVARCHAR(20)  NOT NULL,
+        Pronouns            NVARCHAR(20)  NOT NULL,
+        Status              NVARCHAR(20)  NOT NULL DEFAULT 'outpatient'
+                            CHECK (Status IN ('outpatient', 'inpatient')),
+        ProviderId          INT           NULL REFERENCES dbo.Providers(ProviderId) -- patient's medical provider
     );
 END
 GO
