@@ -43,3 +43,8 @@ export interface Staff {
   student: boolean;
   admin: boolean;
 }
+
+export interface LoginResponse {
+  username: string;
+  staffid: number;
+}

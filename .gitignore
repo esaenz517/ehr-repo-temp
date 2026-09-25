@@ -1,0 +1,15 @@
+#macOS files
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+
+# Build output
+dist/
+
+tsconfig.tsbuildinfo
