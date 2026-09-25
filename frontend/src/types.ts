@@ -59,3 +59,10 @@ export interface FamilyHistory {
   condition: string;
   notes: string | null;
 }
+
+export interface Room {
+  room_id: number;
+  room_number: number;
+  unit: string;
+  status: string;
+}
