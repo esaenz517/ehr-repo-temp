@@ -15,6 +15,7 @@ from app.routers import (
     rooms,
     staff,
     users,
+    medical_history,
 )
 =======
 from app.routers import drugs, medical_history, items, patients, providers, staff

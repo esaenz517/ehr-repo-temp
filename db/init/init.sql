@@ -102,56 +102,6 @@ BEGIN
 END
 GO
 
--- PERMISSIONS DATA
-MERGE dbo.Permissions AS target
-USING (
-    VALUES
-        ('patient.read',   'patient',   'read'),
-        ('patient.create', 'patient',   'create'),
-        ('patient.delete', 'patient',   'delete'),
-
-        ('staff.read',     'staff',     'read'),
-        ('staff.create',   'staff',     'create'),
-        ('staff.delete',   'staff',     'delete'),
-
-        ('provider.read',   'provider',   'read'),
-        ('provider.create', 'provider',   'create'),
-        ('provider.delete', 'provider',   'delete'),
-
-        ('drug.read',   'drug',   'read'),
-        ('drug.create', 'drug',   'create'),
-        ('drug.delete', 'drug',   'delete'),
-
-        ('room.read',   'room',   'read'),
-        ('room.create', 'room',   'create'),
-        ('room.update', 'room',   'update'),
-        ('room.delete', 'room',   'delete'),
-
-        ('user.read',         'user', 'read'),
-        ('user.create',       'user', 'create'),
-        ('user.manage_roles', 'user', 'manage_roles'),
-
-        ('role.read',               'role', 'read'),
-        ('role.manage_permissions', 'role', 'manage_permissions'),
-
-        ('permission.read', 'permission', 'read')
-) AS source (PermissionCode, ResourceType, Action)
-
-ON target.PermissionCode = source.PermissionCode
-
-WHEN NOT MATCHED THEN
-    INSERT (
-        PermissionCode,
-        ResourceType,
-        Action
-    )
-    VALUES (
-        source.PermissionCode,
-        source.ResourceType,
-        source.Action
-    );
-GO
-
 -- DRUGS TABLE (catalog of drugs that can be prescribed to patients)
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Drugs')
 BEGIN
@@ -514,7 +464,24 @@ BEGIN
             FOREIGN KEY (PatientId)
             REFERENCES dbo.Patients(PatientId)
             ON DELETE CASCADE
+<<<<<<< HEAD
 >>>>>>> 3e7527a (Complete medical and family history feature)
+=======
+);
+END
+GO
+
+-- ROOMS TABLE
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Rooms')
+BEGIN
+    CREATE TABLE dbo.Rooms (
+        RoomId      INT IDENTITY(1,1) PRIMARY KEY,
+        RoomNumber  INT  NOT NULL UNIQUE,
+        Unit        NVARCHAR(100)  NULL, --Verify requirements to see the units that will be used
+        --RoomType    NVARCHAR(100)  NULL, --Verify requirements to see how to label rooms types based on inpatient or outpatient
+        Status       NVARCHAR(20)  NOT NULL DEFAULT 'available'
+                     CHECK (Status IN ('available', 'occupied'))
+>>>>>>> 499af05 (Syntax bug fix)
     );
 END
 GO
