@@ -102,6 +102,7 @@ BEGIN
 END
 GO
 
+
 -- DRUGS TABLE (catalog of drugs that can be prescribed to patients)
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Drugs')
 BEGIN
@@ -198,18 +199,6 @@ WHEN NOT MATCHED THEN
     );
 GO
 
--- PATIENTS TABLE
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Patients')
-BEGIN
-    CREATE TABLE dbo.Providers (
-        ProviderId INT IDENTITY(1,1) PRIMARY KEY,
-        FirstName  NVARCHAR(100) NOT NULL,
-        LastName   NVARCHAR(100) NOT NULL,
-        Specialty  NVARCHAR(100) NULL,
-        Phone      NVARCHAR(20)  NULL,
-        Email      NVARCHAR(200) NULL
-    );
-END
 -- PERMISSIONS DATA
 MERGE dbo.Permissions AS target
 USING (
@@ -289,24 +278,6 @@ BEGIN
 END
 GO
 
-IF NOT EXISTS (SELECT * FROM dbo.Providers)
-BEGIN
-    INSERT INTO dbo.Providers (FirstName, LastName, Specialty, Phone, Email) VALUES
-        ('Susan', 'Lee',     'Cardiology',        '555-0101', 'susan.lee@clinic.example'),
-        ('Mark',  'Feldman', 'Internal Medicine', '555-0102', 'mark.feldman@clinic.example'),
-        ('Priya', 'Rao',     'Pediatrics',        '555-0103', 'priya.rao@clinic.example');
-END
-GO
-
--- DRUGS TABLE (catalog of drugs that can be prescribed to patients)
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Drugs')
-BEGIN
-    CREATE TABLE dbo.Drugs (
-        DrugId      INT IDENTITY(1,1) PRIMARY KEY,
-        Name        NVARCHAR(200) NOT NULL,
-        Description NVARCHAR(1000) NULL
-    );
-END
 -- ASSIGN DEVELOPMENT USER TO ADMIN ROLE
 -- Development-only bootstrap access.
 -- ADMIN receives all currently defined permissions so RBAC can be tested.
@@ -437,19 +408,6 @@ BEGIN
         (6, 3, N'20mg nightly');
 END
 GO
-
-<<<<<<< HEAD
--- ROOMS TABLE
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Rooms')
-BEGIN
-    CREATE TABLE dbo.Rooms (
-        RoomId      INT IDENTITY(1,1) PRIMARY KEY,
-        RoomNumber  INT  NOT NULL UNIQUE,
-        Unit        NVARCHAR(100)  NULL, --Verify requirements to see the units that will be used
-        --RoomType    NVARCHAR(100)  NULL, --Verify requirements to see how to label rooms types based on inpatient or outpatient
-        Status       NVARCHAR(20)  NOT NULL DEFAULT 'available'
-                     CHECK (Status IN ('available', 'occupied'))
-=======
 -- MEDICAL HISTORY TABLE
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'MedicalHistory')
 BEGIN
@@ -464,9 +422,6 @@ BEGIN
             FOREIGN KEY (PatientId)
             REFERENCES dbo.Patients(PatientId)
             ON DELETE CASCADE
-<<<<<<< HEAD
->>>>>>> 3e7527a (Complete medical and family history feature)
-=======
 );
 END
 GO
@@ -481,12 +436,10 @@ BEGIN
         --RoomType    NVARCHAR(100)  NULL, --Verify requirements to see how to label rooms types based on inpatient or outpatient
         Status       NVARCHAR(20)  NOT NULL DEFAULT 'available'
                      CHECK (Status IN ('available', 'occupied'))
->>>>>>> 499af05 (Syntax bug fix)
     );
 END
 GO
 
-<<<<<<< HEAD
 -- ROOMS DATA
 IF NOT EXISTS (SELECT * FROM dbo.Rooms)
 BEGIN
@@ -545,7 +498,17 @@ BEGIN
         (N'Alex',   NULL, N'Morgan', N'Administration',    0, 1);
 END
 GO
-=======
+
+-- LOGIN TABLE (username/password credentials for staff; used by /auth/login)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'T_Login')
+BEGIN
+    CREATE TABLE dbo.T_Login (
+        username      NVARCHAR(254) NOT NULL PRIMARY KEY,
+        password_hash NVARCHAR(100) NOT NULL, -- bcrypt hash
+        staffid       INT NOT NULL REFERENCES dbo.Staff(StaffId)
+    );
+END
+GO
 
 -- FAMILY HISTORY TABLE
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'FamilyHistory')
@@ -564,4 +527,3 @@ BEGIN
     );
 END
 GO
->>>>>>> 3e7527a (Complete medical and family history feature)

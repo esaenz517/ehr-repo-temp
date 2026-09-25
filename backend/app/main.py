@@ -3,7 +3,6 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-<<<<<<< HEAD
 from app.routers import (
     login,
     drugs,
@@ -15,11 +14,8 @@ from app.routers import (
     rooms,
     staff,
     users,
-    medical_history,
+    medical_history
 )
-=======
-from app.routers import drugs, medical_history, items, patients, providers, staff
->>>>>>> 3e7527a (Complete medical and family history feature)
 
 app = FastAPI(title="Simple Items API")
 
@@ -37,16 +33,13 @@ app.include_router(patients.router)
 app.include_router(providers.router)
 app.include_router(drugs.router)
 app.include_router(staff.router)
-<<<<<<< HEAD
 app.include_router(rooms.router)
 app.include_router(login.router)
 
 app.include_router(users.router)
 app.include_router(roles.router)
 app.include_router(permissions.router)
-=======
 app.include_router(medical_history.router)
->>>>>>> 3e7527a (Complete medical and family history feature)
 
 
 @app.get("/health")
