@@ -1,3 +1,32 @@
+export interface Role {
+  role_id: number;
+  role_name: string;
+  display_name: string;
+  discipline: string | null;
+  is_active: boolean;
+}
+
+export interface Permission {
+  permission_id: number;
+  permission_code: string;
+  resource_type: string;
+  action: string;
+  required_discipline: string | null;
+  sensitivity_level: string | null;
+  note_type_restriction: string | null;
+  care_context: string | null;
+  is_active: boolean;
+}
+
+export interface User {
+  user_id: number;
+  name: string;
+  email: string;
+  discipline: string | null;
+  account_status: string;
+  created_at: string;
+}
+
 export interface Item {
   id: number;
   name: string;
