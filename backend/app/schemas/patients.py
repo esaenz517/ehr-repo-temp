@@ -18,6 +18,7 @@ class PatientBase(BaseModel):
     first_name: str
     middle_name: str | None = None
     last_name: str
+    preferred_name: str | None = None
     date_of_birth: date
     gender_at_birth: str
     gender_identity: str
