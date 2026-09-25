@@ -3,6 +3,8 @@ export type View = "home" | "items" | "patients" | "staff" | "providers" | "drug
 interface SidebarProps {
   active: View;
   onNavigate: (view: View) => void;
+  username: string;
+  onLogout: () => void;
 }
 
 const NAV_ITEMS: { view: View; label: string }[] = [
@@ -15,7 +17,7 @@ const NAV_ITEMS: { view: View; label: string }[] = [
   { view: "createCase", label: "Create Case" },
 ];
 
-export function Sidebar({ active, onNavigate }: SidebarProps) {
+export function Sidebar({ active, onNavigate, username, onLogout }: SidebarProps) {
   return (
     <nav className="sidebar">
       <ul>
@@ -33,6 +35,9 @@ export function Sidebar({ active, onNavigate }: SidebarProps) {
           </li>
         ))}
       </ul>
+      
+      <p>{username}</p>
+      <button onClick={onLogout}>Log out</button>
     </nav>
   );
 }

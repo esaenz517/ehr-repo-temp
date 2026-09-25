@@ -73,6 +73,11 @@ export interface Staff {
   admin: boolean;
 }
 
+export interface LoginResponse {
+  username: string;
+  staffid: number;
+}
+
 export interface MedicalHistory {
   medical_history_id: number;
   patient_id: number;

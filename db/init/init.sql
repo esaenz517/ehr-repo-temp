@@ -402,6 +402,43 @@ BEGIN
 END
 GO
 
+-- STAFF TABLE
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Staff')
+BEGIN
+    CREATE TABLE dbo.Staff (
+        StaffId    INT IDENTITY(1,1) PRIMARY KEY,
+        FirstName    NVARCHAR(100) NOT NULL,
+        MiddleName   NVARCHAR(100) NULL,
+        LastName     NVARCHAR(100) NOT NULL,
+        Specialization  NVARCHAR(100) NOT NULL,
+        Student      BIT  NOT NULL DEFAULT 1,
+        Admin        BIT  NOT NULL DEFAULT 0,
+    );
+END
+GO
+
+-- T_LOGIN TABLE
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'T_Login')
+BEGIN
+    CREATE TABLE dbo.T_Login (
+        username    NVARCHAR(254) NOT NULL PRIMARY KEY,
+        password_hash NVARCHAR(100) NOT NULL,
+        staffid     INT           NOT NULL UNIQUE REFERENCES dbo.Staff(StaffId),
+    );
+END
+GO
+
+-- DEV LOGIN SEED: Staff member plus login "dev" / "dev123"
+IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'dev')
+BEGIN
+    INSERT INTO dbo.Staff (FirstName, MiddleName, LastName, Specialization, Student, Admin)
+    VALUES (N'Dev', NULL, N'User', N'Development', 0, 1)
+
+    INSERT INTO dbo.T_Login (username, password_hash, staffid)
+    VALUES (N'Dev', N'$2b$12$JiMOYxRva65eUaBh74GGfeyJTmACdFGT8zCuYfpyy7SfT7NjNkLt.', SCOPE_IDENTITY());
+END
+GO
+
 -- Add ProviderId (and its FK) to a Patients table created before this relationship existed.
 IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Patients') AND name = 'ProviderId')
 BEGIN

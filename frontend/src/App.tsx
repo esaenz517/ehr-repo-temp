@@ -8,13 +8,25 @@ import { StaffPage } from "./components/StaffPage";
 import { ProvidersPage } from "./components/ProvidersPage";
 import { RoomsPage } from "./components/RoomsPage";
 import { Sidebar, View } from "./components/Sidebar";
+import { LoginPage } from "./components/LoginPage";
+import type { LoginResponse } from "./types";
 
 function App() {
   const [view, setView] = useState<View>("home");
+  const [user, setUser] = useState<LoginResponse | null>(null);
+
+  if (!user) {
+    return <LoginPage onLogin={setUser} />;
+  }
 
   return (
     <div className="app-layout">
-      <Sidebar active={view} onNavigate={setView} />
+      <Sidebar active={view} onNavigate={setView} username={user.username}
+  onLogout={() => {
+    setUser(null);
+    setView("home");
+  }}
+/>
 
       <main className="app-main">
         {view === "home" && <Home />}
