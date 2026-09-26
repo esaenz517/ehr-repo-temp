@@ -102,56 +102,6 @@ BEGIN
 END
 GO
 
--- PERMISSIONS DATA
-MERGE dbo.Permissions AS target
-USING (
-    VALUES
-        ('patient.read',   'patient',   'read'),
-        ('patient.create', 'patient',   'create'),
-        ('patient.delete', 'patient',   'delete'),
-
-        ('staff.read',     'staff',     'read'),
-        ('staff.create',   'staff',     'create'),
-        ('staff.delete',   'staff',     'delete'),
-
-        ('provider.read',   'provider',   'read'),
-        ('provider.create', 'provider',   'create'),
-        ('provider.delete', 'provider',   'delete'),
-
-        ('drug.read',   'drug',   'read'),
-        ('drug.create', 'drug',   'create'),
-        ('drug.delete', 'drug',   'delete'),
-
-        ('room.read',   'room',   'read'),
-        ('room.create', 'room',   'create'),
-        ('room.update', 'room',   'update'),
-        ('room.delete', 'room',   'delete'),
-
-        ('user.read',         'user', 'read'),
-        ('user.create',       'user', 'create'),
-        ('user.manage_roles', 'user', 'manage_roles'),
-
-        ('role.read',               'role', 'read'),
-        ('role.manage_permissions', 'role', 'manage_permissions'),
-
-        ('permission.read', 'permission', 'read')
-) AS source (PermissionCode, ResourceType, Action)
-
-ON target.PermissionCode = source.PermissionCode
-
-WHEN NOT MATCHED THEN
-    INSERT (
-        PermissionCode,
-        ResourceType,
-        Action
-    )
-    VALUES (
-        source.PermissionCode,
-        source.ResourceType,
-        source.Action
-    );
-GO
-
 -- DRUGS TABLE (catalog of drugs that can be prescribed to patients)
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Drugs')
 BEGIN
@@ -388,16 +338,19 @@ GO
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Patients')
 BEGIN
     CREATE TABLE dbo.Patients (
-        PatientId    INT IDENTITY(1,1) PRIMARY KEY,
-        Mrn          NVARCHAR(20)  NULL UNIQUE, -- medical record number
-        FirstName    NVARCHAR(100) NOT NULL,
-        MiddleName   NVARCHAR(100) NULL,
-        LastName     NVARCHAR(100) NOT NULL,
-        DateOfBirth  DATE          NOT NULL,
-        Gender       NVARCHAR(20)  NULL,
-        Status       NVARCHAR(20)  NOT NULL DEFAULT 'outpatient'
-                     CHECK (Status IN ('outpatient', 'inpatient')),
-        ProviderId   INT           NULL REFERENCES dbo.Providers(ProviderId) -- patient's medical provider
+        PatientId           INT IDENTITY(1,1) PRIMARY KEY,
+        Mrn                 NVARCHAR(20)  NULL UNIQUE, -- medical record number
+        FirstName           NVARCHAR(100) NOT NULL,
+        MiddleName          NVARCHAR(100) NULL,
+        LastName            NVARCHAR(100) NOT NULL,
+        PreferredName       NVARCHAR(50)  NULL,
+        DateOfBirth         DATE          NOT NULL,
+        GenderAtBirth       NVARCHAR(20)  NOT NULL,
+        GenderIdentity      NVARCHAR(20)  NOT NULL,
+        Pronouns            NVARCHAR(20)  NOT NULL,
+        Status              NVARCHAR(20)  NOT NULL DEFAULT 'outpatient'
+                            CHECK (Status IN ('outpatient', 'inpatient')),
+        ProviderId          INT           NULL REFERENCES dbo.Providers(ProviderId) -- patient's medical provider
     );
 END
 GO
@@ -456,13 +409,13 @@ GO
 -- PATIENTS DATA
 IF NOT EXISTS (SELECT * FROM dbo.Patients)
 BEGIN
-    INSERT INTO dbo.Patients (Mrn, FirstName, MiddleName, LastName, DateOfBirth, Gender, Status, ProviderId) VALUES
-        ('MRN000001', 'James',    'Robert',   'Carter',     '1984-03-12', 'Male',        'outpatient', 1),
-        ('MRN000002', 'Maria',    'Elena',    'Gonzalez',   '1992-07-25', 'Female',      'inpatient',  2),
-        ('MRN000003', 'David',    NULL,       'Nguyen',     '1978-11-02', 'Male',        'outpatient', 1),
-        ('MRN000004', 'Sarah',    'Jane',     'Thompson',   '2001-01-19', 'Female',      'outpatient', 3),
-        ('MRN000005', 'Michael',  'A',        'Johnson',    '1965-09-30', 'Male',        'inpatient',  2),
-        ('MRN000006', 'Aisha',    NULL,       'Patel',      '1989-05-14', 'Female',      'outpatient', 3);
+    INSERT INTO dbo.Patients (Mrn, FirstName, MiddleName, LastName, PreferredName, DateOfBirth, GenderAtBirth, GenderIdentity, Pronouns, Status, ProviderId) VALUES
+        ('MRN000001', 'James',    'Robert',   'Carter',     'Jim',  '1984-03-12', 'Male',   'Man',       'he/him',    'outpatient', 1),
+        ('MRN000002', 'Maria',    'Elena',    'Gonzalez',   NULL,   '1992-07-25', 'Female', 'Woman',     'she/her',   'inpatient',  2),
+        ('MRN000003', 'David',    NULL,       'Nguyen',     NULL,   '1978-11-02', 'Male',   'Man',       'he/him',    'outpatient', 1),
+        ('MRN000004', 'Sarah',    'Jane',     'Thompson',   'Sam',  '2001-01-19', 'Female', 'Nonbinary', 'they/them', 'outpatient', 3),
+        ('MRN000005', 'Michael',  'A',        'Johnson',    'Mike', '1965-09-30', 'Male',   'Man',       'he/him',    'inpatient',  2),
+        ('MRN000006', 'Aisha',    NULL,       'Patel',      NULL,   '1989-05-14', 'Female', 'Woman',     'she/her',   'outpatient', 3);
 END
 GO
 
@@ -491,7 +444,6 @@ BEGIN
         (6, 3, N'20mg nightly');
 END
 GO
-
 -- MEDICAL HISTORY TABLE
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'MedicalHistory')
 BEGIN
@@ -506,6 +458,10 @@ BEGIN
             FOREIGN KEY (PatientId)
             REFERENCES dbo.Patients(PatientId)
             ON DELETE CASCADE
+);
+END
+GO
+
 -- ROOMS TABLE
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Rooms')
 BEGIN
@@ -541,12 +497,12 @@ END
 IF NOT EXISTS (SELECT * FROM dbo.Rooms)
 BEGIN
     INSERT INTO dbo.Rooms (RoomNumber, Unit, Status) VALUES
-        ('100', 'General',    'available'),
-        ('101', 'General',    'available'),
-        ('102', 'ICU',        'available'),
-        ('103', 'ICU',        'available'),
-        ('104', 'Pediatrics', 'available'),
-        ('105', 'Pediatrics', 'available');
+        (100, 'General',    'available'),
+        (101, 'General',    'available'),
+        (102, 'ICU',        'available'),
+        (103, 'ICU',        'available'),
+        (104, 'Pediatrics', 'available'),
+        (105, 'Pediatrics', 'available');
 END
 GO
 
@@ -558,7 +514,7 @@ BEGIN
         RoomId       INT NOT NULL REFERENCES dbo.Rooms(RoomId), --Foreign key to Rooms table
         PatientId    INT NOT NULL REFERENCES dbo.Patients(PatientId), --Foreign key to Patients table
         AssignedAt   DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-        DischargedAt DATETIME2 NULL, --NULL means patient is still assigned to the room
+        DischargedAt DATETIME2 NULL --NULL means patient is still assigned to the room
     );
 END 
 GO
@@ -593,5 +549,16 @@ BEGIN
         (N'Daniel', N'J', N'Brooks', N'Cardiology',       0, 0),
         (N'Sophia', NULL, N'Nguyen', N'Physical Therapy', 1, 0),
         (N'Alex',   NULL, N'Morgan', N'Administration',    0, 1);
+END
+GO
+
+-- LOGIN TABLE (username/password credentials for staff; used by /auth/login)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'T_Login')
+BEGIN
+    CREATE TABLE dbo.T_Login (
+        username      NVARCHAR(254) NOT NULL PRIMARY KEY,
+        password_hash NVARCHAR(100) NOT NULL, -- bcrypt hash
+        staffid       INT NOT NULL REFERENCES dbo.Staff(StaffId)
+    );
 END
 GO

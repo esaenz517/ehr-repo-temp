@@ -27,8 +27,11 @@ class Patient(Base):
     first_name = Column("FirstName", String(100), nullable=False)
     middle_name = Column("MiddleName", String(100), nullable=True)
     last_name = Column("LastName", String(100), nullable=False)
+    preferred_name = Column("PreferredName", String(50), nullable=True)
     date_of_birth = Column("DateOfBirth", Date, nullable=False)
-    gender = Column("Gender", String(20), nullable=True)
+    gender_at_birth = Column("GenderAtBirth", String(20), nullable=False)
+    gender_identity = Column("GenderIdentity", String(20), nullable=False)
+    pronouns = Column("Pronouns", String(20), nullable=False)
     status = Column("Status", String(20), nullable=False, default="outpatient")
     provider_id = Column("ProviderId", Integer, ForeignKey("dbo.Providers.ProviderId"), nullable=True)
 

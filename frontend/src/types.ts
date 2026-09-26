@@ -100,3 +100,19 @@ export interface Room {
   unit: string;
   status: string;
 }
+
+export interface MedicalHistory {
+  medical_history_id: number;
+  patient_id: number;
+  condition: string;
+  diagnosis_date: string | null;
+  notes: string | null;
+}
+
+export interface FamilyHistory {
+  family_history_id: number;
+  patient_id: number;
+  relationship: string;
+  condition: string;
+  notes: string | null;
+}

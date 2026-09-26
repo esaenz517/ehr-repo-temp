@@ -17,7 +17,7 @@ router = APIRouter(prefix="/providers", tags=["providers"])
 @router.get("", response_model=list[Provider])
 def list_providers(
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("providers", "read")),
+    current_user=Depends(require_permission("provider", "read")),
 ):
     return crud.list_providers(db)
 
@@ -26,7 +26,7 @@ def list_providers(
 def get_provider(
     provider_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("providers", "read")),
+    current_user=Depends(require_permission("provider", "read")),
 ):
     provider = crud.get_provider(db, provider_id)
     if provider is None:
@@ -38,7 +38,7 @@ def get_provider(
 def create_provider(
     provider: ProviderCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("providers", "create")),
+    current_user=Depends(require_permission("provider", "create")),
 ):
     return crud.create_provider(db, provider)
 
@@ -47,7 +47,7 @@ def create_provider(
 def delete_provider(
     provider_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("providers", "delete")),
+    current_user=Depends(require_permission("provider", "delete")),
 ):
     deleted = crud.delete_provider(db, provider_id)
     if not deleted:
