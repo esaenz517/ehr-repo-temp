@@ -1,0 +1,231 @@
+.clinical-notes {
+    color: #20303a;
+}
+
+.clinical-notes .note-muted {
+    color: #596871;
+    font-size: .9rem;
+}
+
+.note-controls,
+.note-toolbar,
+.note-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.note-controls label,
+.note-toolbar label,
+.note-actions label {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+    font-weight: 600;
+}
+
+.clinical-notes button {
+    border: 1px solid #adc4cd;
+    border-radius: 6px;
+    background: white;
+    color: #164e63;
+}
+
+.clinical-notes button:hover:not(:disabled) {
+    background: #e8f4f6;
+}
+
+.clinical-notes button:disabled {
+    opacity: .55;
+    cursor: default;
+}
+
+.clinical-notes select,
+.clinical-notes input,
+.clinical-notes textarea {
+    border: 1px solid #afbdc4;
+    border-radius: 5px;
+    max-width: 100%;
+}
+
+.notes-layout {
+    display: grid;
+    grid-template-columns: 190px minmax(0, 1fr);
+    gap: 1.2rem;
+    align-items: start;
+}
+
+.note-list {
+    padding: .8rem;
+    border: 1px solid #d6e0e3;
+    border-radius: 8px;
+    background: #f5f8f9;
+}
+
+.note-list h2 {
+    font-size: 1rem;
+}
+
+.note-list ul,
+.note-history ul {
+    list-style: none;
+    padding: 0;
+}
+
+.note-list li {
+    margin: .5rem 0;
+}
+
+.note-list li button {
+    width: 100%;
+    text-align: left;
+}
+
+.note-list li button.selected {
+    background: #d7edf0;
+    border-color: #398093;
+}
+
+.note-list small {
+    display: block;
+    color: #53646b;
+    margin-top: .3rem;
+}
+
+.note-archive-toggle {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    margin-top: .75rem;
+    font-size: .85rem;
+}
+
+.note-workspace {
+    min-width: 0;
+}
+
+.soap-section {
+    margin: 0 0 1rem;
+    padding: 1rem;
+    border: 1px solid #d6e0e3;
+    border-radius: 8px;
+    background: white;
+}
+
+.soap-section h2 {
+    display: flex;
+    gap: .65rem;
+    align-items: center;
+    font-size: 1.2rem;
+    margin: 0 0 1rem;
+}
+
+.soap-section h2 span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 5px;
+    color: white;
+    background: #276b7d;
+}
+
+.soap-section h3 {
+    font-size: .94rem;
+    margin: 1.2rem 0 .4rem;
+}
+
+.soap-section h3 small {
+    color: #596871;
+    font-weight: normal;
+}
+
+.soap-section ul {
+    margin: .3rem 0 .8rem;
+    padding-left: 1.5rem;
+}
+
+.note-field {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+    margin: .8rem 0;
+    font-size: .91rem;
+    font-weight: 600;
+}
+
+.note-field textarea {
+    resize: vertical;
+    width: 100%;
+    padding: .6rem;
+    font: inherit;
+    font-weight: normal;
+}
+
+.note-field input {
+    font-weight: normal;
+}
+
+.note-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.note-prompts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+}
+
+.note-prompts button {
+    font-size: .8rem;
+}
+
+.note-empty {
+    background: #f5f8f9;
+    padding: .65rem;
+    border-radius: 5px;
+    color: #596871;
+}
+
+.note-chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .6rem;
+    background: #f5f8f9;
+    padding: .8rem;
+}
+
+.note-error {
+    color: #a22828;
+}
+
+.note-success {
+    color: #13623f;
+}
+
+.note-review {
+    background: #e7f3f5;
+    padding: .8rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.note-history {
+    border-top: 1px solid #d6e0e3;
+    margin-top: 1.5rem;
+}
+
+@media (max-width: 760px) {
+
+    .notes-layout,
+    .note-columns,
+    .note-chart-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
