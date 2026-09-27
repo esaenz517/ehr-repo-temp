@@ -36,7 +36,7 @@ function App() {
         {view === "providers" && <ProvidersPage />}
         {view === "drugs" && <DrugsPage />}
         {view === "rooms" && <RoomsPage />}
-        {view === "createCase" && <CreateCasePage />}
+        {view === "createCase" && <CreateCasePage staffId={user.staffid} />}
       </main>
     </div>
   );
