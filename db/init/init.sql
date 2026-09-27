@@ -359,6 +359,67 @@ BEGIN
 END
 GO
 
+-- Upgrade older Patients tables to the current patient demographic schema.
+
+IF COL_LENGTH('dbo.Patients', 'PreferredName') IS NULL
+BEGIN
+    ALTER TABLE dbo.Patients
+    ADD PreferredName NVARCHAR(50) NULL;
+END
+GO
+
+IF COL_LENGTH('dbo.Patients', 'GenderAtBirth') IS NULL
+BEGIN
+    ALTER TABLE dbo.Patients
+    ADD GenderAtBirth NVARCHAR(20) NULL;
+END
+GO
+
+IF COL_LENGTH('dbo.Patients', 'GenderIdentity') IS NULL
+BEGIN
+    ALTER TABLE dbo.Patients
+    ADD GenderIdentity NVARCHAR(20) NULL;
+END
+GO
+
+IF COL_LENGTH('dbo.Patients', 'Pronouns') IS NULL
+BEGIN
+    ALTER TABLE dbo.Patients
+    ADD Pronouns NVARCHAR(20) NULL;
+END
+GO
+
+-- Backfill demographic fields for patients created under the older schema.
+-- These fields are required by the current Patient API response.
+
+UPDATE dbo.Patients
+SET GenderAtBirth = N'Unknown'
+WHERE GenderAtBirth IS NULL;
+GO
+
+UPDATE dbo.Patients
+SET GenderIdentity = N'Unknown'
+WHERE GenderIdentity IS NULL;
+GO
+
+UPDATE dbo.Patients
+SET Pronouns = N'Unspecified'
+WHERE Pronouns IS NULL;
+GO
+
+-- Bring upgraded databases in line with the current fresh-install schema.
+ALTER TABLE dbo.Patients
+ALTER COLUMN GenderAtBirth NVARCHAR(20) NOT NULL;
+GO
+
+ALTER TABLE dbo.Patients
+ALTER COLUMN GenderIdentity NVARCHAR(20) NOT NULL;
+GO
+
+ALTER TABLE dbo.Patients
+ALTER COLUMN Pronouns NVARCHAR(20) NOT NULL;
+GO
+
 -- STAFF TABLE
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Staff')
 BEGIN
@@ -369,7 +430,7 @@ BEGIN
         LastName     NVARCHAR(100) NOT NULL,
         Specialization  NVARCHAR(100) NOT NULL,
         Student      BIT  NOT NULL DEFAULT 1,
-        Admin        BIT  NOT NULL DEFAULT 0,
+        Admin        BIT  NOT NULL DEFAULT 0
     );
 END
 GO
@@ -380,7 +441,7 @@ BEGIN
     CREATE TABLE dbo.T_Login (
         username    NVARCHAR(254) NOT NULL PRIMARY KEY,
         password_hash NVARCHAR(100) NOT NULL,
-        staffid     INT           NOT NULL UNIQUE REFERENCES dbo.Staff(StaffId),
+        staffid     INT           NOT NULL UNIQUE REFERENCES dbo.Staff(StaffId)
     );
 END
 GO
@@ -432,6 +493,13 @@ BEGIN
         Dosage    NVARCHAR(100) NULL,
         CONSTRAINT PK_PatientDrugs PRIMARY KEY (PatientId, DrugId)
     );
+END
+GO
+
+IF COL_LENGTH('dbo.PatientDrugs', 'Dosage') IS NULL
+BEGIN
+    ALTER TABLE dbo.PatientDrugs
+    ADD Dosage NVARCHAR(100) NULL;
 END
 GO
 
@@ -580,4 +648,175 @@ BEGIN
         CreatedAt         DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
     );
 END
+GO
+-- SOAP sprint: encounter identity and chart context. Empty chart tables are intentional:
+-- missing data must never be displayed as a normal result or 'no known allergies'.
+IF OBJECT_ID(N'dbo.Encounters', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Encounters (
+        EncounterId INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId INT NOT NULL REFERENCES dbo.Patients(PatientId),
+        StartedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+GO
+
+IF OBJECT_ID(N'dbo.PatientAllergies', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.PatientAllergies (
+        AllergyId INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId INT NOT NULL REFERENCES dbo.Patients(PatientId),
+        Substance NVARCHAR(200) NOT NULL,
+        Reaction NVARCHAR(500) NULL
+    );
+END
+GO
+
+IF OBJECT_ID(N'dbo.PatientVitals', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.PatientVitals (
+        VitalId INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId INT NOT NULL REFERENCES dbo.Patients(PatientId),
+        RecordedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        BloodPressure NVARCHAR(40) NULL,
+        HeartRate INT NULL,
+        RespiratoryRate INT NULL,
+        TemperatureC DECIMAL(5,2) NULL,
+        OxygenSaturation DECIMAL(5,2) NULL,
+        HeightCm DECIMAL(7,2) NULL,
+        WeightKg DECIMAL(7,2) NULL
+    );
+END
+GO
+
+IF OBJECT_ID(N'dbo.PatientLabResults', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.PatientLabResults (
+        LabResultId INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId INT NOT NULL REFERENCES dbo.Patients(PatientId),
+        TestName NVARCHAR(200) NOT NULL,
+        Result NVARCHAR(200) NOT NULL,
+        Unit NVARCHAR(50) NULL,
+        Flag NVARCHAR(40) NULL,
+        CollectedAt DATETIME2 NOT NULL
+    );
+END
+GO
+
+-- The note type and sensitivity belong to the note, never to the patient.
+-- Keep note types open for future editors; the API currently accepts SOAP only.
+IF OBJECT_ID(N'dbo.ClinicalNotes', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.ClinicalNotes (
+        NoteId INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId INT NOT NULL REFERENCES dbo.Patients(PatientId),
+        EncounterId INT NOT NULL REFERENCES dbo.Encounters(EncounterId),
+        NoteType NVARCHAR(100) NOT NULL,
+        Discipline NVARCHAR(100) NULL,
+        AuthorUserId INT NOT NULL REFERENCES dbo.Users(UserId),
+        ResponsibleProviderId INT NULL REFERENCES dbo.Providers(ProviderId),
+        CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        LastModifiedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        Content NVARCHAR(MAX) NOT NULL,
+        SensitivityClassification NVARCHAR(40) NOT NULL DEFAULT 'general',
+        CurrentVersion INT NOT NULL DEFAULT 1,
+        IsArchived BIT NOT NULL DEFAULT 0,
+        CONSTRAINT CK_ClinicalNotes_Sensitivity
+            CHECK (SensitivityClassification IN ('general', 'restricted')),
+        CONSTRAINT CK_ClinicalNotes_Version
+            CHECK (CurrentVersion >= 1)
+    );
+
+    CREATE INDEX IX_ClinicalNotes_Patient
+        ON dbo.ClinicalNotes(PatientId, EncounterId);
+END
+GO
+
+IF OBJECT_ID(N'dbo.NoteVersions', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.NoteVersions (
+        VersionId INT IDENTITY(1,1) PRIMARY KEY,
+        NoteId INT NOT NULL REFERENCES dbo.ClinicalNotes(NoteId),
+        VersionNumber INT NOT NULL,
+        ContentSnapshot NVARCHAR(MAX) NOT NULL,
+        AuthorUserId INT NOT NULL REFERENCES dbo.Users(UserId),
+        CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        ChangeSummary NVARCHAR(500) NULL,
+        CONSTRAINT UQ_NoteVersions_NoteVersion
+            UNIQUE (NoteId, VersionNumber)
+    );
+END
+GO
+
+-- Contextual note permissions: general grants do not cover restricted notes.
+MERGE dbo.Permissions AS target
+USING (
+    VALUES
+        ('note.read.general', 'read', 'general'),
+        ('note.create.general', 'create', 'general'),
+        ('note.update.general', 'update', 'general'),
+        ('note.archive.general', 'archive', 'general'),
+        ('note.read.restricted', 'read', 'restricted'),
+        ('note.create.restricted', 'create', 'restricted'),
+        ('note.update.restricted', 'update', 'restricted'),
+        ('note.archive.restricted', 'archive', 'restricted')
+) AS source (
+    PermissionCode,
+    Action,
+    SensitivityLevel
+)
+ON target.PermissionCode = source.PermissionCode
+
+WHEN NOT MATCHED THEN
+    INSERT (
+        PermissionCode,
+        ResourceType,
+        Action,
+        SensitivityLevel,
+        IsActive
+    )
+    VALUES (
+        source.PermissionCode,
+        'note',
+        source.Action,
+        source.SensitivityLevel,
+        1
+    );
+GO
+
+INSERT INTO dbo.RolePermissions (
+    RoleId,
+    PermissionId
+)
+SELECT
+    r.RoleId,
+    p.PermissionId
+FROM dbo.Roles r
+CROSS JOIN dbo.Permissions p
+WHERE
+    p.ResourceType = 'note'
+    AND (
+        r.RoleName = 'ADMIN'
+        OR (
+            r.RoleName = 'FACULTY_INSTRUCTOR'
+            AND p.Action = 'read'
+        )
+        OR (
+            r.RoleName IN (
+                'PHYSICIAN',
+                'NURSE',
+                'PSYCHIATRY',
+                'PHYSICAL_THERAPY',
+                'ALLIED_HEALTH'
+            )
+            AND p.SensitivityLevel = 'general'
+        )
+    )
+    AND NOT EXISTS (
+        SELECT 1
+        FROM dbo.RolePermissions rp
+        WHERE
+            rp.RoleId = r.RoleId
+            AND rp.PermissionId = p.PermissionId
+    );
 GO
