@@ -206,6 +206,10 @@ USING (
         ('patient.create', 'patient',   'create'),
         ('patient.delete', 'patient',   'delete'),
 
+        ('case.read',   'case',   'read'),
+        ('case.create', 'case',   'create'),
+        ('case.delete', 'case',   'delete'),
+
         ('staff.read',     'staff',     'read'),
         ('staff.create',   'staff',     'create'),
         ('staff.delete',   'staff',     'delete'),
@@ -631,6 +635,20 @@ BEGIN
 END
 GO
 
+-- Case Table
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Cases')
+BEGIN
+    CREATE TABLE dbo.Cases (
+        CaseId            INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId         INT NOT NULL REFERENCES dbo.Patients(PatientId),  -- the case's original patient
+        ChiefComplaint    NVARCHAR(500)  NOT NULL,
+        Narrative         NVARCHAR(4000) NULL,       -- "Case narrative / HPI seed"
+        --SourceCaseId      INT NULL REFERENCES dbo.Cases(CaseId),  -- set when "Start from: Existing case"
+        CreatedByStaffId  INT NOT NULL REFERENCES dbo.Staff(StaffId),
+        CreatedAt         DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+GO
 -- SOAP sprint: encounter identity and chart context. Empty chart tables are intentional:
 -- missing data must never be displayed as a normal result or 'no known allergies'.
 IF OBJECT_ID(N'dbo.Encounters', N'U') IS NULL

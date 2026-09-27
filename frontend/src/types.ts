@@ -55,8 +55,11 @@ export interface Patient {
   first_name: string;
   middle_name: string | null;
   last_name: string;
+  preferred_name: string | null;
   date_of_birth: string;
-  gender: string | null;
+  gender_at_birth: string | null;
+  gender_identity: string;
+  pronouns: string;
   status: string;
   provider_id: number | null;
   provider: Provider | null;
@@ -115,4 +118,14 @@ export interface FamilyHistory {
   relationship: string;
   condition: string;
   notes: string | null;
+}
+
+export interface Case {
+  case_id: number;
+  patient_id: number;
+  chief_complaint: string;
+  narrative: string | null;
+  created_by_staff_id: number;
+  created_at: string;
+  patient: Patient | null;
 }

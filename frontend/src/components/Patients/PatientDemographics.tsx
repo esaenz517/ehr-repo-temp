@@ -1,9 +1,27 @@
-import { ReactNode, useState } from "react";
+import { Field } from "../FormField";
 
-// Patient demographics section of the Create Case page. Frontend-only for now:
-// values live in local state and aren't sent anywhere yet.
-const EMPTY = {
+// Dropdown options for the patient identity fields. Shared with PatientForm so
+// both forms send the same values to the backend.
+export const SEX_OPTIONS = ["Female", "Male", "Intersex"];
+export const GENDER_IDENTITY_OPTIONS = ["Woman", "Man", "Nonbinary", "Transgender woman", "Transgender man", "Prefer not to say"];
+export const PRONOUN_OPTIONS = ["she/her", "he/him", "they/them", "Use name only"];
+
+// The values this section collects. The state itself lives in useCreateCase.
+export interface DemographicsValues {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  preferredName: string;
+  dateOfBirth: string;
+  sex: string;
+  genderIdentity: string;
+  pronouns: string;
+}
+
+// Starting (blank) values for the form.
+export const EMPTY_DEMOGRAPHICS: DemographicsValues = {
   firstName: "",
+  middleName: "",
   lastName: "",
   preferredName: "",
   dateOfBirth: "",
@@ -12,68 +30,54 @@ const EMPTY = {
   pronouns: "",
 };
 
-type FieldName = keyof typeof EMPTY;
-
-// Label stacked above its input, one cell of the .form-grid table.
-function Field({ id, label, required, children }: { id: string; label: string; required?: boolean; children: ReactNode }) {
-  return (
-    <div className="form-field">
-      <label htmlFor={id}>
-        {label}
-        {required && <span className="required" aria-hidden="true">*</span>}
-      </label>
-      {children}
-    </div>
-  );
+interface PatientDemographicsProps {
+  values: DemographicsValues;
+  onChange: (field: keyof DemographicsValues, value: string) => void;
+  errors: Partial<Record<keyof DemographicsValues, string>>;
 }
 
-export function PatientDemographics() {
-  const [values, setValues] = useState(EMPTY);
-  const set = (field: FieldName) => (e: { target: { value: string } }) =>
-    setValues((prev) => ({ ...prev, [field]: e.target.value }));
+// Patient demographics section of the Create Case page.
+// It only displays the values it's given and reports changes back up.
+export function PatientDemographics({ values, onChange, errors }: PatientDemographicsProps) {
+  // Returns an onChange handler that updates one field.
+  const set = (field: keyof DemographicsValues) => (e: { target: { value: string } }) =>
+    onChange(field, e.target.value);
 
   return (
     <div className="form-grid">
-      <Field id="demo-first" label="First name" required>
+      <Field id="demo-first" label="First name" required error={errors.firstName}>
         <input id="demo-first" value={values.firstName} onChange={set("firstName")} required />
       </Field>
-      <Field id="demo-last" label="Last name" required>
+      <Field id="demo-middle" label="Middle name">
+        <input id="demo-middle" value={values.middleName} onChange={set("middleName")} />
+      </Field>
+      <Field id="demo-last" label="Last name" required error={errors.lastName}>
         <input id="demo-last" value={values.lastName} onChange={set("lastName")} required />
       </Field>
+
       <Field id="demo-preferred" label="Preferred name">
         <input id="demo-preferred" value={values.preferredName} onChange={set("preferredName")} />
       </Field>
-
-      <Field id="demo-dob" label="Date of birth" required>
+      <Field id="demo-dob" label="Date of birth" required error={errors.dateOfBirth}>
         <input id="demo-dob" type="date" value={values.dateOfBirth} onChange={set("dateOfBirth")} required />
       </Field>
-      <Field id="demo-sex" label="Sex assigned at birth">
-        <select id="demo-sex" value={values.sex} onChange={set("sex")}>
+      <Field id="demo-sex" label="Sex assigned at birth" required error={errors.sex}>
+        <select id="demo-sex" value={values.sex} onChange={set("sex")} required>
           <option value="">Select</option>
-          <option>Female</option>
-          <option>Male</option>
-          <option>Intersex</option>
-        </select>
-      </Field>
-      <Field id="demo-gender" label="Gender identity">
-        <select id="demo-gender" value={values.genderIdentity} onChange={set("genderIdentity")}>
-          <option value="">Select</option>
-          <option>Woman</option>
-          <option>Man</option>
-          <option>Nonbinary</option>
-          <option>Transgender woman</option>
-          <option>Transgender man</option>
-          <option>Prefer not to say</option>
+          {SEX_OPTIONS.map((o) => <option key={o}>{o}</option>)}
         </select>
       </Field>
 
-      <Field id="demo-pronouns" label="Pronouns">
-        <select id="demo-pronouns" value={values.pronouns} onChange={set("pronouns")}>
+      <Field id="demo-gender" label="Gender identity" required error={errors.genderIdentity}>
+        <select id="demo-gender" value={values.genderIdentity} onChange={set("genderIdentity")} required>
           <option value="">Select</option>
-          <option>she/her</option>
-          <option>he/him</option>
-          <option>they/them</option>
-          <option>Use name only</option>
+          {GENDER_IDENTITY_OPTIONS.map((o) => <option key={o}>{o}</option>)}
+        </select>
+      </Field>
+      <Field id="demo-pronouns" label="Pronouns" required error={errors.pronouns}>
+        <select id="demo-pronouns" value={values.pronouns} onChange={set("pronouns")} required>
+          <option value="">Select</option>
+          {PRONOUN_OPTIONS.map((o) => <option key={o}>{o}</option>)}
         </select>
       </Field>
     </div>

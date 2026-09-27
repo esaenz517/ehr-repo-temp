@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import type { CreatePatientInput } from "../../api/patients";
 import type { Drug, Provider } from "../../types";
+import { GENDER_IDENTITY_OPTIONS, PRONOUN_OPTIONS, SEX_OPTIONS } from "./PatientDemographics";
 
 interface PatientFormProps {
   providers: Provider[];
@@ -13,8 +14,11 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [preferredName, setPreferredName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
-  const [gender, setGender] = useState("");
+  const [genderAtBirth, setGenderAtBirth] = useState("");
+  const [genderIdentity, setGenderIdentity] = useState("");
+  const [pronouns, setPronouns] = useState("");
   const [status, setStatus] = useState("outpatient");
   const [providerId, setProviderId] = useState("");
   const [drugIds, setDrugIds] = useState<number[]>([]);
@@ -28,13 +32,17 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!firstName.trim() || !lastName.trim() || !dateOfBirth) return;
+    if (!genderAtBirth || !genderIdentity || !pronouns) return;
     onSubmit({
       mrn: mrn || null,
       first_name: firstName,
       middle_name: middleName || null,
       last_name: lastName,
+      preferred_name: preferredName || null,
       date_of_birth: dateOfBirth,
-      gender: gender || null,
+      gender_at_birth: genderAtBirth,
+      gender_identity: genderIdentity,
+      pronouns,
       status,
       provider_id: providerId ? Number(providerId) : null,
       drug_ids: drugIds,
@@ -43,8 +51,11 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
     setFirstName("");
     setMiddleName("");
     setLastName("");
+    setPreferredName("");
     setDateOfBirth("");
-    setGender("");
+    setGenderAtBirth("");
+    setGenderIdentity("");
+    setPronouns("");
     setStatus("outpatient");
     setProviderId("");
     setDrugIds([]);
@@ -78,17 +89,32 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
           style={{ flex: 2 }}
         />
         <input
+          value={preferredName}
+          onChange={(e) => setPreferredName(e.target.value)}
+          placeholder="Preferred Name"
+          style={{ flex: 2 }}
+        />
+      </div>
+
+      <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+        <input
           type="date"
           value={dateOfBirth}
           onChange={(e) => setDateOfBirth(e.target.value)}
           style={{ flex: 2 }}
         />
-        <input
-          value={gender}
-          onChange={(e) => setGender(e.target.value)}
-          placeholder="Gender"
-          style={{ flex: 2 }}
-        />
+        <select value={genderAtBirth} onChange={(e) => setGenderAtBirth(e.target.value)} style={{ flex: 2 }}>
+          <option value="">Sex at birth</option>
+          {SEX_OPTIONS.map((o) => <option key={o}>{o}</option>)}
+        </select>
+        <select value={genderIdentity} onChange={(e) => setGenderIdentity(e.target.value)} style={{ flex: 2 }}>
+          <option value="">Gender identity</option>
+          {GENDER_IDENTITY_OPTIONS.map((o) => <option key={o}>{o}</option>)}
+        </select>
+        <select value={pronouns} onChange={(e) => setPronouns(e.target.value)} style={{ flex: 2 }}>
+          <option value="">Pronouns</option>
+          {PRONOUN_OPTIONS.map((o) => <option key={o}>{o}</option>)}
+        </select>
         <select value={status} onChange={(e) => setStatus(e.target.value)} style={{ flex: 2 }}>
           <option value="outpatient">Outpatient</option>
           <option value="inpatient">Inpatient</option>
