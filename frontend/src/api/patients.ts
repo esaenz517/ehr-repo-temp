@@ -10,6 +10,7 @@ export interface CreatePatientInput {
   date_of_birth: string;
   gender_at_birth: string;
   gender_identity: string;
+  pronouns: string;
   status: string;
   provider_id: number | null;
   drug_ids: number[];

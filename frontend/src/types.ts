@@ -119,3 +119,13 @@ export interface FamilyHistory {
   condition: string;
   notes: string | null;
 }
+
+export interface Case {
+  case_id: number;
+  patient_id: number;
+  chief_complaint: string;
+  narrative: string | null;
+  created_by_staff_id: number;
+  created_at: string;
+  patient: Patient | null;
+}
