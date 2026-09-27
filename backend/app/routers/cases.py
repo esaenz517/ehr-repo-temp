@@ -6,7 +6,7 @@ from app.database import get_db
 from app.schemas.cases import Case, CaseCreate
 from app.security.authorization import require_permission
 
-router = APIRouter(prefix="/patients", tags=["patients"])
+router = APIRouter(prefix="/cases", tags=["cases"])
 
 
 @router.get("", response_model=list[Case])
@@ -32,7 +32,7 @@ def get_case(
 
 
 @router.post("", response_model=Case, status_code=201)
-def create_patient(
+def create_case(
     case: CaseCreate,
     db: Session = Depends(get_db),
     current_user=Depends(require_permission("case", "create")),
@@ -41,7 +41,7 @@ def create_patient(
 
 
 @router.delete("/{case_id}", status_code=204)
-def delete_patient(
+def delete_case(
     case_id: int,
     db: Session = Depends(get_db),
     current_user=Depends(require_permission("case", "delete")),

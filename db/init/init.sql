@@ -206,6 +206,10 @@ USING (
         ('patient.create', 'patient',   'create'),
         ('patient.delete', 'patient',   'delete'),
 
+        ('case.read',   'case',   'read'),
+        ('case.create', 'case',   'create'),
+        ('case.delete', 'case',   'delete'),
+
         ('staff.read',     'staff',     'read'),
         ('staff.create',   'staff',     'create'),
         ('staff.delete',   'staff',     'delete'),

@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 
 from pydantic import BaseModel
 
@@ -17,7 +17,7 @@ class CaseCreate(CaseBase):
 
 class Case(CaseBase):
     case_id: int
-    created_at: date
+    created_at: datetime
     patient: Patient | None = None
 
     class Config:
