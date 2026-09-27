@@ -1,7 +1,7 @@
-'''
+"""
 Patients Model
 SQLAlchemy ORM class mapped to the dbo.Patients table.
-'''
+"""
 
 from sqlalchemy import Column, Date, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
@@ -12,8 +12,11 @@ from app.database import Base
 patient_drugs = Table(
     "PatientDrugs",
     Base.metadata,
-    Column("PatientId", Integer, ForeignKey("dbo.Patients.PatientId"), primary_key=True),
+    Column(
+        "PatientId", Integer, ForeignKey("dbo.Patients.PatientId"), primary_key=True
+    ),
     Column("DrugId", Integer, ForeignKey("dbo.Drugs.DrugId"), primary_key=True),
+    Column("Dosage", String(100), nullable=True),
     schema="dbo",
 )
 
@@ -33,7 +36,9 @@ class Patient(Base):
     gender_identity = Column("GenderIdentity", String(20), nullable=False)
     pronouns = Column("Pronouns", String(20), nullable=False)
     status = Column("Status", String(20), nullable=False, default="outpatient")
-    provider_id = Column("ProviderId", Integer, ForeignKey("dbo.Providers.ProviderId"), nullable=True)
+    provider_id = Column(
+        "ProviderId", Integer, ForeignKey("dbo.Providers.ProviderId"), nullable=True
+    )
 
     # Many-to-one: the patient's medical provider.
     provider = relationship("Provider")
