@@ -6,8 +6,10 @@ export interface CreatePatientInput {
   first_name: string;
   middle_name: string | null;
   last_name: string;
+  preferred_name: string | null;
   date_of_birth: string;
-  gender: string | null;
+  gender_at_birth: string;
+  gender_identity: string;
   status: string;
   provider_id: number | null;
   drug_ids: number[];

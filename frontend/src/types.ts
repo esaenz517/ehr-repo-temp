@@ -55,8 +55,11 @@ export interface Patient {
   first_name: string;
   middle_name: string | null;
   last_name: string;
+  preferred_name: string | null;
   date_of_birth: string;
-  gender: string | null;
+  gender_at_birth: string | null;
+  gender_identity: string;
+  pronouns: string;
   status: string;
   provider_id: number | null;
   provider: Provider | null;
