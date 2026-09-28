@@ -1,6 +1,21 @@
 import type { Case } from "../types";
 import { apiFetch } from "./client";
 
+// One allergy saved to the case's patient.
+export interface AllergyInput {
+  substance: string;
+  reaction: string | null;
+}
+
+// One lab result saved to the case's patient.
+export interface LabResultInput {
+  test_name: string;
+  result: string;
+  unit: string | null;
+  flag: string | null;
+  collected_at: string;
+}
+
 // Shape of the data sent to the backend when creating a case.
 // The patient must already exist (create it with patientsApi first).
 export interface CreateCaseInput {
@@ -8,6 +23,8 @@ export interface CreateCaseInput {
   chief_complaint: string;
   narrative: string | null;
   created_by_staff_id: number;
+  allergies: AllergyInput[];
+  labs: LabResultInput[];
 }
 
 // One function per backend endpoint under /cases.
