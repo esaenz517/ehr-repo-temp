@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { PatientDemographics } from "./Patients/PatientDemographics";
+import { AssignmentSection } from "./Assignment/AssignmentSection";
 
 // Instructor workflow: create a case. Each section renders its `content`
 // component if it has one, otherwise a "coming soon" placeholder. To fill in
@@ -11,7 +12,7 @@ const SECTIONS: { title: string; description?: string; content?: ReactNode }[] =
   { title: "Patient Demographics", content: <PatientDemographics /> },
   { title: "Case Content", description: "Chief complaint and case narrative / HPI seed." },
   { title: "Chart Data", description: "Medications, allergies, and labs." },
-  { title: "Assignment", description: "Encounter status, course, due date, mode, and students." },
+  { title: "Assignment", content: <AssignmentSection /> },
 ];
 
 export function CreateCasePage() {

@@ -116,3 +116,15 @@ export interface FamilyHistory {
   condition: string;
   notes: string | null;
 }
+
+export type EncounterStatus = "not_started" | "in_progress" | "submitted" | "signed";  //for use with Assignment interface
+
+export interface Assignment {
+  assignment_id: number;
+  case_id: number;
+  encounter_status: EncounterStatus;
+  course: string | null;
+  due_date: string | null;
+  assigned_to: number;
+  assigned_by: number;
+}

@@ -10,6 +10,7 @@ import { RoomsPage } from "./components/RoomsPage";
 import { Sidebar, View } from "./components/Sidebar";
 import { LoginPage } from "./components/LoginPage";
 import type { LoginResponse } from "./types";
+import { MyAssignmentsPage } from "./components/Assignment/MyAssignmentsPage";
 
 function App() {
   const [view, setView] = useState<View>("home");
@@ -37,6 +38,7 @@ function App() {
         {view === "drugs" && <DrugsPage />}
         {view === "rooms" && <RoomsPage />}
         {view === "createCase" && <CreateCasePage />}
+        {view === "assignments" && <MyAssignmentsPage studentId={user.staffid} />}
       </main>
     </div>
   );

@@ -356,7 +356,7 @@ END
 GO
 
 -- STAFF TABLE
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Staff')
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Staff' AND schema_id = SCHEMA_ID('dbo'))
 BEGIN
     CREATE TABLE dbo.Staff (
         StaffId    INT IDENTITY(1,1) PRIMARY KEY,
@@ -364,19 +364,32 @@ BEGIN
         MiddleName   NVARCHAR(100) NULL,
         LastName     NVARCHAR(100) NOT NULL,
         Specialization  NVARCHAR(100) NOT NULL,
-        Student      BIT  NOT NULL DEFAULT 1,
-        Admin        BIT  NOT NULL DEFAULT 0,
+        Student      BIT  NOT NULL DEFAULT 0,
+        Admin        BIT  NOT NULL DEFAULT 0
     );
 END
 GO
 
--- T_LOGIN TABLE
+-- STAFF DATA
+IF NOT EXISTS (SELECT * FROM dbo.Staff)
+BEGIN
+    INSERT INTO dbo.Staff
+        (FirstName, MiddleName, LastName, Specialization, Student, Admin)
+    VALUES
+        (N'Emily',  NULL, N'Carter', N'Nursing',          0, 0),
+        (N'Daniel', N'J', N'Brooks', N'Cardiology',       0, 0),
+        (N'Sophia', NULL, N'Nguyen', N'Physical Therapy', 1, 0),
+        (N'Alex',   NULL, N'Morgan', N'Administration',    0, 1);
+END
+GO
+
+-- LOGIN TABLE
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'T_Login')
 BEGIN
     CREATE TABLE dbo.T_Login (
         username    NVARCHAR(254) NOT NULL PRIMARY KEY,
-        password_hash NVARCHAR(100) NOT NULL,
-        staffid     INT           NOT NULL UNIQUE REFERENCES dbo.Staff(StaffId),
+        password_hash NVARCHAR(100) NOT NULL, -- bcrypt hash
+        staffid     INT NOT NULL UNIQUE REFERENCES dbo.Staff(StaffId) -- May become dbo.Users(UserId)
     );
 END
 GO
@@ -519,46 +532,27 @@ BEGIN
 END 
 GO
 
--- STAFF TABLE
-IF NOT EXISTS (
-    SELECT *
-    FROM sys.tables
-    WHERE name = 'Staff'
-      AND schema_id = SCHEMA_ID('dbo')
-)
+-- INSERT CASES TABLE PRIOR TO ASSIGNMENT TABLE 
+-- ASSIGNMENT TABLE 
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Assignment' AND schema_id = SCHEMA_ID('dbo'))
 BEGIN
-    CREATE TABLE dbo.Staff (
-        StaffId        INT IDENTITY(1,1) PRIMARY KEY,
-        FirstName      NVARCHAR(100) NOT NULL,
-        MiddleName     NVARCHAR(100) NULL,
-        LastName       NVARCHAR(100) NOT NULL,
-        Specialization NVARCHAR(100) NOT NULL,
-        Student        BIT NOT NULL DEFAULT 0,
-        Admin          BIT NOT NULL DEFAULT 0
-    );
-END
-GO
-
--- STAFF DATA
-IF NOT EXISTS (SELECT * FROM dbo.Staff)
-BEGIN
-    INSERT INTO dbo.Staff
-        (FirstName, MiddleName, LastName, Specialization, Student, Admin)
-    VALUES
-        (N'Emily',  NULL, N'Carter', N'Nursing',          0, 0),
-        (N'Daniel', N'J', N'Brooks', N'Cardiology',       0, 0),
-        (N'Sophia', NULL, N'Nguyen', N'Physical Therapy', 1, 0),
-        (N'Alex',   NULL, N'Morgan', N'Administration',    0, 1);
-END
-GO
-
--- LOGIN TABLE (username/password credentials for staff; used by /auth/login)
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'T_Login')
-BEGIN
-    CREATE TABLE dbo.T_Login (
-        username      NVARCHAR(254) NOT NULL PRIMARY KEY,
-        password_hash NVARCHAR(100) NOT NULL, -- bcrypt hash
-        staffid       INT NOT NULL REFERENCES dbo.Staff(StaffId)
+    CREATE TABLE dbo.Assignment (
+        AssignmentId    INT IDENTITY(1,1) PRIMARY KEY,
+        CaseId          INT NOT NULL REFERENCES dbo.Cases(CaseId), 
+        EncounterStatus NVARCHAR(20) NOT NULL DEFAULT 'not_started'
+                        CHECK (EncounterStatus IN ('not_started', 'in_progress', 'submitted', 'signed')),
+        -- not_started: encounter assigned, student has not opened the encounter
+        -- in_progress: student has opened the encounter, is working on it, or instructor has kicked back the submission for re-work
+        -- submitted: student has completed encounter and submitted it for review
+        -- signed: instructor has reviewed student's work and signed off on it (not kicked back for re-work)
+        Course          NVARCHAR(100) NULL,
+        DueDate         DATETIME2 NULL, --May not have due dates
+        AssignmentType  NVARCHAR(10) NOT NULL
+                        CHECK(AssignmentType IN ('practice', 'graded')),
+        -- practice: ungraded assignment, does not contribute to cumulative GPA
+        -- graded: assignment contributes to cumulative GPA
+        AssignedTo      INT NOT NULL REFERENCES dbo.Staff(StaffId), 
+        AssignedBy      INT NOT NULL REFERENCES dbo.Staff(StaffId) 
     );
 END
 GO
