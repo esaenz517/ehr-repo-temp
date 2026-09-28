@@ -5,11 +5,10 @@ DB access functions for cases - list, get, create, delete.
 
 from sqlalchemy.orm import Session
 
-from app.models.drugs import Drug as DrugModel
 from app.models.cases import Case as CaseModel
-from app.models.patients import Patient as PatientModel
+from app.models.clinical_notes import PatientAllergy, PatientLabResult
+
 from app.schemas.cases import CaseCreate
-from app.schemas.patients import PatientCreate
 
 
 # Gets all cases from the DB.
@@ -30,7 +29,23 @@ def create_case(db: Session, case: CaseCreate):
         narrative=case.narrative,
         created_by_staff_id=case.created_by_staff_id
     )
+    
     db.add(db_case)
+    
+    # Save each allergy for patient
+    for a in case.allergies:
+        db.add(PatientAllergy(patient_id=case.patient_id, 
+                              substance=a.substance, 
+                              reaction=a.reaction))
+    # Save each lab result for patient
+    for lab in case.labs:
+        db.add(PatientLabResult(patient_id=case.patient_id,
+                                test_name=lab.test_name,
+                                result=lab.result,
+                                unit=lab.unit,
+                                flag=lab.flag,
+                                collected_at=lab.collected_at
+                                ))
     db.commit()
     db.refresh(db_case)
     return db_case  
