@@ -634,7 +634,7 @@ BEGIN
         -- signed: instructor has reviewed student's work and signed off on it (not kicked back for re-work)
         Course          NVARCHAR(100) NULL,
         DueDate         DATETIME2 NULL, --May not have due dates
-        AssignmentType  NVARCHAR(10) NOT NULL
+        AssignmentType  NVARCHAR(10) NOT NULL DEFAULT 'graded'
                         CHECK(AssignmentType IN ('practice', 'graded')),
         -- practice: ungraded assignment, does not contribute to cumulative GPA
         -- graded: assignment contributes to cumulative GPA
