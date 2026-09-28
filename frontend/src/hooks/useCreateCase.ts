@@ -45,6 +45,11 @@ export function useCreateCase() {
     if (!demographics.pronouns) errors.pronouns = "Select pronouns.";
     if (!caseContent.chiefComplaint.trim()) errors.chiefComplaint = "Enter a chief complaint.";
 
+    // Each medication needs a drug, and a drug can only be listed once per patient.
+    const drugIds = chartData.medications.map((m) => m.drugId);
+    if (drugIds.some((id) => !id)) errors.medications = "Every medication needs a drug.";
+    else if (new Set(drugIds).size !== drugIds.length) errors.medications = "Each drug can only be listed once.";
+
     // Substance, test, result, and collection time can't be empty in the database.
     if (chartData.allergies.some((a) => !a.substance.trim()))
       errors.allergies = "Every allergy needs a substance.";
@@ -90,7 +95,7 @@ export function useCreateCase() {
         pronouns: demographics.pronouns,
         status: "outpatient",
         provider_id: null,
-        drug_ids: chartData.drugIds,
+        drug_ids: [], // medications are saved with the case below (with dose, route, frequency)
       });
 
       // Step 2: create the case for the new patient.
@@ -100,6 +105,12 @@ export function useCreateCase() {
         narrative: caseContent.narrative.trim() || null,
         created_by_staff_id: staffId,
         // Convert the form rows to the backend's field names; blank optional fields become null.
+        medications: chartData.medications.map((m) => ({
+          drug_id: Number(m.drugId),
+          dose: m.dose.trim() || null,
+          route: m.route || null,
+          frequency: m.frequency || null,
+        })),
         allergies: chartData.allergies.map((a) => ({
           substance: a.substance.trim(),
           reaction: a.reaction.trim() || null,

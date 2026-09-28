@@ -1,6 +1,14 @@
 import type { Case } from "../types";
 import { apiFetch } from "./client";
 
+// One medication saved to the case's patient.
+export interface MedicationInput {
+  drug_id: number;
+  dose: string | null;
+  route: string | null;
+  frequency: string | null;
+}
+
 // One allergy saved to the case's patient.
 export interface AllergyInput {
   substance: string;
@@ -23,6 +31,7 @@ export interface CreateCaseInput {
   chief_complaint: string;
   narrative: string | null;
   created_by_staff_id: number;
+  medications: MedicationInput[];
   allergies: AllergyInput[];
   labs: LabResultInput[];
 }

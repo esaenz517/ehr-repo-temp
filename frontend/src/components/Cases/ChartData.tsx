@@ -1,5 +1,18 @@
 import type { Drug } from "../../types";
 
+// Dropdown options, same as the EMR mockup.
+const ROUTES = ["PO", "SC", "IM", "IV", "Topical"];
+const FREQUENCIES = ["Once daily", "Twice daily (BID)", "Three times daily (TID)", "Nightly (QHS)", "Once weekly", "As needed (PRN)"];
+const FLAGS = ["Normal", "High", "Low"];
+
+// One medication row in the form.
+export interface MedicationRow {
+  drugId: string; // the <select> value; converted to a number when saving
+  dose: string;
+  route: string;
+  frequency: string;
+}
+
 // One allergy row in the form.
 export interface AllergyRow {
   substance: string;
@@ -17,15 +30,16 @@ export interface LabRow {
 
 // The values this section collects. The state itself lives in useCreateCase.
 export interface ChartDataValues {
-  drugIds: number[];
+  medications: MedicationRow[];
   allergies: AllergyRow[];
   labs: LabRow[];
 }
 
 // Starting (blank) values for the form.
-export const EMPTY_CHART_DATA: ChartDataValues = { drugIds: [], allergies: [], labs: [] };
+export const EMPTY_CHART_DATA: ChartDataValues = { medications: [], allergies: [], labs: [] };
 
 // Blank rows added by the "Add" buttons.
+const EMPTY_MEDICATION: MedicationRow = { drugId: "", dose: "", route: "", frequency: "" };
 const EMPTY_ALLERGY: AllergyRow = { substance: "", reaction: "" };
 const EMPTY_LAB: LabRow = { testName: "", result: "", unit: "", flag: "", collectedAt: "" };
 
@@ -44,13 +58,11 @@ interface ChartDataProps {
 
 // Chart Data section of the Create Case page: medications, allergies, and labs.
 export function ChartData({ values, drugs, onChange, errors }: ChartDataProps) {
-  // Check or uncheck one drug.
-  const toggleDrug = (drugId: number) =>
+  // Change one field in one medication row.
+  const updateMedication = (index: number, field: keyof MedicationRow, value: string) =>
     onChange({
       ...values,
-      drugIds: values.drugIds.includes(drugId)
-        ? values.drugIds.filter((id) => id !== drugId)
-        : [...values.drugIds, drugId],
+      medications: values.medications.map((row, i) => (i === index ? { ...row, [field]: value } : row)),
     });
 
   // Change one field in one allergy row.
@@ -68,6 +80,10 @@ export function ChartData({ values, drugs, onChange, errors }: ChartDataProps) {
     });
 
   // Add a blank row, or remove the row at index.
+  const addMedication = () =>
+    onChange({ ...values, medications: [...values.medications, EMPTY_MEDICATION] });
+  const removeMedication = (index: number) =>
+    onChange({ ...values, medications: values.medications.filter((_, i) => i !== index) });
   const addAllergy = () => onChange({ ...values, allergies: [...values.allergies, EMPTY_ALLERGY] });
   const removeAllergy = (index: number) =>
     onChange({ ...values, allergies: values.allergies.filter((_, i) => i !== index) });
@@ -78,20 +94,49 @@ export function ChartData({ values, drugs, onChange, errors }: ChartDataProps) {
   // Every button below is type="button" so it doesn't submit the whole form.
   return (
     <div className="form-stack">
-      {/* Medications: pick from the drugs already in the system */}
+      {/* Medications: one row per drug, picked from the drugs already in the system */}
       <div>
         <h3 style={headingStyle}>Medications</h3>
-        {drugs.length === 0 && <span className="field-hint">No drugs yet. Add them on the Drugs page.</span>}
-        {drugs.map((drug) => (
-          <label key={drug.drug_id} style={{ marginRight: 12 }}>
+        {drugs.length === 0 && <p className="field-hint">No drugs yet. Add them on the Drugs page.</p>}
+        {values.medications.map((row, i) => (
+          <div key={i} style={rowStyle}>
+            <select
+              aria-label="Drug"
+              value={row.drugId}
+              onChange={(e) => updateMedication(i, "drugId", e.target.value)}
+            >
+              <option value="">Drug *</option>
+              {drugs.map((drug) => (
+                <option key={drug.drug_id} value={drug.drug_id}>{drug.name}</option>
+              ))}
+            </select>
             <input
-              type="checkbox"
-              checked={values.drugIds.includes(drug.drug_id)}
-              onChange={() => toggleDrug(drug.drug_id)}
-            />{" "}
-            {drug.name}
-          </label>
+              aria-label="Dose"
+              placeholder="Dose (e.g. 500 mg)"
+              value={row.dose}
+              onChange={(e) => updateMedication(i, "dose", e.target.value)}
+            />
+            <select
+              aria-label="Route"
+              value={row.route}
+              onChange={(e) => updateMedication(i, "route", e.target.value)}
+            >
+              <option value="">Route</option>
+              {ROUTES.map((r) => <option key={r} value={r}>{r}</option>)}
+            </select>
+            <select
+              aria-label="Frequency"
+              value={row.frequency}
+              onChange={(e) => updateMedication(i, "frequency", e.target.value)}
+            >
+              <option value="">Frequency</option>
+              {FREQUENCIES.map((f) => <option key={f} value={f}>{f}</option>)}
+            </select>
+            <button type="button" onClick={() => removeMedication(i)}>Remove</button>
+          </div>
         ))}
+        {errors.medications && <p className="field-error">{errors.medications}</p>}
+        <button type="button" onClick={addMedication}>Add medication</button>
       </div>
 
       {/* Allergies: one row per allergy */}
@@ -141,12 +186,14 @@ export function ChartData({ values, drugs, onChange, errors }: ChartDataProps) {
               value={row.unit}
               onChange={(e) => updateLab(i, "unit", e.target.value)}
             />
-            <input
+            <select
               aria-label="Flag"
-              placeholder="Flag (e.g. High)"
               value={row.flag}
               onChange={(e) => updateLab(i, "flag", e.target.value)}
-            />
+            >
+              <option value="">Flag</option>
+              {FLAGS.map((f) => <option key={f} value={f}>{f}</option>)}
+            </select>
             <input
               type="datetime-local"
               aria-label="Collected at"
