@@ -78,9 +78,8 @@ export function CreateCasePage({ staffId }: CreateCasePageProps) {
         <ComingSoon text="Medications, allergies, and labs." />
       </Section>
 
-      {/* TODO: Assignment - move state into useCreateCase so submit includes it. */}
       <Section title="Assignment">
-        <AssignmentSection />
+        <AssignmentSection values={createCase.assignment} onChange={createCase.updateAssignment} />
       </Section>
 
       <button type="submit" disabled={createCase.submitting}>

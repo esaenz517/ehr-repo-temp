@@ -21,6 +21,7 @@ def create_assignment(db: Session, request: AssignmentRequest, assigned_by: int)
             case_id = request.case_id,
             course = request.course,
             due_date = request.due_date,
+            assignment_type = request.assignment_type,
             assigned_to = student_id,
             assigned_by = assigned_by
         )

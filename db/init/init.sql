@@ -343,7 +343,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Patients')
 BEGIN
     CREATE TABLE dbo.Patients (
         PatientId           INT IDENTITY(1,1) PRIMARY KEY,
-        Mrn                 NVARCHAR(20)  NULL UNIQUE, -- medical record number
+        Mrn                 NVARCHAR(20)  NULL, -- medical record number (unique when present; see index below)
         FirstName           NVARCHAR(100) NOT NULL,
         MiddleName          NVARCHAR(100) NULL,
         LastName            NVARCHAR(100) NOT NULL,
@@ -356,6 +356,14 @@ BEGIN
                             CHECK (Status IN ('outpatient', 'inpatient')),
         ProviderId          INT           NULL REFERENCES dbo.Providers(ProviderId) -- patient's medical provider
     );
+END
+GO
+
+-- MRN must be unique when present, but many patients may have none.
+-- (A plain UNIQUE constraint would allow only one NULL.)
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'UX_Patients_Mrn')
+BEGIN
+    CREATE UNIQUE INDEX UX_Patients_Mrn ON dbo.Patients (Mrn) WHERE Mrn IS NOT NULL;
 END
 GO
 

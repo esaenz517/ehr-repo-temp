@@ -5,6 +5,7 @@ export interface AssignmentRequest {
   case_id: number;
   course?: string | null;
   due_date?: string | null;
+  assignment_type?: "graded" | "practice";
   assigned_to: number[];
   assigned_by: number;
 }

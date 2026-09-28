@@ -10,12 +10,14 @@ from typing import Literal
 from pydantic import BaseModel
 
 EncounterStatus = Literal["not_started", "in_progress", "submitted", "signed"] # Encounter status options
+AssingmentType = Literal["graded", "practice"] # Assignment types
 
 # What front end sends to assign cases.
 class AssignmentRequest(BaseModel):
     case_id: int
     course: str | None = None
     due_date: datetime | None = None
+    assignment_type: AssingmentType = "graded"
     assigned_to: list[int]
     assigned_by: int # WILL NEED REFACTORING to draw from active session rather than manual input (not sure how to do this yet)
 
@@ -30,6 +32,7 @@ class Assignment(BaseModel):
     encounter_status: EncounterStatus
     course: str | None
     due_date: datetime | None
+    assignment_type: AssingmentType
     assigned_to: int
     assigned_by: int
 
