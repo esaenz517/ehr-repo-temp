@@ -491,6 +491,8 @@ BEGIN
         PatientId INT NOT NULL REFERENCES dbo.Patients(PatientId) ON DELETE CASCADE,
         DrugId    INT NOT NULL REFERENCES dbo.Drugs(DrugId) ON DELETE CASCADE,
         Dosage    NVARCHAR(100) NULL,
+        Route     NVARCHAR(20) NULL,
+        Frequency NVARCHAR(50) NULL,
         CONSTRAINT PK_PatientDrugs PRIMARY KEY (PatientId, DrugId)
     );
 END
@@ -499,7 +501,7 @@ GO
 IF COL_LENGTH('dbo.PatientDrugs', 'Dosage') IS NULL
 BEGIN
     ALTER TABLE dbo.PatientDrugs
-    ADD Dosage NVARCHAR(100) NULL;
+    ADD Dosage    NVARCHAR(100) NULL
 END
 GO
 

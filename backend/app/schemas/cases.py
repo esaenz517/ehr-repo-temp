@@ -18,6 +18,13 @@ class LabResultCreate(BaseModel):
     unit: str | None = None
     flag: str | None = None
     collected_at: datetime
+    
+#Creating a Medication
+class MedicationCreate(BaseModel):
+    drug_id: int
+    dose: str | None = None
+    route: str | None = None
+    frequency: str | None = None
 
 class CaseBase(BaseModel):
     patient_id: int
@@ -28,6 +35,7 @@ class CaseBase(BaseModel):
 class CaseCreate(CaseBase):
     allergies: list[AllergyCreate] = []
     labs: list[LabResultCreate] = []
+    medications: list[MedicationCreate] = []
 
 class Case(CaseBase):
     case_id: int

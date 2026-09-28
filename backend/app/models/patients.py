@@ -12,11 +12,11 @@ from app.database import Base
 patient_drugs = Table(
     "PatientDrugs",
     Base.metadata,
-    Column(
-        "PatientId", Integer, ForeignKey("dbo.Patients.PatientId"), primary_key=True
-    ),
+    Column("PatientId", Integer, ForeignKey("dbo.Patients.PatientId"), primary_key=True),
     Column("DrugId", Integer, ForeignKey("dbo.Drugs.DrugId"), primary_key=True),
     Column("Dosage", String(100), nullable=True),
+    Column("Route", String(20), nullable=True),
+    Column("Frequency", String(50), nullable=True),
     schema="dbo",
 )
 
@@ -44,3 +44,12 @@ class Patient(Base):
     provider = relationship("Provider")
     # Many-to-many: the drugs a patient may take.
     drugs = relationship("Drug", secondary=patient_drugs)
+
+class PatientDrug(Base):
+    __table__ = patient_drugs
+    
+    patient_id = patient_drugs.c.PatientId
+    drug_id = patient_drugs.c.DrugId
+    dosage = patient_drugs.c.Dosage
+    route = patient_drugs.c.Route
+    frequency = patient_drugs.c.Frequency

@@ -44,11 +44,13 @@ export function useCreateCase() {
     if (!demographics.genderIdentity) errors.genderIdentity = "Select a gender identity.";
     if (!demographics.pronouns) errors.pronouns = "Select pronouns.";
     if (!caseContent.chiefComplaint.trim()) errors.chiefComplaint = "Enter a chief complaint.";
+
     // Substance, test, result, and collection time can't be empty in the database.
     if (chartData.allergies.some((a) => !a.substance.trim()))
       errors.allergies = "Every allergy needs a substance.";
     if (chartData.labs.some((l) => !l.testName.trim() || !l.result.trim() || !l.collectedAt))
       errors.labs = "Every lab needs a test, result, and collection time.";
+    
     return errors;
   };
 
