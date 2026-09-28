@@ -343,7 +343,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Patients')
 BEGIN
     CREATE TABLE dbo.Patients (
         PatientId           INT IDENTITY(1,1) PRIMARY KEY,
-        Mrn                 NVARCHAR(20)  NULL UNIQUE, -- medical record number
+        Mrn                 NVARCHAR(20)  NULL, -- medical record number (unique when present; see index below)
         FirstName           NVARCHAR(100) NOT NULL,
         MiddleName          NVARCHAR(100) NULL,
         LastName            NVARCHAR(100) NOT NULL,
@@ -356,6 +356,14 @@ BEGIN
                             CHECK (Status IN ('outpatient', 'inpatient')),
         ProviderId          INT           NULL REFERENCES dbo.Providers(ProviderId) -- patient's medical provider
     );
+END
+GO
+
+-- MRN must be unique when present, but many patients may have none.
+-- (A plain UNIQUE constraint would allow only one NULL.)
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'UX_Patients_Mrn')
+BEGIN
+    CREATE UNIQUE INDEX UX_Patients_Mrn ON dbo.Patients (Mrn) WHERE Mrn IS NOT NULL;
 END
 GO
 
@@ -421,7 +429,7 @@ ALTER COLUMN Pronouns NVARCHAR(20) NOT NULL;
 GO
 
 -- STAFF TABLE
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Staff')
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Staff' AND schema_id = SCHEMA_ID('dbo'))
 BEGIN
     CREATE TABLE dbo.Staff (
         StaffId    INT IDENTITY(1,1) PRIMARY KEY,
@@ -429,19 +437,32 @@ BEGIN
         MiddleName   NVARCHAR(100) NULL,
         LastName     NVARCHAR(100) NOT NULL,
         Specialization  NVARCHAR(100) NOT NULL,
-        Student      BIT  NOT NULL DEFAULT 1,
+        Student      BIT  NOT NULL DEFAULT 0,
         Admin        BIT  NOT NULL DEFAULT 0
     );
 END
 GO
 
--- T_LOGIN TABLE
+-- STAFF DATA
+IF NOT EXISTS (SELECT * FROM dbo.Staff)
+BEGIN
+    INSERT INTO dbo.Staff
+        (FirstName, MiddleName, LastName, Specialization, Student, Admin)
+    VALUES
+        (N'Emily',  NULL, N'Carter', N'Nursing',          0, 0),
+        (N'Daniel', N'J', N'Brooks', N'Cardiology',       0, 0),
+        (N'Sophia', NULL, N'Nguyen', N'Physical Therapy', 1, 0),
+        (N'Alex',   NULL, N'Morgan', N'Administration',    0, 1);
+END
+GO
+
+-- LOGIN TABLE
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'T_Login')
 BEGIN
     CREATE TABLE dbo.T_Login (
         username    NVARCHAR(254) NOT NULL PRIMARY KEY,
-        password_hash NVARCHAR(100) NOT NULL,
-        staffid     INT           NOT NULL UNIQUE REFERENCES dbo.Staff(StaffId)
+        password_hash NVARCHAR(100) NOT NULL, -- bcrypt hash
+        staffid     INT NOT NULL UNIQUE REFERENCES dbo.Staff(StaffId) -- May become dbo.Users(UserId)
     );
 END
 GO
@@ -450,7 +471,7 @@ GO
 IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'dev')
 BEGIN
     INSERT INTO dbo.Staff (FirstName, MiddleName, LastName, Specialization, Student, Admin)
-    VALUES (N'Dev', NULL, N'User', N'Development', 0, 1)
+    VALUES (N'Dev', NULL, N'User', N'Development', 1, 1)
 
     INSERT INTO dbo.T_Login (username, password_hash, staffid)
     VALUES (N'Dev', N'$2b$12$JiMOYxRva65eUaBh74GGfeyJTmACdFGT8zCuYfpyy7SfT7NjNkLt.', SCOPE_IDENTITY());
@@ -593,49 +614,6 @@ BEGIN
 END 
 GO
 
--- STAFF TABLE
-IF NOT EXISTS (
-    SELECT *
-    FROM sys.tables
-    WHERE name = 'Staff'
-      AND schema_id = SCHEMA_ID('dbo')
-)
-BEGIN
-    CREATE TABLE dbo.Staff (
-        StaffId        INT IDENTITY(1,1) PRIMARY KEY,
-        FirstName      NVARCHAR(100) NOT NULL,
-        MiddleName     NVARCHAR(100) NULL,
-        LastName       NVARCHAR(100) NOT NULL,
-        Specialization NVARCHAR(100) NOT NULL,
-        Student        BIT NOT NULL DEFAULT 0,
-        Admin          BIT NOT NULL DEFAULT 0
-    );
-END
-GO
-
--- STAFF DATA
-IF NOT EXISTS (SELECT * FROM dbo.Staff)
-BEGIN
-    INSERT INTO dbo.Staff
-        (FirstName, MiddleName, LastName, Specialization, Student, Admin)
-    VALUES
-        (N'Emily',  NULL, N'Carter', N'Nursing',          0, 0),
-        (N'Daniel', N'J', N'Brooks', N'Cardiology',       0, 0),
-        (N'Sophia', NULL, N'Nguyen', N'Physical Therapy', 1, 0),
-        (N'Alex',   NULL, N'Morgan', N'Administration',    0, 1);
-END
-GO
-
--- LOGIN TABLE (username/password credentials for staff; used by /auth/login)
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'T_Login')
-BEGIN
-    CREATE TABLE dbo.T_Login (
-        username      NVARCHAR(254) NOT NULL PRIMARY KEY,
-        password_hash NVARCHAR(100) NOT NULL, -- bcrypt hash
-        staffid       INT NOT NULL REFERENCES dbo.Staff(StaffId)
-    );
-END
-GO
 
 -- Case Table
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Cases')
@@ -651,6 +629,31 @@ BEGIN
     );
 END
 GO
+
+-- ASSIGNMENT TABLE (must be initialized after CASE Table)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Assignment' AND schema_id = SCHEMA_ID('dbo'))
+BEGIN
+    CREATE TABLE dbo.Assignment (
+        AssignmentId    INT IDENTITY(1,1) PRIMARY KEY,
+        CaseId          INT NOT NULL REFERENCES dbo.Cases(CaseId), 
+        EncounterStatus NVARCHAR(20) NOT NULL DEFAULT 'not_started'
+                        CHECK (EncounterStatus IN ('not_started', 'in_progress', 'submitted', 'signed')),
+        -- not_started: encounter assigned, student has not opened the encounter
+        -- in_progress: student has opened the encounter, is working on it, or instructor has kicked back the submission for re-work
+        -- submitted: student has completed encounter and submitted it for review
+        -- signed: instructor has reviewed student's work and signed off on it (not kicked back for re-work)
+        Course          NVARCHAR(100) NULL,
+        DueDate         DATETIME2 NULL, --May not have due dates
+        AssignmentType  NVARCHAR(10) NOT NULL DEFAULT 'graded'
+                        CHECK(AssignmentType IN ('practice', 'graded')),
+        -- practice: ungraded assignment, does not contribute to cumulative GPA
+        -- graded: assignment contributes to cumulative GPA
+        AssignedTo      INT NOT NULL REFERENCES dbo.Staff(StaffId), 
+        AssignedBy      INT NOT NULL REFERENCES dbo.Staff(StaffId) 
+    );
+END
+GO
+
 -- SOAP sprint: encounter identity and chart context. Empty chart tables are intentional:
 -- missing data must never be displayed as a normal result or 'no known allergies'.
 IF OBJECT_ID(N'dbo.Encounters', N'U') IS NULL

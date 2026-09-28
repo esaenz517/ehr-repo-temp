@@ -10,6 +10,7 @@ import { RoomsPage } from "./components/RoomsPage";
 import { Sidebar, View } from "./components/Sidebar";
 import { LoginPage } from "./components/LoginPage";
 import type { LoginResponse } from "./types";
+import { MyAssignmentsPage } from "./components/Assignment/MyAssignmentsPage";
 import { ClinicalNotesPage } from "./components/ClinicalNotes/ClinicalNotesPage";
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
         {view === "drugs" && <DrugsPage />}
         {view === "rooms" && <RoomsPage />}
         {view === "createCase" && <CreateCasePage staffId={user.staffid} />}
+        {view === "assignments" && <MyAssignmentsPage studentId={user.staffid} />}
         {view === "clinicalNotes" && <ClinicalNotesPage />}
       </main>
     </div>

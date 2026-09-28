@@ -7,6 +7,7 @@ export type View =
   | "drugs"
   | "rooms"
   | "createCase"
+  | "assignments"
   | "clinicalNotes";
 interface SidebarProps {
   active: View;
@@ -23,6 +24,7 @@ const NAV_ITEMS: { view: View; label: string }[] = [
   { view: "drugs", label: "Drugs" },
   { view: "rooms", label: "Rooms" },
   { view: "createCase", label: "Create Case" },
+  { view: "assignments", label: "My Assignments" },
   { view: "clinicalNotes", label: "Clinical Notes" },
 ];
 

@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { assignmentApi } from "../api/assignment";
 import { casesApi } from "../api/cases";
 import { patientsApi } from "../api/patients";
+import { AssignmentValues, EMPTY_ASSIGNMENT } from "../components/Assignment/AssignmentSection";
 import { CaseContentValues, EMPTY_CASE_CONTENT } from "../components/Cases/CaseContent";
 import { ChartDataValues, EMPTY_CHART_DATA } from "../components/Cases/ChartData";
 import { DemographicsValues, EMPTY_DEMOGRAPHICS } from "../components/Patients/PatientDemographics";
@@ -19,8 +21,9 @@ export type CaseFieldErrors = Partial<
 export function useCreateCase() {
   const [demographics, setDemographics] = useState<DemographicsValues>(EMPTY_DEMOGRAPHICS);
   const [caseContent, setCaseContent] = useState<CaseContentValues>(EMPTY_CASE_CONTENT);
+  // TODO (Chart Data): add medications / allergies / labs state here.
+  const [assignment, setAssignment] = useState<AssignmentValues>(EMPTY_ASSIGNMENT);
   const [chartData, setChartData] = useState<ChartDataValues>(EMPTY_CHART_DATA);
-  // TODO (Assignment): add course / due date / mode / students state here.
 
   const [fieldErrors, setFieldErrors] = useState<CaseFieldErrors>({});
   const [submitting, setSubmitting] = useState(false); // true while saving
@@ -33,6 +36,9 @@ export function useCreateCase() {
 
   const updateCaseContent = (field: keyof CaseContentValues, value: string) =>
     setCaseContent((prev) => ({ ...prev, [field]: value }));
+
+  const updateAssignment = <K extends keyof AssignmentValues>(field: K, value: AssignmentValues[K]) =>
+    setAssignment((prev) => ({ ...prev, [field]: value }));
 
   // Check the required fields for a case (Ex. First name, notes, drug data, etc.)
   const validate = (): CaseFieldErrors => {
@@ -63,13 +69,15 @@ export function useCreateCase() {
   const reset = () => {
     setDemographics(EMPTY_DEMOGRAPHICS);
     setCaseContent(EMPTY_CASE_CONTENT);
+    setAssignment(EMPTY_ASSIGNMENT);
     setChartData(EMPTY_CHART_DATA);
     setFieldErrors({});
   };
 
-  // Save the case. This takes two requests for now:
+  // Save the case. This takes up to three requests:
   //   1. create the patient,
-  //   2. create the case that points to that patient.
+  //   2. create the case that points to that patient,
+  //   3. assign the case to the checked students (skipped if none are checked).
   // staffId is the logged-in instructor, SAVED as the case's creator.
   const submit = async (staffId: number) => {
     setCreated(null);
@@ -124,6 +132,31 @@ export function useCreateCase() {
         })),
       });
 
+      // TODO (Chart Data): save that section here, using newCase.case_id.
+
+      // Step 3: assign the case. The case is already saved at this point, so if
+      // this step fails, say so instead of reporting the whole case as failed.
+      if (assignment.studentIds.length > 0) {
+        try {
+          await assignmentApi.create({
+            case_id: newCase.case_id,
+            course: assignment.course.trim() || null,
+            // datetime-local gives local time; the backend stores UTC without a "Z".
+            due_date: assignment.dueDate ? new Date(assignment.dueDate).toISOString().slice(0, 19) : null,
+            assignment_type: assignment.assignmentType,
+            assigned_to: assignment.studentIds,
+            assigned_by: staffId, // TEMPORARY: the backend will take this from the session
+          });
+        } catch (err) {
+          setCreated(newCase);
+          reset();
+          setError(
+            `Case #${newCase.case_id} was created, but assigning it failed: ` +
+              (err instanceof Error ? err.message : "unknown error")
+          );
+          return;
+        }
+      }
       // TODO (Assignment): save that section here, using newCase.case_id.
 
       setCreated(newCase);
@@ -138,6 +171,7 @@ export function useCreateCase() {
   return {
     demographics,
     caseContent,
+    assignment,
     chartData,
     setChartData,
     fieldErrors,
@@ -146,6 +180,7 @@ export function useCreateCase() {
     created,
     updateDemographics,
     updateCaseContent,
+    updateAssignment,
     submit,
   };
 }

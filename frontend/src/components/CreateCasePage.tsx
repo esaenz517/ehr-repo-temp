@@ -4,6 +4,7 @@ import { useDrugs } from "../hooks/useDrugs";
 import { CaseContent } from "./Cases/CaseContent";
 import { ChartData } from "./Cases/ChartData";
 import { PatientDemographics } from "./Patients/PatientDemographics";
+import { AssignmentSection } from "./Assignment/AssignmentSection";
 
 // One boxed section of the form, with its title in the border.
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -84,9 +85,8 @@ export function CreateCasePage({ staffId }: CreateCasePageProps) {
         />
       </Section>
 
-      {/* TODO: Assignment - encounter status, course, due date, mode, and students. */}
       <Section title="Assignment">
-        <ComingSoon text="Encounter status, course, due date, mode, and students." />
+        <AssignmentSection values={createCase.assignment} onChange={createCase.updateAssignment} />
       </Section>
 
       <button type="submit" disabled={createCase.submitting}>
