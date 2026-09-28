@@ -4,9 +4,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import (
-    login,
+    appointments,
     drugs,
     items,
+    login,
+    medical_history,
     patients,
     permissions,
     providers,
@@ -39,6 +41,7 @@ app.include_router(staff.router)
 app.include_router(login.router)
 app.include_router(medical_history.router)
 app.include_router(rooms.router)
+app.include_router(appointments.router)
 app.include_router(cases.router)
 
 app.include_router(users.router)

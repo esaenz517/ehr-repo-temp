@@ -104,6 +104,14 @@ export interface Room {
   status: string;
 }
 
+export interface Appointment {
+  appointment_id: number;
+  patient_id: number;
+  appointment_datetime: string;
+  location: string;
+  status: string;
+}
+
 export interface MedicalHistory {
   medical_history_id: number;
   patient_id: number;
