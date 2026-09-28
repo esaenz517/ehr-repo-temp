@@ -95,3 +95,11 @@ export interface Room {
   unit: string;
   status: string;
 }
+
+export interface Appointment {
+  appointment_id: number;
+  patient_id: number;
+  appointment_datetime: string;
+  location: string;
+  status: string;
+}
