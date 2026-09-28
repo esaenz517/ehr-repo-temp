@@ -55,8 +55,11 @@ export interface Patient {
   first_name: string;
   middle_name: string | null;
   last_name: string;
+  preferred_name: string | null;
   date_of_birth: string;
-  gender: string | null;
+  gender_at_birth: string | null;
+  gender_identity: string;
+  pronouns: string;
   status: string;
   provider_id: number | null;
   provider: Provider | null;
@@ -71,6 +74,11 @@ export interface Staff {
   specialization: string;
   student: boolean;
   admin: boolean;
+}
+
+export interface LoginResponse {
+  username: string;
+  staffid: number;
 }
 
 export interface MedicalHistory {
@@ -102,4 +110,43 @@ export interface Appointment {
   appointment_datetime: string;
   location: string;
   status: string;
+}
+
+export interface MedicalHistory {
+  medical_history_id: number;
+  patient_id: number;
+  condition: string;
+  diagnosis_date: string | null;
+  notes: string | null;
+}
+
+export interface FamilyHistory {
+  family_history_id: number;
+  patient_id: number;
+  relationship: string;
+  condition: string;
+  notes: string | null;
+}
+
+export type EncounterStatus = "not_started" | "in_progress" | "submitted" | "signed";  //for use with Assignment interface
+
+export interface Assignment {
+  assignment_id: number;
+  case_id: number;
+  encounter_status: EncounterStatus;
+  course: string | null;
+  due_date: string | null;
+  assignment_type?: "graded" | "practice";
+  assigned_to: number;
+  assigned_by: number;
+}
+
+export interface Case {
+  case_id: number;
+  patient_id: number;
+  chief_complaint: string;
+  narrative: string | null;
+  created_by_staff_id: number;
+  created_at: string;
+  patient: Patient | null;
 }

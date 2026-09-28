@@ -8,13 +8,27 @@ import { StaffPage } from "./components/StaffPage";
 import { ProvidersPage } from "./components/ProvidersPage";
 import { RoomsPage } from "./components/RoomsPage";
 import { Sidebar, View } from "./components/Sidebar";
+import { LoginPage } from "./components/LoginPage";
+import type { LoginResponse } from "./types";
+import { MyAssignmentsPage } from "./components/Assignment/MyAssignmentsPage";
+import { ClinicalNotesPage } from "./components/ClinicalNotes/ClinicalNotesPage";
 
 function App() {
   const [view, setView] = useState<View>("home");
+  const [user, setUser] = useState<LoginResponse | null>(null);
+
+  if (!user) {
+    return <LoginPage onLogin={setUser} />;
+  }
 
   return (
     <div className="app-layout">
-      <Sidebar active={view} onNavigate={setView} />
+      <Sidebar active={view} onNavigate={setView} username={user.username}
+        onLogout={() => {
+          setUser(null);
+          setView("home");
+        }}
+      />
 
       <main className="app-main">
         {view === "home" && <Home />}
@@ -24,7 +38,9 @@ function App() {
         {view === "providers" && <ProvidersPage />}
         {view === "drugs" && <DrugsPage />}
         {view === "rooms" && <RoomsPage />}
-        {view === "createCase" && <CreateCasePage />}
+        {view === "createCase" && <CreateCasePage staffId={user.staffid} />}
+        {view === "assignments" && <MyAssignmentsPage studentId={user.staffid} />}
+        {view === "clinicalNotes" && <ClinicalNotesPage />}
       </main>
     </div>
   );

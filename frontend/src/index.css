@@ -41,6 +41,82 @@ button {
   flex-wrap: wrap;
 }
 
+/* Labeled inputs laid out as a table: 3 columns, label above each input */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.form-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+
+.form-field .required {
+  color: #c0392b;
+  margin-left: 2px;
+}
+
+/* Small grey helper text and red validation text under an input */
+.field-hint {
+  font-size: 12px;
+  color: #777;
+}
+
+.field-error {
+  font-size: 12px;
+  color: #c0392b;
+}
+
+/* Fields stacked in one full-width column (e.g. Case Content) */
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+textarea {
+  font: inherit;
+  font-size: 14px;
+  padding: 6px 10px;
+  width: 100%;
+  resize: vertical;
+}
+
+/* Banner shown after saving a form */
+.form-message {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid;
+}
+
+.form-message.success {
+  color: #1a6841;
+  background: #e1f1e7;
+  border-color: #a0d1b3;
+}
+
+.form-message.error {
+  color: #b3261e;
+  background: #fcebea;
+  border-color: #ebaea9;
+}
+
+@media (max-width: 900px) {
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .sidebar {
   width: 200px;
   flex-shrink: 0;
@@ -96,6 +172,10 @@ button {
 
   .sidebar li {
     margin-bottom: 0;
+  }
+
+  .form-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .sidebar button {

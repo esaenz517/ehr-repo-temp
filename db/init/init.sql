@@ -102,56 +102,6 @@ BEGIN
 END
 GO
 
--- PERMISSIONS DATA
-MERGE dbo.Permissions AS target
-USING (
-    VALUES
-        ('patient.read',   'patient',   'read'),
-        ('patient.create', 'patient',   'create'),
-        ('patient.delete', 'patient',   'delete'),
-
-        ('staff.read',     'staff',     'read'),
-        ('staff.create',   'staff',     'create'),
-        ('staff.delete',   'staff',     'delete'),
-
-        ('provider.read',   'provider',   'read'),
-        ('provider.create', 'provider',   'create'),
-        ('provider.delete', 'provider',   'delete'),
-
-        ('drug.read',   'drug',   'read'),
-        ('drug.create', 'drug',   'create'),
-        ('drug.delete', 'drug',   'delete'),
-
-        ('room.read',   'room',   'read'),
-        ('room.create', 'room',   'create'),
-        ('room.update', 'room',   'update'),
-        ('room.delete', 'room',   'delete'),
-
-        ('user.read',         'user', 'read'),
-        ('user.create',       'user', 'create'),
-        ('user.manage_roles', 'user', 'manage_roles'),
-
-        ('role.read',               'role', 'read'),
-        ('role.manage_permissions', 'role', 'manage_permissions'),
-
-        ('permission.read', 'permission', 'read')
-) AS source (PermissionCode, ResourceType, Action)
-
-ON target.PermissionCode = source.PermissionCode
-
-WHEN NOT MATCHED THEN
-    INSERT (
-        PermissionCode,
-        ResourceType,
-        Action
-    )
-    VALUES (
-        source.PermissionCode,
-        source.ResourceType,
-        source.Action
-    );
-GO
-
 -- DRUGS TABLE (catalog of drugs that can be prescribed to patients)
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Drugs')
 BEGIN
@@ -255,6 +205,10 @@ USING (
         ('patient.read',   'patient',   'read'),
         ('patient.create', 'patient',   'create'),
         ('patient.delete', 'patient',   'delete'),
+
+        ('case.read',   'case',   'read'),
+        ('case.create', 'case',   'create'),
+        ('case.delete', 'case',   'delete'),
 
         ('staff.read',     'staff',     'read'),
         ('staff.create',   'staff',     'create'),
@@ -388,17 +342,139 @@ GO
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Patients')
 BEGIN
     CREATE TABLE dbo.Patients (
-        PatientId    INT IDENTITY(1,1) PRIMARY KEY,
-        Mrn          NVARCHAR(20)  NULL UNIQUE, -- medical record number
+        PatientId           INT IDENTITY(1,1) PRIMARY KEY,
+        Mrn                 NVARCHAR(20)  NULL, -- medical record number (unique when present; see index below)
+        FirstName           NVARCHAR(100) NOT NULL,
+        MiddleName          NVARCHAR(100) NULL,
+        LastName            NVARCHAR(100) NOT NULL,
+        PreferredName       NVARCHAR(50)  NULL,
+        DateOfBirth         DATE          NOT NULL,
+        GenderAtBirth       NVARCHAR(20)  NOT NULL,
+        GenderIdentity      NVARCHAR(20)  NOT NULL,
+        Pronouns            NVARCHAR(20)  NOT NULL,
+        Status              NVARCHAR(20)  NOT NULL DEFAULT 'outpatient'
+                            CHECK (Status IN ('outpatient', 'inpatient')),
+        ProviderId          INT           NULL REFERENCES dbo.Providers(ProviderId) -- patient's medical provider
+    );
+END
+GO
+
+-- MRN must be unique when present, but many patients may have none.
+-- (A plain UNIQUE constraint would allow only one NULL.)
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'UX_Patients_Mrn')
+BEGIN
+    CREATE UNIQUE INDEX UX_Patients_Mrn ON dbo.Patients (Mrn) WHERE Mrn IS NOT NULL;
+END
+GO
+
+-- Upgrade older Patients tables to the current patient demographic schema.
+
+IF COL_LENGTH('dbo.Patients', 'PreferredName') IS NULL
+BEGIN
+    ALTER TABLE dbo.Patients
+    ADD PreferredName NVARCHAR(50) NULL;
+END
+GO
+
+IF COL_LENGTH('dbo.Patients', 'GenderAtBirth') IS NULL
+BEGIN
+    ALTER TABLE dbo.Patients
+    ADD GenderAtBirth NVARCHAR(20) NULL;
+END
+GO
+
+IF COL_LENGTH('dbo.Patients', 'GenderIdentity') IS NULL
+BEGIN
+    ALTER TABLE dbo.Patients
+    ADD GenderIdentity NVARCHAR(20) NULL;
+END
+GO
+
+IF COL_LENGTH('dbo.Patients', 'Pronouns') IS NULL
+BEGIN
+    ALTER TABLE dbo.Patients
+    ADD Pronouns NVARCHAR(20) NULL;
+END
+GO
+
+-- Backfill demographic fields for patients created under the older schema.
+-- These fields are required by the current Patient API response.
+
+UPDATE dbo.Patients
+SET GenderAtBirth = N'Unknown'
+WHERE GenderAtBirth IS NULL;
+GO
+
+UPDATE dbo.Patients
+SET GenderIdentity = N'Unknown'
+WHERE GenderIdentity IS NULL;
+GO
+
+UPDATE dbo.Patients
+SET Pronouns = N'Unspecified'
+WHERE Pronouns IS NULL;
+GO
+
+-- Bring upgraded databases in line with the current fresh-install schema.
+ALTER TABLE dbo.Patients
+ALTER COLUMN GenderAtBirth NVARCHAR(20) NOT NULL;
+GO
+
+ALTER TABLE dbo.Patients
+ALTER COLUMN GenderIdentity NVARCHAR(20) NOT NULL;
+GO
+
+ALTER TABLE dbo.Patients
+ALTER COLUMN Pronouns NVARCHAR(20) NOT NULL;
+GO
+
+-- STAFF TABLE
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Staff' AND schema_id = SCHEMA_ID('dbo'))
+BEGIN
+    CREATE TABLE dbo.Staff (
+        StaffId    INT IDENTITY(1,1) PRIMARY KEY,
         FirstName    NVARCHAR(100) NOT NULL,
         MiddleName   NVARCHAR(100) NULL,
         LastName     NVARCHAR(100) NOT NULL,
-        DateOfBirth  DATE          NOT NULL,
-        Gender       NVARCHAR(20)  NULL,
-        Status       NVARCHAR(20)  NOT NULL DEFAULT 'outpatient'
-                     CHECK (Status IN ('outpatient', 'inpatient')),
-        ProviderId   INT           NULL REFERENCES dbo.Providers(ProviderId) -- patient's medical provider
+        Specialization  NVARCHAR(100) NOT NULL,
+        Student      BIT  NOT NULL DEFAULT 0,
+        Admin        BIT  NOT NULL DEFAULT 0
     );
+END
+GO
+
+-- STAFF DATA
+IF NOT EXISTS (SELECT * FROM dbo.Staff)
+BEGIN
+    INSERT INTO dbo.Staff
+        (FirstName, MiddleName, LastName, Specialization, Student, Admin)
+    VALUES
+        (N'Emily',  NULL, N'Carter', N'Nursing',          0, 0),
+        (N'Daniel', N'J', N'Brooks', N'Cardiology',       0, 0),
+        (N'Sophia', NULL, N'Nguyen', N'Physical Therapy', 1, 0),
+        (N'Alex',   NULL, N'Morgan', N'Administration',    0, 1);
+END
+GO
+
+-- LOGIN TABLE
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'T_Login')
+BEGIN
+    CREATE TABLE dbo.T_Login (
+        username    NVARCHAR(254) NOT NULL PRIMARY KEY,
+        password_hash NVARCHAR(100) NOT NULL, -- bcrypt hash
+        staffid     INT NOT NULL UNIQUE REFERENCES dbo.Staff(StaffId) -- May become dbo.Users(UserId)
+    );
+END
+GO
+
+-- DEV LOGIN SEED: Staff member plus login "dev" / "dev123"
+IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'dev')
+BEGIN
+    INSERT INTO dbo.Staff (FirstName, MiddleName, LastName, Specialization, Student, Admin)
+    VALUES (N'Dev', NULL, N'User', N'Development', 1, 1)
+
+    INSERT INTO dbo.T_Login (username, password_hash, staffid)
+    VALUES (N'Dev', N'$2b$12$JiMOYxRva65eUaBh74GGfeyJTmACdFGT8zCuYfpyy7SfT7NjNkLt.', SCOPE_IDENTITY());
 END
 GO
 
@@ -419,13 +495,13 @@ GO
 -- PATIENTS DATA
 IF NOT EXISTS (SELECT * FROM dbo.Patients)
 BEGIN
-    INSERT INTO dbo.Patients (Mrn, FirstName, MiddleName, LastName, DateOfBirth, Gender, Status, ProviderId) VALUES
-        ('MRN000001', 'James',    'Robert',   'Carter',     '1984-03-12', 'Male',        'outpatient', 1),
-        ('MRN000002', 'Maria',    'Elena',    'Gonzalez',   '1992-07-25', 'Female',      'inpatient',  2),
-        ('MRN000003', 'David',    NULL,       'Nguyen',     '1978-11-02', 'Male',        'outpatient', 1),
-        ('MRN000004', 'Sarah',    'Jane',     'Thompson',   '2001-01-19', 'Female',      'outpatient', 3),
-        ('MRN000005', 'Michael',  'A',        'Johnson',    '1965-09-30', 'Male',        'inpatient',  2),
-        ('MRN000006', 'Aisha',    NULL,       'Patel',      '1989-05-14', 'Female',      'outpatient', 3);
+    INSERT INTO dbo.Patients (Mrn, FirstName, MiddleName, LastName, PreferredName, DateOfBirth, GenderAtBirth, GenderIdentity, Pronouns, Status, ProviderId) VALUES
+        ('MRN000001', 'James',    'Robert',   'Carter',     'Jim',  '1984-03-12', 'Male',   'Man',       'he/him',    'outpatient', 1),
+        ('MRN000002', 'Maria',    'Elena',    'Gonzalez',   NULL,   '1992-07-25', 'Female', 'Woman',     'she/her',   'inpatient',  2),
+        ('MRN000003', 'David',    NULL,       'Nguyen',     NULL,   '1978-11-02', 'Male',   'Man',       'he/him',    'outpatient', 1),
+        ('MRN000004', 'Sarah',    'Jane',     'Thompson',   'Sam',  '2001-01-19', 'Female', 'Nonbinary', 'they/them', 'outpatient', 3),
+        ('MRN000005', 'Michael',  'A',        'Johnson',    'Mike', '1965-09-30', 'Male',   'Man',       'he/him',    'inpatient',  2),
+        ('MRN000006', 'Aisha',    NULL,       'Patel',      NULL,   '1989-05-14', 'Female', 'Woman',     'she/her',   'outpatient', 3);
 END
 GO
 
@@ -436,8 +512,17 @@ BEGIN
         PatientId INT NOT NULL REFERENCES dbo.Patients(PatientId) ON DELETE CASCADE,
         DrugId    INT NOT NULL REFERENCES dbo.Drugs(DrugId) ON DELETE CASCADE,
         Dosage    NVARCHAR(100) NULL,
+        Route     NVARCHAR(20) NULL,
+        Frequency NVARCHAR(50) NULL,
         CONSTRAINT PK_PatientDrugs PRIMARY KEY (PatientId, DrugId)
     );
+END
+GO
+
+IF COL_LENGTH('dbo.PatientDrugs', 'Dosage') IS NULL
+BEGIN
+    ALTER TABLE dbo.PatientDrugs
+    ADD Dosage    NVARCHAR(100) NULL
 END
 GO
 
@@ -454,7 +539,6 @@ BEGIN
         (6, 3, N'20mg nightly');
 END
 GO
-
 -- MEDICAL HISTORY TABLE
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'MedicalHistory')
 BEGIN
@@ -469,6 +553,10 @@ BEGIN
             FOREIGN KEY (PatientId)
             REFERENCES dbo.Patients(PatientId)
             ON DELETE CASCADE
+);
+END
+GO
+
 -- ROOMS TABLE
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Rooms')
 BEGIN
@@ -504,12 +592,12 @@ END
 IF NOT EXISTS (SELECT * FROM dbo.Rooms)
 BEGIN
     INSERT INTO dbo.Rooms (RoomNumber, Unit, Status) VALUES
-        ('100', 'General',    'available'),
-        ('101', 'General',    'available'),
-        ('102', 'ICU',        'available'),
-        ('103', 'ICU',        'available'),
-        ('104', 'Pediatrics', 'available'),
-        ('105', 'Pediatrics', 'available');
+        (100, 'General',    'available'),
+        (101, 'General',    'available'),
+        (102, 'ICU',        'available'),
+        (103, 'ICU',        'available'),
+        (104, 'Pediatrics', 'available'),
+        (105, 'Pediatrics', 'available');
 END
 GO
 
@@ -521,41 +609,131 @@ BEGIN
         RoomId       INT NOT NULL REFERENCES dbo.Rooms(RoomId), --Foreign key to Rooms table
         PatientId    INT NOT NULL REFERENCES dbo.Patients(PatientId), --Foreign key to Patients table
         AssignedAt   DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-        DischargedAt DATETIME2 NULL, --NULL means patient is still assigned to the room
+        DischargedAt DATETIME2 NULL --NULL means patient is still assigned to the room
     );
 END 
 GO
 
--- STAFF TABLE
-IF NOT EXISTS (
-    SELECT *
-    FROM sys.tables
-    WHERE name = 'Staff'
-      AND schema_id = SCHEMA_ID('dbo')
-)
+
+-- Case Table
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Cases')
 BEGIN
-    CREATE TABLE dbo.Staff (
-        StaffId        INT IDENTITY(1,1) PRIMARY KEY,
-        FirstName      NVARCHAR(100) NOT NULL,
-        MiddleName     NVARCHAR(100) NULL,
-        LastName       NVARCHAR(100) NOT NULL,
-        Specialization NVARCHAR(100) NOT NULL,
-        Student        BIT NOT NULL DEFAULT 0,
-        Admin          BIT NOT NULL DEFAULT 0
+    CREATE TABLE dbo.Cases (
+        CaseId            INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId         INT NOT NULL REFERENCES dbo.Patients(PatientId),  -- the case's original patient
+        ChiefComplaint    NVARCHAR(500)  NOT NULL,
+        Narrative         NVARCHAR(4000) NULL,       -- "Case narrative / HPI seed"
+        --SourceCaseId      INT NULL REFERENCES dbo.Cases(CaseId),  -- set when "Start from: Existing case"
+        CreatedByStaffId  INT NOT NULL REFERENCES dbo.Staff(StaffId),
+        CreatedAt         DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
     );
 END
 GO
 
--- STAFF DATA
-IF NOT EXISTS (SELECT * FROM dbo.Staff)
+-- ASSIGNMENT TABLE (must be initialized after CASE Table)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Assignment' AND schema_id = SCHEMA_ID('dbo'))
 BEGIN
-    INSERT INTO dbo.Staff
-        (FirstName, MiddleName, LastName, Specialization, Student, Admin)
-    VALUES
-        (N'Emily',  NULL, N'Carter', N'Nursing',          0, 0),
-        (N'Daniel', N'J', N'Brooks', N'Cardiology',       0, 0),
-        (N'Sophia', NULL, N'Nguyen', N'Physical Therapy', 1, 0),
-        (N'Alex',   NULL, N'Morgan', N'Administration',    0, 1);
+    CREATE TABLE dbo.Assignment (
+        AssignmentId    INT IDENTITY(1,1) PRIMARY KEY,
+        CaseId          INT NOT NULL REFERENCES dbo.Cases(CaseId), 
+        EncounterStatus NVARCHAR(20) NOT NULL DEFAULT 'not_started'
+                        CHECK (EncounterStatus IN ('not_started', 'in_progress', 'submitted', 'signed')),
+        -- not_started: encounter assigned, student has not opened the encounter
+        -- in_progress: student has opened the encounter, is working on it, or instructor has kicked back the submission for re-work
+        -- submitted: student has completed encounter and submitted it for review
+        -- signed: instructor has reviewed student's work and signed off on it (not kicked back for re-work)
+        Course          NVARCHAR(100) NULL,
+        DueDate         DATETIME2 NULL, --May not have due dates
+        AssignmentType  NVARCHAR(10) NOT NULL DEFAULT 'graded'
+                        CHECK(AssignmentType IN ('practice', 'graded')),
+        -- practice: ungraded assignment, does not contribute to cumulative GPA
+        -- graded: assignment contributes to cumulative GPA
+        AssignedTo      INT NOT NULL REFERENCES dbo.Staff(StaffId), 
+        AssignedBy      INT NOT NULL REFERENCES dbo.Staff(StaffId) 
+    );
+END
+GO
+
+-- SOAP sprint: encounter identity and chart context. Empty chart tables are intentional:
+-- missing data must never be displayed as a normal result or 'no known allergies'.
+IF OBJECT_ID(N'dbo.Encounters', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Encounters (
+        EncounterId INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId INT NOT NULL REFERENCES dbo.Patients(PatientId),
+        StartedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+GO
+
+IF OBJECT_ID(N'dbo.PatientAllergies', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.PatientAllergies (
+        AllergyId INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId INT NOT NULL REFERENCES dbo.Patients(PatientId),
+        Substance NVARCHAR(200) NOT NULL,
+        Reaction NVARCHAR(500) NULL
+    );
+END
+GO
+
+IF OBJECT_ID(N'dbo.PatientVitals', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.PatientVitals (
+        VitalId INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId INT NOT NULL REFERENCES dbo.Patients(PatientId),
+        RecordedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        BloodPressure NVARCHAR(40) NULL,
+        HeartRate INT NULL,
+        RespiratoryRate INT NULL,
+        TemperatureC DECIMAL(5,2) NULL,
+        OxygenSaturation DECIMAL(5,2) NULL,
+        HeightCm DECIMAL(7,2) NULL,
+        WeightKg DECIMAL(7,2) NULL
+    );
+END
+GO
+
+IF OBJECT_ID(N'dbo.PatientLabResults', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.PatientLabResults (
+        LabResultId INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId INT NOT NULL REFERENCES dbo.Patients(PatientId),
+        TestName NVARCHAR(200) NOT NULL,
+        Result NVARCHAR(200) NOT NULL,
+        Unit NVARCHAR(50) NULL,
+        Flag NVARCHAR(40) NULL,
+        CollectedAt DATETIME2 NOT NULL
+    );
+END
+GO
+
+-- The note type and sensitivity belong to the note, never to the patient.
+-- Keep note types open for future editors; the API currently accepts SOAP only.
+IF OBJECT_ID(N'dbo.ClinicalNotes', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.ClinicalNotes (
+        NoteId INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId INT NOT NULL REFERENCES dbo.Patients(PatientId),
+        EncounterId INT NOT NULL REFERENCES dbo.Encounters(EncounterId),
+        NoteType NVARCHAR(100) NOT NULL,
+        Discipline NVARCHAR(100) NULL,
+        AuthorUserId INT NOT NULL REFERENCES dbo.Users(UserId),
+        ResponsibleProviderId INT NULL REFERENCES dbo.Providers(ProviderId),
+        CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        LastModifiedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        Content NVARCHAR(MAX) NOT NULL,
+        SensitivityClassification NVARCHAR(40) NOT NULL DEFAULT 'general',
+        CurrentVersion INT NOT NULL DEFAULT 1,
+        IsArchived BIT NOT NULL DEFAULT 0,
+        CONSTRAINT CK_ClinicalNotes_Sensitivity
+            CHECK (SensitivityClassification IN ('general', 'restricted')),
+        CONSTRAINT CK_ClinicalNotes_Version
+            CHECK (CurrentVersion >= 1)
+    );
+
+    CREATE INDEX IX_ClinicalNotes_Patient
+        ON dbo.ClinicalNotes(PatientId, EncounterId);
 END
 GO
 
@@ -587,4 +765,92 @@ BEGIN
             REFERENCES dbo.Patients(PatientId)
     );
 END
+GO
+IF OBJECT_ID(N'dbo.NoteVersions', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.NoteVersions (
+        VersionId INT IDENTITY(1,1) PRIMARY KEY,
+        NoteId INT NOT NULL REFERENCES dbo.ClinicalNotes(NoteId),
+        VersionNumber INT NOT NULL,
+        ContentSnapshot NVARCHAR(MAX) NOT NULL,
+        AuthorUserId INT NOT NULL REFERENCES dbo.Users(UserId),
+        CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        ChangeSummary NVARCHAR(500) NULL,
+        CONSTRAINT UQ_NoteVersions_NoteVersion
+            UNIQUE (NoteId, VersionNumber)
+    );
+END
+GO
+
+-- Contextual note permissions: general grants do not cover restricted notes.
+MERGE dbo.Permissions AS target
+USING (
+    VALUES
+        ('note.read.general', 'read', 'general'),
+        ('note.create.general', 'create', 'general'),
+        ('note.update.general', 'update', 'general'),
+        ('note.archive.general', 'archive', 'general'),
+        ('note.read.restricted', 'read', 'restricted'),
+        ('note.create.restricted', 'create', 'restricted'),
+        ('note.update.restricted', 'update', 'restricted'),
+        ('note.archive.restricted', 'archive', 'restricted')
+) AS source (
+    PermissionCode,
+    Action,
+    SensitivityLevel
+)
+ON target.PermissionCode = source.PermissionCode
+
+WHEN NOT MATCHED THEN
+    INSERT (
+        PermissionCode,
+        ResourceType,
+        Action,
+        SensitivityLevel,
+        IsActive
+    )
+    VALUES (
+        source.PermissionCode,
+        'note',
+        source.Action,
+        source.SensitivityLevel,
+        1
+    );
+GO
+
+INSERT INTO dbo.RolePermissions (
+    RoleId,
+    PermissionId
+)
+SELECT
+    r.RoleId,
+    p.PermissionId
+FROM dbo.Roles r
+CROSS JOIN dbo.Permissions p
+WHERE
+    p.ResourceType = 'note'
+    AND (
+        r.RoleName = 'ADMIN'
+        OR (
+            r.RoleName = 'FACULTY_INSTRUCTOR'
+            AND p.Action = 'read'
+        )
+        OR (
+            r.RoleName IN (
+                'PHYSICIAN',
+                'NURSE',
+                'PSYCHIATRY',
+                'PHYSICAL_THERAPY',
+                'ALLIED_HEALTH'
+            )
+            AND p.SensitivityLevel = 'general'
+        )
+    )
+    AND NOT EXISTS (
+        SELECT 1
+        FROM dbo.RolePermissions rp
+        WHERE
+            rp.RoleId = r.RoleId
+            AND rp.PermissionId = p.PermissionId
+    );
 GO

@@ -1,7 +1,7 @@
-'''
+"""
 Patients Model
 SQLAlchemy ORM class mapped to the dbo.Patients table.
-'''
+"""
 
 from sqlalchemy import Column, Date, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
@@ -14,6 +14,9 @@ patient_drugs = Table(
     Base.metadata,
     Column("PatientId", Integer, ForeignKey("dbo.Patients.PatientId"), primary_key=True),
     Column("DrugId", Integer, ForeignKey("dbo.Drugs.DrugId"), primary_key=True),
+    Column("Dosage", String(100), nullable=True),
+    Column("Route", String(20), nullable=True),
+    Column("Frequency", String(50), nullable=True),
     schema="dbo",
 )
 
@@ -27,12 +30,26 @@ class Patient(Base):
     first_name = Column("FirstName", String(100), nullable=False)
     middle_name = Column("MiddleName", String(100), nullable=True)
     last_name = Column("LastName", String(100), nullable=False)
+    preferred_name = Column("PreferredName", String(50), nullable=True)
     date_of_birth = Column("DateOfBirth", Date, nullable=False)
-    gender = Column("Gender", String(20), nullable=True)
+    gender_at_birth = Column("GenderAtBirth", String(20), nullable=False)
+    gender_identity = Column("GenderIdentity", String(20), nullable=False)
+    pronouns = Column("Pronouns", String(20), nullable=False)
     status = Column("Status", String(20), nullable=False, default="outpatient")
-    provider_id = Column("ProviderId", Integer, ForeignKey("dbo.Providers.ProviderId"), nullable=True)
+    provider_id = Column(
+        "ProviderId", Integer, ForeignKey("dbo.Providers.ProviderId"), nullable=True
+    )
 
     # Many-to-one: the patient's medical provider.
     provider = relationship("Provider")
     # Many-to-many: the drugs a patient may take.
     drugs = relationship("Drug", secondary=patient_drugs)
+
+class PatientDrug(Base):
+    __table__ = patient_drugs
+    
+    patient_id = patient_drugs.c.PatientId
+    drug_id = patient_drugs.c.DrugId
+    dosage = patient_drugs.c.Dosage
+    route = patient_drugs.c.Route
+    frequency = patient_drugs.c.Frequency

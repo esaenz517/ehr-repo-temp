@@ -1,8 +1,19 @@
-export type View = "home" | "items" | "patients" | "staff" | "providers" | "drugs" | "rooms" | "createCase";
-
+export type View =
+  | "home"
+  | "items"
+  | "patients"
+  | "staff"
+  | "providers"
+  | "drugs"
+  | "rooms"
+  | "createCase"
+  | "assignments"
+  | "clinicalNotes";
 interface SidebarProps {
   active: View;
   onNavigate: (view: View) => void;
+  username: string;
+  onLogout: () => void;
 }
 
 const NAV_ITEMS: { view: View; label: string }[] = [
@@ -14,9 +25,11 @@ const NAV_ITEMS: { view: View; label: string }[] = [
   { view: "drugs", label: "Drugs" },
   { view: "rooms", label: "Rooms" },
   { view: "createCase", label: "Create Case" },
+  { view: "assignments", label: "My Assignments" },
+  { view: "clinicalNotes", label: "Clinical Notes" },
 ];
 
-export function Sidebar({ active, onNavigate }: SidebarProps) {
+export function Sidebar({ active, onNavigate, username, onLogout }: SidebarProps) {
   return (
     <nav className="sidebar">
       <ul>
@@ -34,6 +47,9 @@ export function Sidebar({ active, onNavigate }: SidebarProps) {
           </li>
         ))}
       </ul>
+
+      <p>{username}</p>
+      <button onClick={onLogout}>Log out</button>
     </nav>
   );
 }

@@ -33,12 +33,17 @@ export function PatientList({ patients, onDelete }: PatientListProps) {
               {patient.first_name} {patient.middle_name ? `${patient.middle_name} ` : ""}
               {patient.last_name}
             </strong>
+            {patient.preferred_name && (
+              <span style={{ color: "#555" }}> ("{patient.preferred_name}")</span>
+            )}
             <div style={{ fontSize: 14, color: "#555" }}>
               {patient.mrn && <>MRN: {patient.mrn} · </>}
               DOB: {patient.date_of_birth}
-              {patient.gender && <> · {patient.gender}</>}
               {" · "}
               {patient.status}
+            </div>
+            <div style={{ fontSize: 14, color: "#555" }}>
+              Sex at birth: {patient.gender_at_birth ?? "—"} · Gender: {patient.gender_identity} · {patient.pronouns}
             </div>
             <div style={{ fontSize: 14, color: "#555" }}>
               Provider:{" "}
