@@ -1,6 +1,8 @@
 import { FormEvent, ReactNode } from "react";
 import { useCreateCase } from "../hooks/useCreateCase";
+import { useDrugs } from "../hooks/useDrugs";
 import { CaseContent } from "./Cases/CaseContent";
+import { ChartData } from "./Cases/ChartData";
 import { PatientDemographics } from "./Patients/PatientDemographics";
 import { AssignmentSection } from "./Assignment/AssignmentSection";
 
@@ -29,6 +31,7 @@ interface CreateCasePageProps {
 // add its state to hooks/useCreateCase.ts, then replace its <ComingSoon> below.
 export function CreateCasePage({ staffId }: CreateCasePageProps) {
   const createCase = useCreateCase();
+  const { drugs } = useDrugs(); // drug list for the Medications checkboxes
 
   // Runs when the "Create case" button is pressed.
   const handleSubmit = (e: FormEvent) => {
@@ -73,9 +76,13 @@ export function CreateCasePage({ staffId }: CreateCasePageProps) {
         />
       </Section>
 
-      {/* TODO: Chart Data - medications, allergies, and labs. */}
       <Section title="Chart Data">
-        <ComingSoon text="Medications, allergies, and labs." />
+        <ChartData
+          values={createCase.chartData}
+          drugs={drugs}
+          onChange={createCase.setChartData}
+          errors={createCase.fieldErrors}
+        />
       </Section>
 
       <Section title="Assignment">

@@ -38,8 +38,8 @@ function App() {
         {view === "providers" && <ProvidersPage />}
         {view === "drugs" && <DrugsPage />}
         {view === "rooms" && <RoomsPage />}
-        {view === "assignments" && <MyAssignmentsPage studentId={user.staffid} />}
         {view === "createCase" && <CreateCasePage staffId={user.staffid} />}
+        {view === "assignments" && <MyAssignmentsPage studentId={user.staffid} />}
         {view === "clinicalNotes" && <ClinicalNotesPage />}
       </main>
     </div>
