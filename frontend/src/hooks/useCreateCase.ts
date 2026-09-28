@@ -2,11 +2,14 @@ import { useState } from "react";
 import { casesApi } from "../api/cases";
 import { patientsApi } from "../api/patients";
 import { CaseContentValues, EMPTY_CASE_CONTENT } from "../components/Cases/CaseContent";
+import { ChartDataValues, EMPTY_CHART_DATA } from "../components/Cases/ChartData";
 import { DemographicsValues, EMPTY_DEMOGRAPHICS } from "../components/Patients/PatientDemographics";
 import type { Case } from "../types";
 
 // One error message per form field, keyed by the field's name.
-export type CaseFieldErrors = Partial<Record<keyof DemographicsValues | keyof CaseContentValues, string>>;
+export type CaseFieldErrors = Partial<
+  Record<keyof DemographicsValues | keyof CaseContentValues | keyof ChartDataValues, string>
+>;
 
 
 // Dev notes:
@@ -16,7 +19,7 @@ export type CaseFieldErrors = Partial<Record<keyof DemographicsValues | keyof Ca
 export function useCreateCase() {
   const [demographics, setDemographics] = useState<DemographicsValues>(EMPTY_DEMOGRAPHICS);
   const [caseContent, setCaseContent] = useState<CaseContentValues>(EMPTY_CASE_CONTENT);
-  // TODO (Chart Data): add medications / allergies / labs state here.
+  const [chartData, setChartData] = useState<ChartDataValues>(EMPTY_CHART_DATA);
   // TODO (Assignment): add course / due date / mode / students state here.
 
   const [fieldErrors, setFieldErrors] = useState<CaseFieldErrors>({});
@@ -41,6 +44,18 @@ export function useCreateCase() {
     if (!demographics.genderIdentity) errors.genderIdentity = "Select a gender identity.";
     if (!demographics.pronouns) errors.pronouns = "Select pronouns.";
     if (!caseContent.chiefComplaint.trim()) errors.chiefComplaint = "Enter a chief complaint.";
+
+    // Each medication needs a drug, and a drug can only be listed once per patient.
+    const drugIds = chartData.medications.map((m) => m.drugId);
+    if (drugIds.some((id) => !id)) errors.medications = "Every medication needs a drug.";
+    else if (new Set(drugIds).size !== drugIds.length) errors.medications = "Each drug can only be listed once.";
+
+    // Substance, test, result, and collection time can't be empty in the database.
+    if (chartData.allergies.some((a) => !a.substance.trim()))
+      errors.allergies = "Every allergy needs a substance.";
+    if (chartData.labs.some((l) => !l.testName.trim() || !l.result.trim() || !l.collectedAt))
+      errors.labs = "Every lab needs a test, result, and collection time.";
+    
     return errors;
   };
 
@@ -48,6 +63,7 @@ export function useCreateCase() {
   const reset = () => {
     setDemographics(EMPTY_DEMOGRAPHICS);
     setCaseContent(EMPTY_CASE_CONTENT);
+    setChartData(EMPTY_CHART_DATA);
     setFieldErrors({});
   };
 
@@ -79,7 +95,7 @@ export function useCreateCase() {
         pronouns: demographics.pronouns,
         status: "outpatient",
         provider_id: null,
-        drug_ids: [],
+        drug_ids: [], // medications are saved with the case below (with dose, route, frequency)
       });
 
       // Step 2: create the case for the new patient.
@@ -88,9 +104,27 @@ export function useCreateCase() {
         chief_complaint: caseContent.chiefComplaint.trim(),
         narrative: caseContent.narrative.trim() || null,
         created_by_staff_id: staffId,
+        // Convert the form rows to the backend's field names; blank optional fields become null.
+        medications: chartData.medications.map((m) => ({
+          drug_id: Number(m.drugId),
+          dose: m.dose.trim() || null,
+          route: m.route || null,
+          frequency: m.frequency || null,
+        })),
+        allergies: chartData.allergies.map((a) => ({
+          substance: a.substance.trim(),
+          reaction: a.reaction.trim() || null,
+        })),
+        labs: chartData.labs.map((l) => ({
+          test_name: l.testName.trim(),
+          result: l.result.trim(),
+          unit: l.unit.trim() || null,
+          flag: l.flag.trim() || null,
+          collected_at: l.collectedAt,
+        })),
       });
 
-      // TODO (Chart Data / Assignment): save those sections here, using newCase.case_id.
+      // TODO (Assignment): save that section here, using newCase.case_id.
 
       setCreated(newCase);
       reset();
@@ -104,6 +138,8 @@ export function useCreateCase() {
   return {
     demographics,
     caseContent,
+    chartData,
+    setChartData,
     fieldErrors,
     submitting,
     error,
