@@ -15,7 +15,9 @@ from app.routers import (
     staff,
     users,
     medical_history,
-    assignment
+    assignment,
+    clinical_notes,
+    cases
 )
 
 app = FastAPI(title="Simple Items API")
@@ -37,11 +39,14 @@ app.include_router(staff.router)
 app.include_router(login.router)
 app.include_router(medical_history.router)
 app.include_router(rooms.router)
+app.include_router(cases.router)
 
 app.include_router(users.router)
 app.include_router(roles.router)
 app.include_router(permissions.router)
 app.include_router(assignment.router)
+
+app.include_router(clinical_notes.router)
 
 
 @app.get("/health")
