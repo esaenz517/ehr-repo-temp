@@ -463,7 +463,7 @@ GO
 IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'dev')
 BEGIN
     INSERT INTO dbo.Staff (FirstName, MiddleName, LastName, Specialization, Student, Admin)
-    VALUES (N'Dev', NULL, N'User', N'Development', 0, 1)
+    VALUES (N'Dev', NULL, N'User', N'Development', 1, 1)
 
     INSERT INTO dbo.T_Login (username, password_hash, staffid)
     VALUES (N'Dev', N'$2b$12$JiMOYxRva65eUaBh74GGfeyJTmACdFGT8zCuYfpyy7SfT7NjNkLt.', SCOPE_IDENTITY());
@@ -604,8 +604,23 @@ BEGIN
 END 
 GO
 
--- INSERT CASES TABLE PRIOR TO ASSIGNMENT TABLE 
--- ASSIGNMENT TABLE 
+
+-- Case Table
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Cases')
+BEGIN
+    CREATE TABLE dbo.Cases (
+        CaseId            INT IDENTITY(1,1) PRIMARY KEY,
+        PatientId         INT NOT NULL REFERENCES dbo.Patients(PatientId),  -- the case's original patient
+        ChiefComplaint    NVARCHAR(500)  NOT NULL,
+        Narrative         NVARCHAR(4000) NULL,       -- "Case narrative / HPI seed"
+        --SourceCaseId      INT NULL REFERENCES dbo.Cases(CaseId),  -- set when "Start from: Existing case"
+        CreatedByStaffId  INT NOT NULL REFERENCES dbo.Staff(StaffId),
+        CreatedAt         DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+GO
+
+-- ASSIGNMENT TABLE (must be initialized after CASE Table)
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Assignment' AND schema_id = SCHEMA_ID('dbo'))
 BEGIN
     CREATE TABLE dbo.Assignment (
@@ -629,20 +644,6 @@ BEGIN
 END
 GO
 
--- Case Table
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Cases')
-BEGIN
-    CREATE TABLE dbo.Cases (
-        CaseId            INT IDENTITY(1,1) PRIMARY KEY,
-        PatientId         INT NOT NULL REFERENCES dbo.Patients(PatientId),  -- the case's original patient
-        ChiefComplaint    NVARCHAR(500)  NOT NULL,
-        Narrative         NVARCHAR(4000) NULL,       -- "Case narrative / HPI seed"
-        --SourceCaseId      INT NULL REFERENCES dbo.Cases(CaseId),  -- set when "Start from: Existing case"
-        CreatedByStaffId  INT NOT NULL REFERENCES dbo.Staff(StaffId),
-        CreatedAt         DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
-    );
-END
-GO
 -- SOAP sprint: encounter identity and chart context. Empty chart tables are intentional:
 -- missing data must never be displayed as a normal result or 'no known allergies'.
 IF OBJECT_ID(N'dbo.Encounters', N'U') IS NULL
