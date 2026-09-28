@@ -39,10 +39,7 @@ function App() {
         {view === "drugs" && <DrugsPage />}
         {view === "rooms" && <RoomsPage />}
         {view === "createCase" && <CreateCasePage staffId={user.staffid} />}
-<<<<<<< HEAD
         {view === "assignments" && <MyAssignmentsPage studentId={user.staffid} />}
-=======
->>>>>>> cd586d2 (Backend implementation for courses)
         {view === "clinicalNotes" && <ClinicalNotesPage />}
       </main>
     </div>

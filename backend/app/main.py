@@ -42,21 +42,14 @@ app.include_router(staff.router)
 app.include_router(login.router)
 app.include_router(medical_history.router)
 app.include_router(rooms.router)
-<<<<<<< HEAD
 app.include_router(appointments.router)
 app.include_router(cases.router)
-=======
-app.include_router(cases.router)
 app.include_router(courses.router)
->>>>>>> cd586d2 (Backend implementation for courses)
 
 app.include_router(users.router)
 app.include_router(roles.router)
 app.include_router(permissions.router)
-<<<<<<< HEAD
 app.include_router(assignment.router)
-=======
->>>>>>> cd586d2 (Backend implementation for courses)
 
 app.include_router(clinical_notes.router)
 
