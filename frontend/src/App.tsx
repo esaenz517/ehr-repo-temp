@@ -7,6 +7,7 @@ import { PatientsPage } from "./components/PatientsPage";
 import { StaffPage } from "./components/StaffPage";
 import { ProvidersPage } from "./components/ProvidersPage";
 import { RoomsPage } from "./components/RoomsPage";
+import { CoursesPage } from "./components/CoursesPage";
 import { Sidebar, View } from "./components/Sidebar";
 import { LoginPage } from "./components/LoginPage";
 import type { LoginResponse } from "./types";
@@ -38,6 +39,7 @@ function App() {
         {view === "providers" && <ProvidersPage />}
         {view === "drugs" && <DrugsPage />}
         {view === "rooms" && <RoomsPage />}
+        {view === "courses" && <CoursesPage />}
         {view === "createCase" && <CreateCasePage staffId={user.staffid} />}
         {view === "assignments" && <MyAssignmentsPage studentId={user.staffid} />}
         {view === "clinicalNotes" && <ClinicalNotesPage />}
