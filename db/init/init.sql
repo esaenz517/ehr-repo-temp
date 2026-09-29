@@ -3,6 +3,10 @@
 -- SQL Server reports healthy. You can also open this in SSMS by connecting
 -- to localhost,1433 with user "sa" and the password from docker-compose.yml.
 
+-- Filtered indexes (CREATE INDEX ... WHERE, e.g. UX_Patients_Mrn) requires QUOTED_IDENTIFIER ON
+SET QUOTED_IDENTIFIER ON;
+GO
+
 -- App-facing login (used by backend/CloudBeaver instead of sa).
 -- CHECK_POLICY = OFF because SQL Server's default password policy requires
 -- 8+ chars from 3+ character classes, which the dev password doesn't meet.
