@@ -112,6 +112,13 @@ export interface Appointment {
   status: string;
 }
 
+export interface BillingCharge {
+  charge_id: number;
+  patient_id: number;
+  charge_summary: string;
+  charge_amount: string;
+}
+
 export interface MedicalHistory {
   medical_history_id: number;
   patient_id: number;
