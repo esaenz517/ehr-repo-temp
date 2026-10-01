@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Patient } from "../../types";
 import { MedicalHistoryPanel } from "../MedicalHistory/MedicalHistoryPanel";
 import { AppointmentPanel } from "../Appointments/AppointmentPanel";
+import { BillingChargePanel } from "../Billing/BillingChargePanel";
 
 interface PatientListProps {
   patients: Patient[];
@@ -12,6 +13,9 @@ export function PatientList({ patients, onDelete }: PatientListProps) {
   const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
 
   const [appointmentPatientId, setAppointmentPatientId] =
+    useState<number | null>(null);
+
+  const [billingPatientId, setBillingPatientId] =
     useState<number | null>(null);
 
   return (
@@ -83,6 +87,21 @@ export function PatientList({ patients, onDelete }: PatientListProps) {
             </button>
 
             <button
+              onClick={() =>
+                setBillingPatientId(
+                  billingPatientId === patient.patient_id
+                    ? null
+                    : patient.patient_id
+                )
+              }
+              style={{ marginLeft: 8 }}
+            >
+              {billingPatientId === patient.patient_id
+                ? "Hide Charges"
+                : "View Charges"}
+            </button>
+
+            <button
               onClick={() => onDelete(patient.patient_id)}
                style={{ marginLeft: 8 }}
             >
@@ -97,6 +116,11 @@ export function PatientList({ patients, onDelete }: PatientListProps) {
           {appointmentPatientId === patient.patient_id && (
             <div style={{ width: "100%" }}>
               <AppointmentPanel patientId={patient.patient_id} />
+            </div>
+          )}
+          {billingPatientId === patient.patient_id && (
+            <div style={{ width: "100%" }}>
+              <BillingChargePanel patientId={patient.patient_id} />
             </div>
           )}
         </li>
