@@ -150,3 +150,17 @@ export interface Case {
   created_at: string;
   patient: Patient | null;
 }
+export type CourseTerm = "Fall" | "Spring" | "Summer";
+
+export interface Course {
+  course_id: number;
+  subject_code: string;
+  course_number: string;
+  title: string;
+  term: CourseTerm;
+  term_year: number;
+  is_active: boolean;
+  created_at: string;
+  short_label: string; // e.g. "PHAR 5310" (computed by the backend)
+  label: string; // e.g. "PHAR 5310 – Pharmacotherapy I (Fall 2026)"
+}

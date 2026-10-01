@@ -6,6 +6,7 @@ export type View =
   | "providers"
   | "drugs"
   | "rooms"
+  | "courses"
   | "createCase"
   | "assignments"
   | "clinicalNotes";
@@ -24,6 +25,7 @@ const NAV_ITEMS: { view: View; label: string }[] = [
   { view: "providers", label: "Providers" },
   { view: "drugs", label: "Drugs" },
   { view: "rooms", label: "Rooms" },
+  { view: "courses", label: "Courses" },
   { view: "createCase", label: "Create Case" },
   { view: "assignments", label: "My Assignments" },
   { view: "clinicalNotes", label: "Clinical Notes" },

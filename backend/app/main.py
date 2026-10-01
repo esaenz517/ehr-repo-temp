@@ -19,7 +19,8 @@ from app.routers import (
     medical_history,
     assignment,
     clinical_notes,
-    cases
+    cases,
+    courses
 )
 
 app = FastAPI(title="Simple Items API")
@@ -43,6 +44,7 @@ app.include_router(medical_history.router)
 app.include_router(rooms.router)
 app.include_router(appointments.router)
 app.include_router(cases.router)
+app.include_router(courses.router)
 
 app.include_router(users.router)
 app.include_router(roles.router)
