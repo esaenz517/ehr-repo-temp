@@ -28,6 +28,11 @@ def list_for_student(student_id: int, db: Session = Depends(get_db)):
     return crud.list_for_student(db, student_id)
 
 
+@router.get("/assigned-by/{staff_id}", response_model = list[Assignment])
+def list_assigned_by(staff_id: int, db: Session = Depends(get_db)):
+    return crud.list_assigned_by(db, staff_id)
+
+
 @router.get("/case/{case_id}", response_model = list[Assignment])
 def list_for_case(case_id: int, db: Session = Depends(get_db)):
     return crud.list_for_case(db, case_id)
