@@ -14,4 +14,5 @@ class Login(Base):
 
     username = Column("username", String(254), nullable=False, primary_key=True)
     password_hash = Column("password_hash", String(100), nullable=False)
-    staffid = Column("staffid", Integer, ForeignKey("dbo.Staff.StaffId"), nullable=False)
+    staffid = Column("staffid", Integer, ForeignKey("dbo.Staff.StaffId"), nullable=False)  # cases and assignments
+    userid = Column("userid", Integer, ForeignKey("dbo.Users.UserId"), nullable=True)  # roles and permissions

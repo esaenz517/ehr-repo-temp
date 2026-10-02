@@ -1,8 +1,9 @@
 export const API_URL =
   import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-// Development-only user identity used while the final login flow is unfinished.
-const DEV_USER_ID = import.meta.env.VITE_DEV_USER_ID;
+// Fired when the backend rejects the session cookie (expired, idle too long,
+// or signed out elsewhere). App listens for it and returns to the login page.
+export const SESSION_EXPIRED_EVENT = "session-expired";
 
 export async function apiFetch<T>(
   path: string,
@@ -12,14 +13,16 @@ export async function apiFetch<T>(
 
   headers.set("Content-Type", "application/json");
 
-  if (DEV_USER_ID) {
-    headers.set("X-User-Id", DEV_USER_ID);
-  }
-
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers,
+    // Send the HttpOnly session cookie to the API on another port.
+    credentials: "include",
   });
+
+  if (res.status === 401 && !path.startsWith("/auth/")) {
+    window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+  }
 
   if (!res.ok) {
     throw new Error(`Request failed: ${res.status}`);

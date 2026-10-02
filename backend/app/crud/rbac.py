@@ -120,3 +120,51 @@ def user_has_contextual_permission(
         query = query.filter(Permission.care_context == care_context)
 
     return query.first() is not None
+
+
+def get_role_names(db: Session, user_id: int) -> list[str]:
+    """Returns the names of the user's active roles, e.g. ["STUDENT"]."""
+    rows = (
+        db.query(Role.role_name)
+        .join(UserRole, UserRole.role_id == Role.role_id)
+        .filter(
+            UserRole.user_id == user_id,
+            Role.is_active == True,
+        )
+        .order_by(Role.role_name)
+        .all()
+    )
+
+    return [row.role_name for row in rows]
+
+
+def get_permission_codes(db: Session, user_id: int) -> list[str]:
+    """
+    Returns the codes of every active permission the user holds through an
+    active role, e.g. ["case.read", "patient.read"].
+    """
+    rows = (
+        db.query(Permission.permission_code)
+        .join(
+            RolePermission,
+            RolePermission.permission_id == Permission.permission_id,
+        )
+        .join(
+            Role,
+            Role.role_id == RolePermission.role_id,
+        )
+        .join(
+            UserRole,
+            UserRole.role_id == Role.role_id,
+        )
+        .filter(
+            UserRole.user_id == user_id,
+            Role.is_active == True,
+            Permission.is_active == True,
+        )
+        .distinct()
+        .order_by(Permission.permission_code)
+        .all()
+    )
+
+    return [row.permission_code for row in rows]

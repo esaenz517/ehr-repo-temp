@@ -12,10 +12,13 @@ class LoginRequest(BaseModel):
     password: str
 
 
-# Shape of the data the API returns.
+# Shape of the signed-in user the API returns from /auth/login and /auth/me.
+# roles and permissions let the frontend decide which views to show; the
+# backend still checks permissions on every request.
 class LoginResponse(BaseModel):
     username: str
     staffid: int
-
-    class Config:
-        from_attributes = True
+    userid: int
+    name: str
+    roles: list[str]
+    permissions: list[str]

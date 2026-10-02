@@ -79,6 +79,10 @@ export interface Staff {
 export interface LoginResponse {
   username: string;
   staffid: number;
+  userid: number;
+  name: string;
+  roles: string[];
+  permissions: string[];
 }
 
 export interface MedicalHistory {
