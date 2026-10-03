@@ -9,7 +9,7 @@ import { ProvidersPage } from "./components/ProvidersPage";
 import { RoomsPage } from "./components/RoomsPage";
 import { CoursesPage } from "./components/CoursesPage";
 import { Sidebar, STUDENT_VIEWS, View } from "./components/Sidebar";
-import { LoginPage } from "./components/LoginPage";
+import { LoginPage } from "./components/Login/LoginPage";
 import type { LoginResponse } from "./types";
 import { MyAssignmentsPage } from "./components/Assignment/MyAssignmentsPage";
 import { AssignedCasesPage } from "./components/Assignment/AssignedCasesPage";

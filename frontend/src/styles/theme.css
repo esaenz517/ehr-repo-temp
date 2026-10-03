@@ -1,0 +1,25 @@
+/* Shared design tokens (UTEP colors). Change a color here and every
+   component that uses the variable picks it up. */
+:root {
+  /* Brand */
+  --color-primary: #041e42;      /* UTEP blue */
+  --color-primary-dark: #021430; /* hover / pressed */
+  --color-accent: #ff8200;       /* UTEP orange: accents only, not body text */
+  --color-silver: #b1b3b3;       /* UTEP silver: borders, dividers */
+
+  /* Neutrals */
+  --color-surface: #ffffff;
+  --color-bg: #f4f6f9;
+  --color-text: #1c2430;
+  --color-text-muted: #5f6b7a;
+  --color-border: var(--color-silver);
+
+  /* Status */
+  --color-error: #b3261e;
+  --color-error-bg: #fcebea;
+
+  /* Shape and type */
+  --radius: 6px;
+  --shadow: 0 4px 16px rgba(4, 30, 66, 0.08);
+  --font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
