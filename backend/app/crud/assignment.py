@@ -44,6 +44,13 @@ def list_for_student(db: Session, student_id: int):
         .order_by(AssignmentModel.due_date).all()
     )
 
+# Lists each assignment an instructor handed out, so they can follow students' progress
+def list_assigned_by(db: Session, staff_id: int):
+    return (
+        db.query(AssignmentModel).filter(AssignmentModel.assigned_by == staff_id)
+        .order_by(AssignmentModel.due_date, AssignmentModel.assigned_to).all()
+    )
+
 # Lists each student assigned to a case by student ID number (numerical ascending)
 def list_for_case(db: Session, case_id: int):
     return (

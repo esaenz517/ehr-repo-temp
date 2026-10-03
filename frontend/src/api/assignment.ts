@@ -15,6 +15,8 @@ export const assignmentApi = {
         apiFetch<Assignment[]>("/assignments", { method: "POST", body: JSON.stringify(input) }),
     listForStudent: (studentId: number) =>
         apiFetch<Assignment[]>(`/assignments/student/${studentId}`),
+    listAssignedBy: (staffId: number) =>
+        apiFetch<Assignment[]>(`/assignments/assigned-by/${staffId}`),
     listForCase: (caseId: number) =>
         apiFetch<Assignment[]>(`/assignments/case/${caseId}`),
     updateStatus: (assignmentId: number, status: EncounterStatus) =>

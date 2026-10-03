@@ -482,6 +482,16 @@ BEGIN
 END
 GO
 
+-- STUDENT LOGIN SEED: login "sophia" / "student123" for the seeded student Sophia Nguyen
+IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'sophia')
+BEGIN
+    INSERT INTO dbo.T_Login (username, password_hash, staffid)
+    SELECT N'sophia', N'$2b$12$YTNtjyUFsETeYSiswRUwweeLfbJ7UTORETcnI3JF/6E4.2tP1zb5W', StaffId
+    FROM dbo.Staff
+    WHERE FirstName = N'Sophia' AND LastName = N'Nguyen' AND Student = 1 AND Admin = 0;
+END
+GO
+
 -- Add ProviderId (and its FK) to a Patients table created before this relationship existed.
 IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Patients') AND name = 'ProviderId')
 BEGIN
@@ -911,3 +921,17 @@ BEGIN
         (N'OT',   N'5150', N'Occupational Therapy Evaluation',         N'Fall',   2026, 1);
 END
 GO
+
+-- Points student sophia to user sophia
+DECLARE @SophiaStaffId INT = (
+    SELECT TOP 1 StaffId FROM dbo.Staff
+    WHERE FirstName = N'Sophia' AND LastName = N'Nguyen' AND Student = 1 AND Admin = 0
+    ORDER BY StaffId
+);
+IF @SophiaStaffId IS NOT NULL
+    AND NOT EXISTS (SELECT 1 FROM dbo.T_Login WHERE staffid = @SophiaStaffId)
+BEGIN
+    UPDATE dbo.T_Login SET staffid = @SophiaStaffId WHERE username = N'sophia';
+END
+
+

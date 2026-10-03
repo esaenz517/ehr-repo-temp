@@ -79,6 +79,8 @@ export interface Staff {
 export interface LoginResponse {
   username: string;
   staffid: number;
+  student: boolean;
+  admin: boolean;
 }
 
 export interface MedicalHistory {

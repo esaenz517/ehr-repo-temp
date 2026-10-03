@@ -10,12 +10,15 @@ from pydantic import BaseModel
 class LoginRequest(BaseModel):
     username: str
     password: str
+    
 
 
 # Shape of the data the API returns.
 class LoginResponse(BaseModel):
     username: str
     staffid: int
+    student:bool = False
+    admin:bool = False
 
     class Config:
         from_attributes = True

@@ -9,13 +9,17 @@ export type View =
   | "courses"
   | "createCase"
   | "assignments"
+  | "assignedCases"
   | "clinicalNotes";
 interface SidebarProps {
   active: View;
   onNavigate: (view: View) => void;
   username: string;
   onLogout: () => void;
+  allowedViews?: View[]; // student can only see some vi
 }
+
+export const STUDENT_VIEWS: View[] = ["home", "assignments"];
 
 const NAV_ITEMS: { view: View; label: string }[] = [
   { view: "home", label: "Home" },
@@ -28,14 +32,19 @@ const NAV_ITEMS: { view: View; label: string }[] = [
   { view: "courses", label: "Courses" },
   { view: "createCase", label: "Create Case" },
   { view: "assignments", label: "My Assignments" },
+  { view: "assignedCases", label: "Assigned Cases" },
   { view: "clinicalNotes", label: "Clinical Notes" },
 ];
 
-export function Sidebar({ active, onNavigate, username, onLogout }: SidebarProps) {
+export function Sidebar({ active, onNavigate, username, onLogout, allowedViews }: SidebarProps) {
+    const items = allowedViews
+    ? NAV_ITEMS.filter(({ view }) => allowedViews.includes(view))
+    : NAV_ITEMS;
+
   return (
     <nav className="sidebar">
       <ul>
-        {NAV_ITEMS.map(({ view, label }) => (
+        {items.map(({ view, label }) => (
           <li key={view}>
             <button
               onClick={() => onNavigate(view)}
