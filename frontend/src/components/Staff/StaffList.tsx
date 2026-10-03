@@ -6,31 +6,30 @@ interface StaffListProps {
 }
 
 export function StaffList({ staff, onDelete }: StaffListProps) {
+  if (staff.length === 0) {
+    return <p className="ui-row-empty">No staff yet.</p>;
+  }
+
   return (
-    <ul style={{ listStyle: "none", padding: 0 }}>
+    <ul className="ui-row-list">
       {staff.map((member) => (
-        <li
-          key={member.staffid}
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "8px 0",
-            borderBottom: "1px solid #eee",
-          }}
-        >
-          <div>
-            <strong>
+        <li key={member.staffid} className="ui-row">
+          <div className="ui-row-main">
+            <div className="ui-row-title">
               {member.first_name} {member.middle_name ? `${member.middle_name} ` : ""}
               {member.last_name}
-            </strong>
-            <div style={{ fontSize: 14, color: "#555" }}>
+            </div>
+            <div className="ui-row-subtitle">
               {member.specialization}
               {member.student && <> · Student</>}
               {member.admin && <> · Admin</>}
             </div>
           </div>
-          <button onClick={() => onDelete(member.staffid)}>Delete</button>
+          <div className="ui-row-actions">
+            <button className="ui-button ui-button--danger" onClick={() => onDelete(member.staffid)}>
+              Delete
+            </button>
+          </div>
         </li>
       ))}
     </ul>

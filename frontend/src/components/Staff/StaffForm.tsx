@@ -33,48 +33,51 @@ export function StaffForm({ onSubmit }: StaffFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+    <form onSubmit={handleSubmit} className="ui-form-bar">
       <input
         value={firstName}
         onChange={(e) => setFirstName(e.target.value)}
         placeholder="First Name"
-        style={{ flex: 2 }}
+        className="ui-input"
       />
       <input
         value={middleName}
         onChange={(e) => setMiddleName(e.target.value)}
         placeholder="Middle Name"
-        style={{ flex: 2 }}
+        className="ui-input"
       />
       <input
         value={lastName}
         onChange={(e) => setLastName(e.target.value)}
         placeholder="Last Name"
-        style={{ flex: 2 }}
+        className="ui-input"
       />
       <input
         value={specialization}
         onChange={(e) => setSpecialization(e.target.value)}
         placeholder="Specialization"
-        style={{ flex: 2 }}
+        className="ui-input"
       />
-      <label style={{ display: "flex", alignItems: "center", gap: 4 }}>
-        <input
-          type="checkbox"
-          checked={student}
-          onChange={(e) => setStudent(e.target.checked)}
-        />
-        Student
-      </label>
-      <label style={{ display: "flex", alignItems: "center", gap: 4 }}>
-        <input
-          type="checkbox"
-          checked={admin}
-          onChange={(e) => setAdmin(e.target.checked)}
-        />
-        Admin
-      </label>
-      <button type="submit">Add</button>
+      {/* Separate Yes/No dropdowns: a person can be a student, an admin, both or neither */}
+      <select
+        value={student ? "yes" : "no"}
+        onChange={(e) => setStudent(e.target.value === "yes")}
+        aria-label="Student"
+        className="ui-input"
+      >
+        <option value="no">Student: No</option>
+        <option value="yes">Student: Yes</option>
+      </select>
+      <select
+        value={admin ? "yes" : "no"}
+        onChange={(e) => setAdmin(e.target.value === "yes")}
+        aria-label="Admin"
+        className="ui-input"
+      >
+        <option value="no">Admin: No</option>
+        <option value="yes">Admin: Yes</option>
+      </select>
+      <button type="submit" className="ui-button">Add</button>
     </form>
   );
 }
