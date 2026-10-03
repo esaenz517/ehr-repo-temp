@@ -22,6 +22,8 @@
   /* Status */
   --color-error: #b3261e;
   --color-error-bg: #fcebea;
+  --color-success: #1a6841;
+  --color-success-bg: #e1f1e7;
 
   /* Layout */
   --sidebar-width: 220px;
