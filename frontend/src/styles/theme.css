@@ -14,9 +14,18 @@
   --color-text-muted: #5f6b7a;
   --color-border: var(--color-silver);
 
+  /* Text/lines on top of the blue (sidebar, etc.) */
+  --color-on-primary: #ffffff;
+  --color-on-primary-muted: rgba(255, 255, 255, 0.75);
+  --color-on-primary-faint: rgba(255, 255, 255, 0.12);
+
   /* Status */
   --color-error: #b3261e;
   --color-error-bg: #fcebea;
+
+  /* Layout */
+  --sidebar-width: 220px;
+  --sidebar-width-collapsed: 72px;
 
   /* Shape and type */
   --radius: 6px;

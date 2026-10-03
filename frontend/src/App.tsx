@@ -8,7 +8,7 @@ import { StaffPage } from "./components/StaffPage";
 import { ProvidersPage } from "./components/ProvidersPage";
 import { RoomsPage } from "./components/RoomsPage";
 import { CoursesPage } from "./components/CoursesPage";
-import { Sidebar, STUDENT_VIEWS, View } from "./components/Sidebar";
+import { Sidebar, STUDENT_VIEWS, View } from "./components/Sidebar/Sidebar";
 import { LoginPage } from "./components/Login/LoginPage";
 import type { LoginResponse } from "./types";
 import { MyAssignmentsPage } from "./components/Assignment/MyAssignmentsPage";
