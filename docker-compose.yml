@@ -65,8 +65,6 @@ services:
       context: ./frontend
       args:
         VITE_API_URL: "http://localhost:8000"
-        # Development user used by the temporary X-User-Id authentication flow.
-        VITE_DEV_USER_ID: "1"
     container_name: app-frontend
     environment:
       VITE_API_URL: "http://localhost:8000"
