@@ -62,67 +62,67 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
-      <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+    <form onSubmit={handleSubmit} className="ui-form-panel">
+      <div className="ui-form-row">
         <input
           value={mrn}
           onChange={(e) => setMrn(e.target.value)}
           placeholder="MRN"
-          style={{ flex: 1 }}
+          className="ui-input"
         />
         <input
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
           placeholder="First Name"
-          style={{ flex: 2 }}
+          className="ui-input ui-input--wide"
         />
         <input
           value={middleName}
           onChange={(e) => setMiddleName(e.target.value)}
           placeholder="Middle Name"
-          style={{ flex: 2 }}
+          className="ui-input ui-input--wide"
         />
         <input
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
           placeholder="Last Name"
-          style={{ flex: 2 }}
+          className="ui-input ui-input--wide"
         />
         <input
           value={preferredName}
           onChange={(e) => setPreferredName(e.target.value)}
           placeholder="Preferred Name"
-          style={{ flex: 2 }}
+          className="ui-input ui-input--wide"
         />
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+      <div className="ui-form-row">
         <input
           type="date"
           value={dateOfBirth}
           onChange={(e) => setDateOfBirth(e.target.value)}
-          style={{ flex: 2 }}
+          className="ui-input"
         />
-        <select value={genderAtBirth} onChange={(e) => setGenderAtBirth(e.target.value)} style={{ flex: 2 }}>
+        <select value={genderAtBirth} onChange={(e) => setGenderAtBirth(e.target.value)} className="ui-input">
           <option value="">Sex at birth</option>
           {SEX_OPTIONS.map((o) => <option key={o}>{o}</option>)}
         </select>
-        <select value={genderIdentity} onChange={(e) => setGenderIdentity(e.target.value)} style={{ flex: 2 }}>
+        <select value={genderIdentity} onChange={(e) => setGenderIdentity(e.target.value)} className="ui-input">
           <option value="">Gender identity</option>
           {GENDER_IDENTITY_OPTIONS.map((o) => <option key={o}>{o}</option>)}
         </select>
-        <select value={pronouns} onChange={(e) => setPronouns(e.target.value)} style={{ flex: 2 }}>
+        <select value={pronouns} onChange={(e) => setPronouns(e.target.value)} className="ui-input">
           <option value="">Pronouns</option>
           {PRONOUN_OPTIONS.map((o) => <option key={o}>{o}</option>)}
         </select>
-        <select value={status} onChange={(e) => setStatus(e.target.value)} style={{ flex: 2 }}>
+        <select value={status} onChange={(e) => setStatus(e.target.value)} className="ui-input">
           <option value="outpatient">Outpatient</option>
           <option value="inpatient">Inpatient</option>
         </select>
         <select
           value={providerId}
           onChange={(e) => setProviderId(e.target.value)}
-          style={{ flex: 2 }}
+          className="ui-input"
         >
           <option value="">No provider</option>
           {providers.map((provider) => (
@@ -131,19 +131,19 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
             </option>
           ))}
         </select>
-        <button type="submit">Add</button>
+        <button type="submit" className="ui-button">Add</button>
       </div>
 
       {drugs.length > 0 && (
-        <div style={{ fontSize: 14 }}>
-          <span style={{ marginRight: 8, color: "#555" }}>Drugs:</span>
+        <div className="ui-checkbox-group">
+          <span className="ui-checkbox-group-label">Drugs:</span>
           {drugs.map((drug) => (
-            <label key={drug.drug_id} style={{ marginRight: 12 }}>
+            <label key={drug.drug_id} className="ui-checkbox">
               <input
                 type="checkbox"
                 checked={drugIds.includes(drug.drug_id)}
                 onChange={() => toggleDrug(drug.drug_id)}
-              />{" "}
+              />
               {drug.name}
             </label>
           ))}
