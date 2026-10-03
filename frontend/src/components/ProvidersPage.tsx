@@ -6,13 +6,13 @@ export function ProvidersPage() {
   const { providers, loading, error, create, remove } = useProviders();
 
   return (
-    <div>
-      <h1>Providers</h1>
+    <div className="ui-page">
+      <h1 className="ui-page-title">Providers</h1>
 
       <ProviderForm onSubmit={create} />
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {loading ? <p>Loading...</p> : <ProviderList providers={providers} onDelete={remove} />}
+      {error && <p className="ui-error">{error}</p>}
+      {loading ? <p className="ui-muted">Loading...</p> : <ProviderList providers={providers} onDelete={remove} />}
     </div>
   );
 }

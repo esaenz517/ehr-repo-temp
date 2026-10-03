@@ -6,32 +6,35 @@ interface ProviderListProps {
 }
 
 export function ProviderList({ providers, onDelete }: ProviderListProps) {
+  if (providers.length === 0) {
+    return <p className="ui-row-empty">No providers yet.</p>;
+  }
+
   return (
-    <ul style={{ listStyle: "none", padding: 0 }}>
-      {providers.map((provider) => (
-        <li
-          key={provider.provider_id}
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "8px 0",
-            borderBottom: "1px solid #eee",
-          }}
-        >
-          <div>
-            <strong>
-              Dr. {provider.first_name} {provider.last_name}
-            </strong>
-            <div style={{ fontSize: 14, color: "#555" }}>
-              {provider.specialty && <>{provider.specialty} · </>}
-              {provider.phone && <>{provider.phone} · </>}
-              {provider.email}
+    <ul className="ui-row-list">
+      {providers.map((provider) => {
+        // Only join the contact fields that are filled in, so there's no stray " · "
+        const details = [provider.specialty, provider.phone, provider.email].filter(Boolean).join(" · ");
+
+        return (
+          <li key={provider.provider_id} className="ui-row">
+            <div className="ui-row-main">
+              <div className="ui-row-title">
+                Dr. {provider.first_name} {provider.last_name}
+              </div>
+              {details && <div className="ui-row-subtitle">{details}</div>}
             </div>
-          </div>
-          <button onClick={() => onDelete(provider.provider_id)}>Delete</button>
-        </li>
-      ))}
+            <div className="ui-row-actions">
+              <button
+                className="ui-button ui-button--danger"
+                onClick={() => onDelete(provider.provider_id)}
+              >
+                Delete
+              </button>
+            </div>
+          </li>
+        );
+      })}
     </ul>
   );
 }
