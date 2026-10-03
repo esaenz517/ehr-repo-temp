@@ -188,7 +188,8 @@ USING (
         ('NURSE',              'Nurse',                'Nursing'),
         ('PSYCHIATRY',         'Psychiatry',           'Psychiatry'),
         ('PHYSICAL_THERAPY',   'Physical Therapy',     'Physical Therapy'),
-        ('ALLIED_HEALTH',      'Other Allied Health',  NULL)
+        ('ALLIED_HEALTH',      'Other Allied Health',  NULL),
+        ('STUDENT',            'Student',              NULL)
 ) AS source (RoleName, DisplayName, Discipline)
 
 ON target.RoleName = source.RoleName
@@ -331,6 +332,90 @@ WHERE
     );
 GO
 
+-- INSTRUCTOR AND STUDENT PERMISSIONS
+-- Instructors build cases and manage the clinical catalog; staff.read lets
+-- Create Case list students. Students only read what they need for their
+-- assignments. Note permissions are granted with the note permissions below.
+INSERT INTO dbo.RolePermissions (
+    RoleId,
+    PermissionId
+)
+SELECT
+    r.RoleId,
+    p.PermissionId
+FROM (
+    VALUES
+        ('FACULTY_INSTRUCTOR', 'patient.read'),
+        ('FACULTY_INSTRUCTOR', 'patient.create'),
+        ('FACULTY_INSTRUCTOR', 'patient.delete'),
+        ('FACULTY_INSTRUCTOR', 'case.read'),
+        ('FACULTY_INSTRUCTOR', 'case.create'),
+        ('FACULTY_INSTRUCTOR', 'case.delete'),
+        ('FACULTY_INSTRUCTOR', 'staff.read'),
+        ('FACULTY_INSTRUCTOR', 'provider.read'),
+        ('FACULTY_INSTRUCTOR', 'provider.create'),
+        ('FACULTY_INSTRUCTOR', 'provider.delete'),
+        ('FACULTY_INSTRUCTOR', 'drug.read'),
+        ('FACULTY_INSTRUCTOR', 'drug.create'),
+        ('FACULTY_INSTRUCTOR', 'drug.delete'),
+        ('FACULTY_INSTRUCTOR', 'room.read'),
+        ('FACULTY_INSTRUCTOR', 'room.create'),
+        ('FACULTY_INSTRUCTOR', 'room.update'),
+        ('FACULTY_INSTRUCTOR', 'room.delete'),
+
+        ('STUDENT', 'patient.read'),
+        ('STUDENT', 'case.read'),
+        ('STUDENT', 'drug.read')
+) AS grants (RoleName, PermissionCode)
+JOIN dbo.Roles r ON r.RoleName = grants.RoleName
+JOIN dbo.Permissions p ON p.PermissionCode = grants.PermissionCode
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM dbo.RolePermissions rp
+    WHERE
+        rp.RoleId = r.RoleId
+        AND rp.PermissionId = p.PermissionId
+);
+GO
+
+-- DEMO STUDENT AND INSTRUCTOR USERS
+-- Passwords live in dbo.T_Login (seeded below), so PasswordHash stays NULL.
+MERGE dbo.Users AS target
+USING (
+    VALUES
+        ('Sam Student',     'student@example.local',    'Nursing'),
+        ('Ivy Instructor',  'instructor@example.local', 'Nursing')
+) AS source (Name, Email, Discipline)
+ON target.Email = source.Email
+
+WHEN NOT MATCHED THEN
+    INSERT (Name, Email, PasswordHash, AccountStatus, Discipline)
+    VALUES (source.Name, source.Email, NULL, 'active', source.Discipline);
+GO
+
+INSERT INTO dbo.UserRoles (
+    UserId,
+    RoleId
+)
+SELECT
+    u.UserId,
+    r.RoleId
+FROM (
+    VALUES
+        ('student@example.local',    'STUDENT'),
+        ('instructor@example.local', 'FACULTY_INSTRUCTOR')
+) AS assignments (Email, RoleName)
+JOIN dbo.Users u ON u.Email = assignments.Email
+JOIN dbo.Roles r ON r.RoleName = assignments.RoleName
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM dbo.UserRoles ur
+    WHERE
+        ur.UserId = u.UserId
+        AND ur.RoleId = r.RoleId
+);
+GO
+
 IF NOT EXISTS (SELECT * FROM dbo.Drugs)
 BEGIN
     INSERT INTO dbo.Drugs (Name, Description) VALUES
@@ -451,12 +536,12 @@ GO
 IF NOT EXISTS (SELECT * FROM dbo.Staff)
 BEGIN
     INSERT INTO dbo.Staff
-        (FirstName, MiddleName, LastName, Specialization, Student, Admin)
+        (StaffId, FirstName, MiddleName, LastName, Student, Admin)
     VALUES
-        (N'Emily',  NULL, N'Carter', N'Nursing',          0, 0),
-        (N'Daniel', N'J', N'Brooks', N'Cardiology',       0, 0),
-        (N'Sophia', NULL, N'Nguyen', N'Physical Therapy', 1, 0),
-        (N'Alex',   NULL, N'Morgan', N'Administration',    0, 1);
+        (1, N'Emily',  NULL, N'Carter', 0, 0),
+        (2, N'Daniel', N'J', N'Brooks', 0, 0),
+        (3, N'Sophia', NULL, N'Nguyen', 1, 0),
+        (4, N'Alex',   NULL, N'Morgan', 0, 1);
 END
 GO
 
@@ -466,29 +551,99 @@ BEGIN
     CREATE TABLE dbo.T_Login (
         username    NVARCHAR(254) NOT NULL PRIMARY KEY,
         password_hash NVARCHAR(100) NOT NULL, -- bcrypt hash
-        staffid     INT NOT NULL UNIQUE REFERENCES dbo.Staff(StaffId) -- May become dbo.Users(UserId)
+        staffid     INT NOT NULL UNIQUE REFERENCES dbo.Staff(StaffId), -- cases and assignments
+        userid      INT NULL REFERENCES dbo.Users(UserId)              -- roles and permissions
     );
 END
 GO
 
--- DEV LOGIN SEED: Staff member plus login "dev" / "dev123"
+-- Add userid (and its FK) to a T_Login table created before logins were linked to Users.
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.T_Login') AND name = 'userid')
+BEGIN
+    ALTER TABLE dbo.T_Login ADD userid INT NULL;
+END
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM sys.foreign_keys
+    WHERE parent_object_id = OBJECT_ID('dbo.T_Login')
+      AND referenced_object_id = OBJECT_ID('dbo.Users')
+)
+BEGIN
+    ALTER TABLE dbo.T_Login
+        ADD CONSTRAINT FK_T_Login_Users FOREIGN KEY (userid) REFERENCES dbo.Users(UserId);
+END
+GO
+
+-- DEV LOGIN SEED: Staff member plus login "dev" / "dev123", linked to the development admin user
 IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'dev')
 BEGIN
     INSERT INTO dbo.Staff (FirstName, MiddleName, LastName, Specialization, Student, Admin)
     VALUES (N'Dev', NULL, N'User', N'Development', 1, 1)
 
-    INSERT INTO dbo.T_Login (username, password_hash, staffid)
-    VALUES (N'Dev', N'$2b$12$JiMOYxRva65eUaBh74GGfeyJTmACdFGT8zCuYfpyy7SfT7NjNkLt.', SCOPE_IDENTITY());
+    INSERT INTO dbo.T_Login (username, password_hash, staffid, userid)
+    VALUES (
+        N'Dev',
+        N'$2b$12$JiMOYxRva65eUaBh74GGfeyJTmACdFGT8zCuYfpyy7SfT7NjNkLt.',
+        SCOPE_IDENTITY(),
+        (SELECT UserId FROM dbo.Users WHERE Email = 'dev.admin@example.local')
+    );
 END
 GO
 
--- STUDENT LOGIN SEED: login "sophia" / "student123" for the seeded student Sophia Nguyen
-IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'sophia')
+-- Link a dev login seeded before T_Login had a userid column.
+UPDATE dbo.T_Login
+SET userid = (SELECT UserId FROM dbo.Users WHERE Email = 'dev.admin@example.local')
+WHERE username = N'dev' AND userid IS NULL;
+GO
+
+-- DEMO STUDENT LOGIN: "student" / "student123"
+IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'student')
 BEGIN
-    INSERT INTO dbo.T_Login (username, password_hash, staffid)
-    SELECT N'sophia', N'$2b$12$YTNtjyUFsETeYSiswRUwweeLfbJ7UTORETcnI3JF/6E4.2tP1zb5W', StaffId
-    FROM dbo.Staff
-    WHERE FirstName = N'Sophia' AND LastName = N'Nguyen' AND Student = 1 AND Admin = 0;
+    INSERT INTO dbo.Staff (FirstName, MiddleName, LastName, Specialization, Student, Admin)
+    VALUES (N'Sam', NULL, N'Student', N'Nursing', 1, 0)
+
+    INSERT INTO dbo.T_Login (username, password_hash, staffid, userid)
+    VALUES (
+        N'student',
+        N'$2b$12$i.woXWQz6qB2m17SC2fYneRExFaPefSJ1hEfL6spySNCFDlrovVky',
+        SCOPE_IDENTITY(),
+        (SELECT UserId FROM dbo.Users WHERE Email = 'student@example.local')
+    );
+END
+GO
+
+-- DEMO INSTRUCTOR LOGIN: "instructor" / "instructor123"
+IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'instructor')
+BEGIN
+    INSERT INTO dbo.Staff (FirstName, MiddleName, LastName, Specialization, Student, Admin)
+    VALUES (N'Ivy', NULL, N'Instructor', N'Nursing', 0, 0)
+
+    INSERT INTO dbo.T_Login (username, password_hash, staffid, userid)
+    VALUES (
+        N'instructor',
+        N'$2b$12$IEeerdd1YbKnoui2WeZLHOoZgh7shNXg/6wA2Z4Z7uTzwCK5BGaSG',
+        SCOPE_IDENTITY(),
+        (SELECT UserId FROM dbo.Users WHERE Email = 'instructor@example.local')
+    );
+END
+GO
+
+-- SESSIONS TABLE
+-- One row per signed-in browser. The browser holds a random token in an
+-- HttpOnly cookie; only its SHA-256 hash is stored here, so a leaked table
+-- can't be used to sign in. Rows are deleted on logout.
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Sessions')
+BEGIN
+    CREATE TABLE dbo.Sessions (
+        SessionId   INT IDENTITY(1,1) PRIMARY KEY,
+        TokenHash   CHAR(64) NOT NULL UNIQUE,
+        Username    NVARCHAR(254) NOT NULL
+                    REFERENCES dbo.T_Login(username) ON DELETE CASCADE,
+        CreatedAt   DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        LastSeenAt  DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(), -- for the idle timeout
+        ExpiresAt   DATETIME2 NOT NULL                           -- absolute cutoff
+    );
 END
 GO
 
@@ -850,6 +1005,11 @@ WHERE
             AND p.Action = 'read'
         )
         OR (
+            r.RoleName = 'STUDENT'
+            AND p.SensitivityLevel = 'general'
+            AND p.Action IN ('read', 'create', 'update')
+        )
+        OR (
             r.RoleName IN (
                 'PHYSICIAN',
                 'NURSE',
@@ -921,17 +1081,3 @@ BEGIN
         (N'OT',   N'5150', N'Occupational Therapy Evaluation',         N'Fall',   2026, 1);
 END
 GO
-
--- Points student sophia to user sophia
-DECLARE @SophiaStaffId INT = (
-    SELECT TOP 1 StaffId FROM dbo.Staff
-    WHERE FirstName = N'Sophia' AND LastName = N'Nguyen' AND Student = 1 AND Admin = 0
-    ORDER BY StaffId
-);
-IF @SophiaStaffId IS NOT NULL
-    AND NOT EXISTS (SELECT 1 FROM dbo.T_Login WHERE staffid = @SophiaStaffId)
-BEGIN
-    UPDATE dbo.T_Login SET staffid = @SophiaStaffId WHERE username = N'sophia';
-END
-
-
