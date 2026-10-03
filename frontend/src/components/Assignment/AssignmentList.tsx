@@ -17,9 +17,17 @@ const STATUS_LABELS: Record<EncounterStatus, string> = {
   signed: "Signed",
 };
 
+// Color the status text for ease of viewing
+const STATUS_COLORS: Record<EncounterStatus, { background: string; color: string }> = {
+  not_started: { background: "#c62828", color: "#fff" }, // red
+  in_progress: { background: "#f9a825", color: "#222" }, // gold (dark text for readability)
+  submitted:   { background: "#1565c0", color: "#fff" }, // blue
+  signed:      { background: "#2e7d32", color: "#fff" }, // green
+};
+
 // Due dates are stored in UTC without a time zone marker, so add "Z" before converting to local time.
 function formatDueDate(dueDate: string | null) {
-  return dueDate ? new Date(dueDate + "Z").toLocaleString() : "No due date";
+  return dueDate ? new Date(dueDate + "Z").toLocaleString() : "(No due date)";
 }
 
 export function AssignmentList({ assignments, studentName, actions }: AssignmentListProps) {
@@ -39,12 +47,27 @@ export function AssignmentList({ assignments, studentName, actions }: Assignment
           <div>
             <strong>Case #{a.case_id}</strong>
             {studentName && <> · {studentName(a.assigned_to)}</>}
+            {a.patient_name && <span> · {a.patient_name}</span>}
+            {a.chief_complaint && (
+              <div style={{ fontSize: 14 }}>{a.chief_complaint}</div>
+            )}
             <div style={{ fontSize: 14, color: "#555" }}>
               {a.course ?? "No course"} · Due {formatDueDate(a.due_date)}
             </div>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <span>{STATUS_LABELS[a.encounter_status]}</span>
+            <span
+              style={{
+                ...STATUS_COLORS[a.encounter_status],
+                padding: "2px 10px",
+                borderRadius: 12,
+                fontSize: 13,
+                fontWeight: 600,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {STATUS_LABELS[a.encounter_status]}
+            </span>
             {actions?.(a)}
           </div>
         </li>
