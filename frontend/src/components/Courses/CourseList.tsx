@@ -25,25 +25,17 @@ export function CourseList({ courses, onRename, onSetActive }: CourseListProps) 
   };
 
   if (courses.length === 0) {
-    return <p style={{ color: "#555" }}>No courses match this filter.</p>;
+    return <p className="ui-row-empty">No courses match this filter.</p>;
   }
 
   return (
-    <ul style={{ listStyle: "none", padding: 0 }}>
+    <ul className="ui-row-list">
       {courses.map((course) => (
         <li
           key={course.course_id}
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 16,
-            padding: "8px 0",
-            borderBottom: "1px solid #eee",
-            opacity: course.is_active ? 1 : 0.6,
-          }}
+          className={course.is_active ? "ui-row" : "ui-row ui-row--inactive"}
         >
-          <div style={{ flex: 1 }}>
+          <div className="ui-row-main">
             {editingId === course.course_id ? (
               <input
                 value={draftTitle}
@@ -55,26 +47,35 @@ export function CourseList({ courses, onRename, onSetActive }: CourseListProps) 
                 aria-label={`Title for ${course.short_label}`}
                 maxLength={200}
                 autoFocus
-                style={{ width: "100%" }}
+                className="ui-input ui-input--full"
               />
             ) : (
-              <strong>{course.label}</strong>
+              <div className="ui-row-title">{course.label}</div>
             )}
-            <div style={{ fontSize: 14, color: "#555" }}>
+            <div className="ui-row-subtitle">
               Status: {course.is_active ? "Active" : "Deactivated"}
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className="ui-row-actions">
             {editingId === course.course_id ? (
               <>
-                <button onClick={() => saveEdit(course.course_id)}>Save</button>
-                <button onClick={() => setEditingId(null)}>Cancel</button>
+                <button className="ui-button" onClick={() => saveEdit(course.course_id)}>
+                  Save
+                </button>
+                <button className="ui-button ui-button--secondary" onClick={() => setEditingId(null)}>
+                  Cancel
+                </button>
               </>
             ) : (
-              <button onClick={() => startEdit(course)}>Edit title</button>
+              <button className="ui-button ui-button--secondary" onClick={() => startEdit(course)}>
+                Edit title
+              </button>
             )}
-            <button onClick={() => onSetActive(course.course_id, !course.is_active)}>
+            <button
+              className={course.is_active ? "ui-button ui-button--danger" : "ui-button"}
+              onClick={() => onSetActive(course.course_id, !course.is_active)}
+            >
               {course.is_active ? "Deactivate" : "Reactivate"}
             </button>
           </div>

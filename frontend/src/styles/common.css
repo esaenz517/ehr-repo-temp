@@ -27,6 +27,17 @@
   color: var(--color-text-muted);
 }
 
+/* Inline "Show [dropdown]" filter above a list */
+.ui-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
 /* ---------- Add form bar: one row of inputs that wraps on small screens ---------- */
 
 .ui-form-bar {
@@ -76,6 +87,16 @@
 /* Give a field twice the room of its neighbours (e.g. a description) */
 .ui-input--wide {
   flex: 2 1 200px;
+}
+
+/* Short fields that shouldn't grow much (e.g. a year) */
+.ui-input--narrow {
+  flex: 0 1 100px;
+}
+
+/* Fill the parent's width when not inside a flex row (e.g. inline edit in a row) */
+.ui-input--full {
+  width: 100%;
 }
 
 /* A label + row of checkboxes (e.g. pick several drugs) */
@@ -176,6 +197,11 @@
   flex-wrap: wrap;
 }
 
+/* Deactivated/archived rows: fade the text, keep the buttons readable */
+.ui-row--inactive .ui-row-main {
+  opacity: 0.6;
+}
+
 .ui-row:last-child {
   border-bottom: none;
 }
@@ -184,8 +210,10 @@
   background: var(--color-bg);
 }
 
-/* Left side: title + optional subtitle lines */
+/* Left side: title + optional subtitle lines. Takes the free space; in a
+   .ui-row--wrap row the buttons drop below once it would be under 240px. */
 .ui-row-main {
+  flex: 1 1 240px;
   min-width: 0;
 }
 
@@ -232,6 +260,11 @@
 @media (max-width: 640px) {
   .ui-row {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+  }
+
+  /* In a column the flex-basis would set height, not width */
+  .ui-row-main {
+    flex-basis: auto;
   }
 }
