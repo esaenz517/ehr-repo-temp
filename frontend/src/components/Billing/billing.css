@@ -1,0 +1,179 @@
+/* Billing panel: every class is prefixed with "billing-".
+   Rendered inside a patient row's .ui-row-detail box, so it has no border of its own. */
+
+.billing-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: var(--font-family);
+  color: var(--color-text);
+}
+
+/* Title on the left, running total on the right */
+.billing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.billing-title {
+  margin: 0;
+  font-size: 16px;
+  color: var(--color-primary);
+}
+
+.billing-total-badge {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.billing-muted {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.billing-empty {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ---------- Charges table ---------- */
+
+.billing-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.billing-table th {
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.billing-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-bg);
+  vertical-align: middle;
+}
+
+.billing-table tbody tr:hover {
+  background: var(--color-bg);
+}
+
+/* Amount column: right-aligned with digits that line up */
+.billing-table .billing-amount {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.billing-table .billing-actions {
+  width: 1%; /* shrink to the button */
+  text-align: right;
+  white-space: nowrap;
+}
+
+.billing-table tfoot td {
+  border-top: 2px solid var(--color-border);
+  border-bottom: none;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* Smaller version of the shared danger button for table rows */
+.billing-delete {
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+/* ---------- Add charge form ---------- */
+
+.billing-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-bg);
+}
+
+.billing-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.billing-field--summary {
+  flex: 1 1 240px;
+}
+
+.billing-field--amount {
+  flex: 0 1 160px;
+}
+
+.billing-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.billing-input {
+  width: 100%;
+  height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.billing-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(255, 130, 0, 0.35); /* orange focus ring */
+}
+
+/* "$" sits inside the left edge of the amount input */
+.billing-money {
+  position: relative;
+}
+
+.billing-money-symbol {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.billing-money .billing-input {
+  padding-left: 22px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.billing-submit {
+  height: 36px;
+}
