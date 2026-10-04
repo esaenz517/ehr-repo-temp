@@ -23,6 +23,7 @@ interface SidebarProps {
   allowedViews?: View[]; // student can only see some vi
 }
 
+//View for student roles
 export const STUDENT_VIEWS: View[] = ["home", "assignments"];
 
 const COLLAPSED_KEY = "sidebar-collapsed";

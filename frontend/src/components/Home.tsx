@@ -8,7 +8,7 @@ export function Home ({ isStudent = false}: HomeProps){
       <h1>Home</h1>
       <p>
         {isStudent
-        ? "Open My Assignments to see the cases assigned to you."
+        ? "Open 'My Assignments' to see the cases assigned to you."
         : "Pick a feature from the sidebar to view and manage its data."}
       </p>
     </div>
