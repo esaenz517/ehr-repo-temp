@@ -8,8 +8,9 @@ import { StaffPage } from "./components/StaffPage";
 import { ProvidersPage } from "./components/ProvidersPage";
 import { RoomsPage } from "./components/RoomsPage";
 import { CoursesPage } from "./components/CoursesPage";
-import { Sidebar, STUDENT_VIEWS, View } from "./components/Sidebar";
-import { LoginPage } from "./components/LoginPage";
+import { Sidebar, STUDENT_VIEWS, View } from "./components/Sidebar/Sidebar";
+import { LoginPage } from "./components/Login/LoginPage";
+import { loginApi } from "./api/login";
 import type { Assignment, LoginResponse } from "./types";
 import { MyAssignmentsPage } from "./components/Assignment/MyAssignmentsPage";
 import { AssignedCasesPage } from "./components/Assignment/AssignedCasesPage";
@@ -29,10 +30,11 @@ function App() {
       .finally(() => setCheckingSession(false));
   }, []);
 
+  const [openAssignment, setOpenAssignment] = useState<Assignment | null>(null); // Case opens from My Assignments list
+
   if (checkingSession) {
     return null;
   }
-  const [openAssignment, setOpenAssignment] = useState<Assignment | null>(null); // Case opens from My Assignments list
 
   if (!user) {
     return <LoginPage onLogin={setUser} />;
