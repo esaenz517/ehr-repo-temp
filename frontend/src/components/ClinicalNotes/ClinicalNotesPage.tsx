@@ -22,12 +22,16 @@ import { NOTE_TEMPLATES } from "./templates";
 
 import "./clinicalNotes.css";
 
-export function ClinicalNotesPage() {
+interface ClinicalNotesPageProps {
+    initialPatientId?: number;
+}
+
+export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps = {}) {
     const [patients, setPatients] =
         useState<Patient[]>([]);
 
     const [patientId, setPatientId] =
-        useState<number | null>(null);
+        useState<number | null>(initialPatientId ?? null);
 
     const [encounters, setEncounters] =
         useState<Encounter[]>([]);

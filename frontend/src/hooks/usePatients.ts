@@ -41,5 +41,5 @@ export function usePatients() {
     }
   };
 
-  return { patients, loading, error, create, remove };
+  return { patients, loading, error, create, remove, reload: load, };
 }

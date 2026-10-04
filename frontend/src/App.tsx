@@ -8,13 +8,13 @@ import { StaffPage } from "./components/StaffPage";
 import { ProvidersPage } from "./components/ProvidersPage";
 import { RoomsPage } from "./components/RoomsPage";
 import { CoursesPage } from "./components/CoursesPage";
-import { Sidebar, STUDENT_VIEWS, View } from "./components/Sidebar/Sidebar";
-import { LoginPage } from "./components/Login/LoginPage";
-import type { LoginResponse } from "./types";
-import { loginApi } from "./api/login";
+import { Sidebar, STUDENT_VIEWS, View } from "./components/Sidebar";
+import { LoginPage } from "./components/LoginPage";
+import type { Assignment, LoginResponse } from "./types";
 import { MyAssignmentsPage } from "./components/Assignment/MyAssignmentsPage";
 import { AssignedCasesPage } from "./components/Assignment/AssignedCasesPage";
 import { ClinicalNotesPage } from "./components/ClinicalNotes/ClinicalNotesPage";
+import { CaseWorkspacePage } from "./components/Assignment/CaseWorkspacePage";
 
 function App() {
   const [view, setView] = useState<View>("home");
@@ -32,6 +32,7 @@ function App() {
   if (checkingSession) {
     return null;
   }
+  const [openAssignment, setOpenAssignment] = useState<Assignment | null>(null); // Case opens from My Assignments list
 
   if (!user) {
     return <LoginPage onLogin={setUser} />;
@@ -42,7 +43,11 @@ function App() {
 
   return (
     <div className="app-layout">
-      <Sidebar active={view} onNavigate={setView} username={user.username}
+      <Sidebar active={view} username={user.username}
+        onNavigate={(v) => {
+          setOpenAssignment(null); // Clicking out of a case closes it
+          setView(v);
+        }}
         allowedViews={allowedViews}
         onLogout={() => {
           loginApi.logout()
@@ -51,6 +56,9 @@ function App() {
               setUser(null);
               setView("home");
             });
+          setUser(null);
+          setOpenAssignment(null);
+          setView("home");
         }}
       />
 
@@ -64,7 +72,12 @@ function App() {
         {view === "rooms" && canView("rooms") && <RoomsPage />}
         {view === "courses" && canView("courses") && <CoursesPage />}
         {view === "createCase" && canView("createCase") && <CreateCasePage staffId={user.staffid} />}
-        {view === "assignments" && <MyAssignmentsPage studentId={user.staffid} />}
+        {view === "assignments" &&
+          (openAssignment ? (
+            <CaseWorkspacePage assignment={openAssignment} onBack={() => setOpenAssignment(null)} />
+          ) : (
+            <MyAssignmentsPage studentId={user.staffid} onOpen={setOpenAssignment} />
+          ))}
         {view === "assignedCases" && canView("assignedCases") && <AssignedCasesPage staffId={user.staffid} />}
         {view === "clinicalNotes" && canView("clinicalNotes") && <ClinicalNotesPage />}
       </main>
