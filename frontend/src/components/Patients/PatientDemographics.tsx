@@ -34,11 +34,12 @@ interface PatientDemographicsProps {
   values: DemographicsValues;
   onChange: (field: keyof DemographicsValues, value: string) => void;
   errors: Partial<Record<keyof DemographicsValues, string>>;
+  readOnly?: boolean;
 }
 
 // Patient demographics section of the Create Case page.
 // It only displays the values it's given and reports changes back up.
-export function PatientDemographics({ values, onChange, errors }: PatientDemographicsProps) {
+export function PatientDemographics({ values, onChange, errors, readOnly = false }: PatientDemographicsProps) {
   // Returns an onChange handler that updates one field.
   const set = (field: keyof DemographicsValues) => (e: { target: { value: string } }) =>
     onChange(field, e.target.value);
@@ -46,36 +47,36 @@ export function PatientDemographics({ values, onChange, errors }: PatientDemogra
   return (
     <div className="form-grid">
       <Field id="demo-first" label="First name" required error={errors.firstName}>
-        <input id="demo-first" value={values.firstName} onChange={set("firstName")} required />
+        <input id="demo-first" value={values.firstName} onChange={set("firstName")} required disabled={readOnly} />
       </Field>
       <Field id="demo-middle" label="Middle name">
-        <input id="demo-middle" value={values.middleName} onChange={set("middleName")} />
+        <input id="demo-middle" value={values.middleName} onChange={set("middleName")} disabled={readOnly} />
       </Field>
       <Field id="demo-last" label="Last name" required error={errors.lastName}>
-        <input id="demo-last" value={values.lastName} onChange={set("lastName")} required />
+        <input id="demo-last" value={values.lastName} onChange={set("lastName")} required disabled={readOnly} />
       </Field>
 
       <Field id="demo-preferred" label="Preferred name">
-        <input id="demo-preferred" value={values.preferredName} onChange={set("preferredName")} />
+        <input id="demo-preferred" value={values.preferredName} onChange={set("preferredName")} disabled={readOnly} />
       </Field>
       <Field id="demo-dob" label="Date of birth" required error={errors.dateOfBirth}>
-        <input id="demo-dob" type="date" value={values.dateOfBirth} onChange={set("dateOfBirth")} required />
+        <input id="demo-dob" type="date" value={values.dateOfBirth} onChange={set("dateOfBirth")} required disabled={readOnly} />
       </Field>
       <Field id="demo-sex" label="Sex assigned at birth" required error={errors.sex}>
-        <select id="demo-sex" value={values.sex} onChange={set("sex")} required>
+        <select id="demo-sex" value={values.sex} onChange={set("sex")} required disabled={readOnly}>
           <option value="">Select</option>
           {SEX_OPTIONS.map((o) => <option key={o}>{o}</option>)}
         </select>
       </Field>
 
       <Field id="demo-gender" label="Gender identity" required error={errors.genderIdentity}>
-        <select id="demo-gender" value={values.genderIdentity} onChange={set("genderIdentity")} required>
+        <select id="demo-gender" value={values.genderIdentity} onChange={set("genderIdentity")} required disabled={readOnly}>
           <option value="">Select</option>
           {GENDER_IDENTITY_OPTIONS.map((o) => <option key={o}>{o}</option>)}
         </select>
       </Field>
       <Field id="demo-pronouns" label="Pronouns" required error={errors.pronouns}>
-        <select id="demo-pronouns" value={values.pronouns} onChange={set("pronouns")} required>
+        <select id="demo-pronouns" value={values.pronouns} onChange={set("pronouns")} required disabled={readOnly}>
           <option value="">Select</option>
           {PRONOUN_OPTIONS.map((o) => <option key={o}>{o}</option>)}
         </select>
