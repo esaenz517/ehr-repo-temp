@@ -4,6 +4,7 @@ import { useDrugs } from "../hooks/useDrugs";
 import { CaseContent } from "./Cases/CaseContent";
 import { ChartData } from "./Cases/ChartData";
 import { PatientDemographics } from "./Patients/PatientDemographics";
+import { CasePatientSelector } from "./Patients/CasePatientSelector";
 import { AssignmentSection } from "./Assignment/AssignmentSection";
 
 // One boxed section of the form, with its title in the border.
@@ -14,11 +15,6 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
       {children}
     </fieldset>
   );
-}
-
-// Grey placeholder for a section nobody has built yet.
-function ComingSoon({ text }: { text: string }) {
-  return <p style={{ margin: 0, color: "#888" }}>{text} (coming soon)</p>;
 }
 
 interface CreateCasePageProps {
@@ -55,9 +51,18 @@ export function CreateCasePage({ staffId }: CreateCasePageProps) {
       )}
       {createCase.error && <p className="form-message error">{createCase.error}</p>}
 
-      {/* TODO: Start Form - choose an existing case to copy, or build a new patient. */}
       <Section title="Start Form">
-        <ComingSoon text="Start from an existing case or build a new patient." />
+        <CasePatientSelector
+          patients={createCase.patients}
+          loading={createCase.patientsLoading}
+          error={createCase.fieldErrors.patient}
+          loadError={createCase.patientsError}
+          patientMode={createCase.patientMode}
+          selectedPatientId={createCase.selectedPatientId}
+          loadingPatient={createCase.loadingPatient}
+          onSelectExisting={createCase.selectExistingPatient}
+          onSelectNew={createCase.selectNewPatient}
+        />
       </Section>
 
       <Section title="Patient Demographics">
@@ -65,6 +70,7 @@ export function CreateCasePage({ staffId }: CreateCasePageProps) {
           values={createCase.demographics}
           onChange={createCase.updateDemographics}
           errors={createCase.fieldErrors}
+          readOnly={createCase.patientMode == "existing"}
         />
       </Section>
 
@@ -82,6 +88,7 @@ export function CreateCasePage({ staffId }: CreateCasePageProps) {
           drugs={drugs}
           onChange={createCase.setChartData}
           errors={createCase.fieldErrors}
+          readOnly={createCase.patientMode == "existing"}
         />
       </Section>
 
