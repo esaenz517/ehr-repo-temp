@@ -35,6 +35,8 @@ class Assignment(BaseModel):
     assignment_type: AssingmentType
     assigned_to: int
     assigned_by: int
+    patient_name: str | None = None  # Last name, First name format
+    chief_complaint: str | None = None 
 
     class Config:
         from_attributes = True

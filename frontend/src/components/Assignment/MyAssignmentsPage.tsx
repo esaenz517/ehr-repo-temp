@@ -7,9 +7,10 @@ import type { Assignment } from "../../types";
 
 interface MyAssignmentsPageProps {
   studentId: number;
+  onOpen: (assignment: Assignment) => void;
 }
 
-export function MyAssignmentsPage({ studentId }: MyAssignmentsPageProps) {
+export function MyAssignmentsPage({ studentId, onOpen }: MyAssignmentsPageProps) {
   const { assignments, loading, error, reload, updateStatus } = useAssignments(studentId);
 
   // Progress of the assignment
@@ -34,7 +35,7 @@ export function MyAssignmentsPage({ studentId }: MyAssignmentsPageProps) {
       ) : assignments.length === 0 ? (
         <p style={{ color: "#888" }}>No assignments yet.</p>
       ) : (
-        <AssignmentList assignments={assignments} actions={actions} />
+        <AssignmentList assignments={assignments} actions={actions} onOpen={onOpen} />
       )}
     </div>
   );
