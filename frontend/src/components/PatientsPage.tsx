@@ -10,13 +10,13 @@ export function PatientsPage() {
   const { drugs } = useDrugs();
 
   return (
-    <div>
-      <h1>Patients</h1>
+    <div className="ui-page">
+      <h1 className="ui-page-title">Patients</h1>
 
       <PatientForm providers={providers} drugs={drugs} onSubmit={create} />
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {loading ? <p>Loading...</p> : <PatientList patients={patients} onDelete={remove} />}
+      {error && <p className="ui-error">{error}</p>}
+      {loading ? <p className="ui-muted">Loading...</p> : <PatientList patients={patients} onDelete={remove} />}
     </div>
   );
 }

@@ -5,43 +5,42 @@ interface RoomFormProps {
   onSubmit: (input: CreateRoomInput) => void;
 }
 
-// Form for creating a new room. Just collects input and hands it up to
+// Form for creating a new room, laid out to match a room card (RoomList renders
+// it as the last card in the grid). Just collects input and hands it up to
 // whatever onSubmit was passed in (RoomsPage wires this to useRooms().create).
+// New rooms always start "available"; status changes through Assign/Unassign.
 export function RoomForm({ onSubmit }: RoomFormProps) {
   const [roomNumber, setRoomNumber] = useState("");
   const [unit, setUnit] = useState("");
-  const [status, setStatus] = useState("available");
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!roomNumber.trim()) return; // require a room number before submitting
-    onSubmit({ room_number: Number(roomNumber), unit, status });
+    onSubmit({ room_number: Number(roomNumber), unit: unit.trim(), status: "available" });
     // clear the form for the next entry
     setRoomNumber("");
     setUnit("");
-    setStatus("available");
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+    <form onSubmit={handleSubmit} className="rooms-form">
+      <h2 className="rooms-card-number">New room</h2>
       <input
         value={roomNumber}
         onChange={(e) => setRoomNumber(e.target.value)}
         placeholder="Room number"
+        aria-label="Room number"
         type="number"
-        style={{ flex: 1 }}
       />
       <input
         value={unit}
         onChange={(e) => setUnit(e.target.value)}
-        placeholder="Unit (optional)"
-        style={{ flex: 2 }}
+        placeholder="Unit"
+        aria-label="Unit"
       />
-      <select value={status} onChange={(e) => setStatus(e.target.value)}>
-        <option value="available">available</option>
-        <option value="occupied">occupied</option>
-      </select>
-      <button type="submit">Add</button>
+      <div className="rooms-card-actions">
+        <button type="submit" className="rooms-button">Add room</button>
+      </div>
     </form>
   );
 }

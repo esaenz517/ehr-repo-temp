@@ -30,38 +30,38 @@ export function ProviderForm({ onSubmit }: ProviderFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+    <form onSubmit={handleSubmit} className="ui-form-bar">
       <input
         value={firstName}
         onChange={(e) => setFirstName(e.target.value)}
         placeholder="First Name"
-        style={{ flex: 2 }}
+        className="ui-input"
       />
       <input
         value={lastName}
         onChange={(e) => setLastName(e.target.value)}
         placeholder="Last Name"
-        style={{ flex: 2 }}
+        className="ui-input"
       />
       <input
         value={specialty}
         onChange={(e) => setSpecialty(e.target.value)}
         placeholder="Specialty"
-        style={{ flex: 2 }}
+        className="ui-input"
       />
       <input
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
         placeholder="Phone"
-        style={{ flex: 2 }}
+        className="ui-input"
       />
       <input
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Email"
-        style={{ flex: 2 }}
+        className="ui-input"
       />
-      <button type="submit">Add</button>
+      <button type="submit" className="ui-button">Add</button>
     </form>
   );
 }

@@ -37,14 +37,14 @@ export function CourseForm({ onSubmit }: CourseFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
+    <form onSubmit={handleSubmit} className="ui-form-bar">
       <input
         value={subjectCode}
         onChange={(e) => setSubjectCode(e.target.value)}
         placeholder="Subject (e.g. PHAR)"
         aria-label="Subject code"
         maxLength={10}
-        style={{ width: 150 }}
+        className="ui-input"
       />
       <input
         value={courseNumber}
@@ -52,7 +52,7 @@ export function CourseForm({ onSubmit }: CourseFormProps) {
         placeholder="Number (e.g. 5310)"
         aria-label="Course number"
         maxLength={10}
-        style={{ width: 150 }}
+        className="ui-input"
       />
       <input
         value={title}
@@ -60,9 +60,14 @@ export function CourseForm({ onSubmit }: CourseFormProps) {
         placeholder="Course title"
         aria-label="Course title"
         maxLength={200}
-        style={{ flex: 1, minWidth: 200 }}
+        className="ui-input ui-input--wide"
       />
-      <select value={term} onChange={(e) => setTerm(e.target.value as CourseTerm)} aria-label="Term">
+      <select
+        value={term}
+        onChange={(e) => setTerm(e.target.value as CourseTerm)}
+        aria-label="Term"
+        className="ui-input ui-input--narrow"
+      >
         {TERMS.map((t) => (
           <option key={t} value={t}>{t}</option>
         ))}
@@ -74,9 +79,9 @@ export function CourseForm({ onSubmit }: CourseFormProps) {
         min={2000}
         max={2100}
         aria-label="Term year"
-        style={{ width: 90 }}
+        className="ui-input ui-input--narrow"
       />
-      <button type="submit">Add course</button>
+      <button type="submit" className="ui-button">Add course</button>
     </form>
   );
 }

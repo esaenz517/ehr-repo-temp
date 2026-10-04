@@ -6,26 +6,23 @@ interface DrugListProps {
 }
 
 export function DrugList({ drugs, onDelete }: DrugListProps) {
+  if (drugs.length === 0) {
+    return <p className="ui-row-empty">No drugs yet.</p>;
+  }
+
   return (
-    <ul style={{ listStyle: "none", padding: 0 }}>
+    <ul className="ui-row-list">
       {drugs.map((drug) => (
-        <li
-          key={drug.drug_id}
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "8px 0",
-            borderBottom: "1px solid #eee",
-          }}
-        >
-          <div>
-            <strong>{drug.name}</strong>
-            {drug.description && (
-              <div style={{ fontSize: 14, color: "#555" }}>{drug.description}</div>
-            )}
+        <li key={drug.drug_id} className="ui-row">
+          <div className="ui-row-main">
+            <div className="ui-row-title">{drug.name}</div>
+            {drug.description && <div className="ui-row-subtitle">{drug.description}</div>}
           </div>
-          <button onClick={() => onDelete(drug.drug_id)}>Delete</button>
+          <div className="ui-row-actions">
+            <button className="ui-button ui-button--danger" onClick={() => onDelete(drug.drug_id)}>
+              Delete
+            </button>
+          </div>
         </li>
       ))}
     </ul>

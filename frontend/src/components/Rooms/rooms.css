@@ -1,0 +1,174 @@
+/* Rooms page: every class is prefixed with "rooms-" */
+
+.rooms-page {
+  font-family: var(--font-family);
+  color: var(--color-text);
+}
+
+.rooms-title {
+  margin: 0 0 20px;
+  color: var(--color-primary);
+}
+
+/* Shared input/select/button look for the form and the cards */
+.rooms-page input,
+.rooms-page select {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.rooms-page input:focus,
+.rooms-page select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(255, 130, 0, 0.35); /* orange focus ring */
+}
+
+.rooms-button {
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: 600;
+}
+
+.rooms-button:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.rooms-button:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.rooms-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* White button with blue outline (Unassign) */
+.rooms-button--secondary {
+  background: var(--color-surface);
+  color: var(--color-primary);
+}
+
+.rooms-button--secondary:hover:not(:disabled) {
+  background: var(--color-bg);
+}
+
+/* White button with red outline (Delete) */
+.rooms-button--danger {
+  border-color: var(--color-error);
+  background: var(--color-surface);
+  color: var(--color-error);
+}
+
+.rooms-button--danger:hover:not(:disabled) {
+  background: var(--color-error-bg);
+}
+
+/* "New room" form, rendered inside the first card of the grid.
+   .rooms-page prefix outranks the global ".app-main form" wrap rule. */
+.rooms-page .rooms-form {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  flex: 1;
+  gap: 12px;
+}
+
+.rooms-error {
+  margin: 0 0 16px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  border-left: 3px solid var(--color-error);
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  font-size: 13px;
+}
+
+.rooms-muted {
+  color: var(--color-text-muted);
+}
+
+/* Card grid: as many 240px+ columns as fit */
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rooms-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-top: 4px solid var(--color-accent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.rooms-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.rooms-card-number {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.rooms-card-unit {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.rooms-badge {
+  flex-shrink: 0;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.rooms-badge--available {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.rooms-badge--occupied {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* Controls pinned to the bottom so cards in a row line up */
+.rooms-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-bg);
+}
+
+.rooms-card-assign {
+  display: flex;
+  gap: 8px;
+}
+
+.rooms-card-assign select {
+  flex: 1;
+}

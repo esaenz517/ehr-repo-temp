@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreateCasePage } from "./components/CreateCasePage";
 import { DrugsPage } from "./components/DrugsPage";
 import { Home } from "./components/Home";
@@ -19,6 +19,19 @@ import { CaseWorkspacePage } from "./components/Assignment/CaseWorkspacePage";
 function App() {
   const [view, setView] = useState<View>("home");
   const [user, setUser] = useState<LoginResponse | null>(null);
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  // Restore the signed-in user from the session cookie after a page refresh
+  useEffect(() => {
+    loginApi.me()
+      .then(setUser)
+      .catch(() => setUser(null))
+      .finally(() => setCheckingSession(false));
+  }, []);
+
+  if (checkingSession) {
+    return null;
+  }
   const [openAssignment, setOpenAssignment] = useState<Assignment | null>(null); // Case opens from My Assignments list
 
   if (!user) {
@@ -37,6 +50,12 @@ function App() {
         }}
         allowedViews={allowedViews}
         onLogout={() => {
+          loginApi.logout()
+            .catch(() => {}) // sign out locally even if the server call fails
+            .finally(() => {
+              setUser(null);
+              setView("home");
+            });
           setUser(null);
           setOpenAssignment(null);
           setView("home");

@@ -18,20 +18,20 @@ export function DrugForm({ onSubmit }: DrugFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+    <form onSubmit={handleSubmit} className="ui-form-bar">
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Name"
-        style={{ flex: 1 }}
+        className="ui-input"
       />
       <input
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Description (optional)"
-        style={{ flex: 2 }}
+        className="ui-input ui-input--wide"
       />
-      <button type="submit">Add</button>
+      <button type="submit" className="ui-button">Add</button>
     </form>
   );
 }
