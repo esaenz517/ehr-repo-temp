@@ -8,6 +8,7 @@ interface AssignmentListProps {
   assignments: Assignment[];
   studentName?: (staffId: number) => string; // shown when set (instructor view)
   actions?: (assignment: Assignment) => ReactNode; // buttons beside the status
+  onOpen?: (assignment: Assignment) => void; // when set, clicking a case opens it
 }
 
 const STATUS_LABELS: Record<EncounterStatus, string> = {
@@ -30,7 +31,7 @@ function formatDueDate(dueDate: string | null) {
   return dueDate ? new Date(dueDate + "Z").toLocaleString() : "(No due date)";
 }
 
-export function AssignmentList({ assignments, studentName, actions }: AssignmentListProps) {
+export function AssignmentList({ assignments, studentName, actions, onOpen }: AssignmentListProps) {
   return (
     <ul style={{ listStyle: "none", padding: 0 }}>
       {assignments.map((a) => (
@@ -44,7 +45,13 @@ export function AssignmentList({ assignments, studentName, actions }: Assignment
             borderBottom: "1px solid #eee",
           }}
         >
-          <div>
+          <div
+            onClick={onOpen ? () => onOpen(a) : undefined}
+            onKeyDown={onOpen ? (e) => e.key === "Enter" && onOpen(a) : undefined}
+            role={onOpen ? "button" : undefined}
+            tabIndex={onOpen ? 0 : undefined}
+            style={onOpen ? { cursor: "pointer" } : undefined}
+          >
             <strong>Case #{a.case_id}</strong>
             {studentName && <> · {studentName(a.assigned_to)}</>}
             {a.patient_name && <span> · {a.patient_name}</span>}
