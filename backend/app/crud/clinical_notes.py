@@ -56,8 +56,16 @@ def get_chart_context(db: Session, patient_id: int) -> dict:
     )
 
     meds = (
-        db.query(Drug, patient_drugs.c.Dosage)
-        .join(patient_drugs, patient_drugs.c.DrugId == Drug.drug_id)
+        db.query(
+            Drug,
+            patient_drugs.c.Dosage,
+            patient_drugs.c.Route,
+            patient_drugs.c.Frequency,
+        )
+        .join(
+            patient_drugs,
+            patient_drugs.c.DrugId == Drug.drug_id,
+        )
         .filter(patient_drugs.c.PatientId == patient_id)
         .order_by(Drug.name)
         .all()
@@ -112,10 +120,13 @@ def get_chart_context(db: Session, patient_id: int) -> dict:
         ],
         "medications": [
             {
+                "drug_id": drug.drug_id,
                 "name": drug.name,
                 "dosage": dosage,
+                "route": route,
+                "frequency": frequency,
             }
-            for drug, dosage in meds
+            for drug, dosage, route, frequency in meds
         ],
         "allergies": [
             {
