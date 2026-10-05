@@ -79,6 +79,8 @@ export interface Staff {
 export interface LoginResponse {
   username: string;
   staffid: number;
+  student: boolean;
+  admin: boolean;
 }
 
 export interface MedicalHistory {
@@ -147,6 +149,8 @@ export interface Assignment {
   assignment_type?: "graded" | "practice";
   assigned_to: number;
   assigned_by: number;
+  patient_name: string | null; // "Last name, First name"
+  chief_complaint: string | null;
 }
 
 export interface Case {

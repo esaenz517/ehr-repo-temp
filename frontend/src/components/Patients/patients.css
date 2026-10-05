@@ -1,0 +1,127 @@
+/* Patients page: every class is prefixed with "patients-" */
+
+/* New patient form: white panel with a grid of labeled fields */
+.patients-form {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-top: 4px solid var(--color-accent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-family: var(--font-family);
+}
+
+.patients-form-title {
+  margin: 0 0 16px;
+  font-size: 18px;
+  color: var(--color-primary);
+}
+
+/* As many 190px+ columns as fit, so long dropdown options aren't cut off */
+.patients-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px 16px;
+}
+
+/* Label stacked above its input */
+.patients-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Field that spans the whole grid width (drugs) */
+.patients-field--full {
+  grid-column: 1 / -1;
+}
+
+.patients-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.patients-required {
+  margin-left: 2px;
+  color: var(--color-error);
+}
+
+/* Same height for text, date and select fields so the grid lines up */
+.patients-input {
+  width: 100%;
+  height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.patients-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(255, 130, 0, 0.35); /* orange focus ring */
+}
+
+.patients-input:disabled {
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+}
+
+/* Drugs: dropdown on the left, chosen drugs as chips beside/below it */
+.patients-drugs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.patients-drugs .patients-input {
+  width: auto;
+  flex: 0 1 260px;
+}
+
+.patients-drug-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 4px 4px 12px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.patients-drug-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-on-primary);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.patients-drug-chip-remove:hover {
+  background: var(--color-on-primary-faint);
+}
+
+.patients-drug-chip-remove:focus-visible {
+  outline: 2px solid var(--color-accent);
+}
+
+.patients-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}

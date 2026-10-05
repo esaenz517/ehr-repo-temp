@@ -1,20 +1,18 @@
-import { RoomForm } from "./Rooms/RoomForm";
 import { RoomList } from "./Rooms/RoomList";
 import { useRooms } from "../hooks/useRooms";
+import "./Rooms/rooms.css";
 
 // Pulls all rooms and their state
 export function RoomsPage() {
     const { rooms, availablePatients, loading, error, create, remove, assign, unassign } = useRooms();
 
     return (
-        <div>
-              <h1>Rooms</h1>
+        <div className="rooms-page">
+              <h1 className="rooms-title">Rooms</h1>
 
-              <RoomForm onSubmit={create} />
-
-              {error && <p style={{ color: "red" }}>{error}</p>}
+              {error && <p className="rooms-error">{error}</p>}
               {loading ? (
-                <p>Loading...</p>
+                <p className="rooms-muted">Loading...</p>
               ) : (
                 <RoomList
                   rooms={rooms}
@@ -22,6 +20,7 @@ export function RoomsPage() {
                   onDelete={remove}
                   onAssign={assign}
                   onUnassign={unassign}
+                  onCreate={create}
                 />
               )}
             </div>

@@ -6,13 +6,13 @@ export function StaffPage() {
   const { staff, loading, error, create, remove } = useStaff();
 
   return (
-    <div>
-      <h1>Staff</h1>
+    <div className="ui-page">
+      <h1 className="ui-page-title">Staff</h1>
 
       <StaffForm onSubmit={create} />
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {loading ? <p>Loading...</p> : <StaffList staff={staff} onDelete={remove} />}
+      {error && <p className="ui-error">{error}</p>}
+      {loading ? <p className="ui-muted">Loading...</p> : <StaffList staff={staff} onDelete={remove} />}
     </div>
   );
 }

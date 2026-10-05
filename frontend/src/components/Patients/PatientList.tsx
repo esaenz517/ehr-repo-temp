@@ -9,6 +9,9 @@ interface PatientListProps {
   onDelete: (patientId: number) => void;
 }
 
+// Toggle buttons are outlined while closed and solid blue while their panel is open
+const toggleClass = (open: boolean) => (open ? "ui-button" : "ui-button ui-button--secondary");
+
 export function PatientList({ patients, onDelete }: PatientListProps) {
   const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
 
@@ -18,113 +21,95 @@ export function PatientList({ patients, onDelete }: PatientListProps) {
   const [billingPatientId, setBillingPatientId] =
     useState<number | null>(null);
 
+  if (patients.length === 0) {
+    return <p className="ui-row-empty">No patients yet.</p>;
+  }
+
   return (
-    <ul style={{ listStyle: "none", padding: 0 }}>
-      {patients.map((patient) => (
-        <li
-          key={patient.patient_id}
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            padding: "8px 0",
-            borderBottom: "1px solid #eee",
-          }}
-        >
-          <div>
-            <strong>
-              {patient.first_name} {patient.middle_name ? `${patient.middle_name} ` : ""}
-              {patient.last_name}
-            </strong>
-            {patient.preferred_name && (
-              <span style={{ color: "#555" }}> ("{patient.preferred_name}")</span>
+    <ul className="ui-row-list">
+      {patients.map((patient) => {
+        const historyOpen = selectedPatientId === patient.patient_id;
+        const appointmentsOpen = appointmentPatientId === patient.patient_id;
+        const chargesOpen = billingPatientId === patient.patient_id;
+
+        return (
+          <li key={patient.patient_id} className="ui-row ui-row--wrap">
+            <div className="ui-row-main">
+              <div className="ui-row-title">
+                {patient.first_name} {patient.middle_name ? `${patient.middle_name} ` : ""}
+                {patient.last_name}
+                {patient.preferred_name && (
+                  <span className="ui-muted"> ("{patient.preferred_name}")</span>
+                )}
+              </div>
+              <div className="ui-row-subtitle">
+                {patient.mrn && <>MRN: {patient.mrn} · </>}
+                DOB: {patient.date_of_birth}
+                {" · "}
+                {patient.status}
+              </div>
+              <div className="ui-row-subtitle">
+                Sex at birth: {patient.gender_at_birth ?? "—"} · Gender: {patient.gender_identity} · {patient.pronouns}
+              </div>
+              <div className="ui-row-subtitle">
+                Provider:{" "}
+                {patient.provider
+                  ? `Dr. ${patient.provider.first_name} ${patient.provider.last_name}`
+                  : "None"}
+              </div>
+              <div className="ui-row-subtitle">
+                Drugs: {patient.drugs.length > 0 ? patient.drugs.map((d) => d.name).join(", ") : "None"}
+              </div>
+            </div>
+
+            <div className="ui-row-actions">
+              <button
+                className={toggleClass(historyOpen)}
+                onClick={() => setSelectedPatientId(historyOpen ? null : patient.patient_id)}
+              >
+                {historyOpen ? "Hide History" : "View History"}
+              </button>
+
+              <button
+                className={toggleClass(appointmentsOpen)}
+                onClick={() => setAppointmentPatientId(appointmentsOpen ? null : patient.patient_id)}
+              >
+                {appointmentsOpen ? "Hide Appointments" : "View Appointments"}
+              </button>
+
+              <button
+                className={toggleClass(chargesOpen)}
+                onClick={() => setBillingPatientId(chargesOpen ? null : patient.patient_id)}
+              >
+                {chargesOpen ? "Hide Charges" : "View Charges"}
+              </button>
+
+              <button
+                className="ui-button ui-button--danger"
+                onClick={() => onDelete(patient.patient_id)}
+              >
+                Delete
+              </button>
+            </div>
+
+            {historyOpen && (
+              <div className="ui-row-detail">
+                <MedicalHistoryPanel patientId={patient.patient_id} />
+              </div>
             )}
-            <div style={{ fontSize: 14, color: "#555" }}>
-              {patient.mrn && <>MRN: {patient.mrn} · </>}
-              DOB: {patient.date_of_birth}
-              {" · "}
-              {patient.status}
-            </div>
-            <div style={{ fontSize: 14, color: "#555" }}>
-              Sex at birth: {patient.gender_at_birth ?? "—"} · Gender: {patient.gender_identity} · {patient.pronouns}
-            </div>
-            <div style={{ fontSize: 14, color: "#555" }}>
-              Provider:{" "}
-              {patient.provider
-                ? `Dr. ${patient.provider.first_name} ${patient.provider.last_name}`
-                : "None"}
-            </div>
-            <div style={{ fontSize: 14, color: "#555" }}>
-              Drugs: {patient.drugs.length > 0 ? patient.drugs.map((d) => d.name).join(", ") : "None"}
-            </div>
-          </div>
-
-          <div>
-            <button
-              onClick={() =>
-                setSelectedPatientId(
-                  selectedPatientId === patient.patient_id ? null : patient.patient_id
-                )
-              }
-            >
-              {selectedPatientId === patient.patient_id ? "Hide History" : "View History"}
-            </button>
-
-            <button
-              onClick={() =>
-                setAppointmentPatientId(
-                  appointmentPatientId === patient.patient_id
-                  ? null
-                  : patient.patient_id
-                )
-              }
-              style={{ marginLeft: 8 }}
-            >
-              {appointmentPatientId === patient.patient_id
-                ? "Hide Appointments"
-                : "View Appointments"}
-            </button>
-
-            <button
-              onClick={() =>
-                setBillingPatientId(
-                  billingPatientId === patient.patient_id
-                    ? null
-                    : patient.patient_id
-                )
-              }
-              style={{ marginLeft: 8 }}
-            >
-              {billingPatientId === patient.patient_id
-                ? "Hide Charges"
-                : "View Charges"}
-            </button>
-
-            <button
-              onClick={() => onDelete(patient.patient_id)}
-               style={{ marginLeft: 8 }}
-            >
-               Delete
-            </button>
-          </div>
-          {selectedPatientId === patient.patient_id && (
-            <div style={{ width: "100%" }}>
-              <MedicalHistoryPanel patientId={patient.patient_id} />
-            </div>
-          )}
-          {appointmentPatientId === patient.patient_id && (
-            <div style={{ width: "100%" }}>
-              <AppointmentPanel patientId={patient.patient_id} />
-            </div>
-          )}
-          {billingPatientId === patient.patient_id && (
-            <div style={{ width: "100%" }}>
-              <BillingChargePanel patientId={patient.patient_id} />
-            </div>
-          )}
-        </li>
-      ))}
+            {appointmentsOpen && (
+              <div className="ui-row-detail">
+                <AppointmentPanel patientId={patient.patient_id} />
+              </div>
+            )}
+            {chargesOpen && (
+              <div className="ui-row-detail">
+                <BillingChargePanel patientId={patient.patient_id} />
+              </div>
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 }

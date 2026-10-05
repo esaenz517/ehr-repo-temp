@@ -78,8 +78,11 @@ export interface ChartContext {
     }[];
 
     medications: {
+        drug_id: number;
         name: string;
         dosage: string | null;
+        route: string | null;
+        frequency: string | null;
     }[];
 
     allergies: {

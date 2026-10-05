@@ -54,10 +54,11 @@ interface ChartDataProps {
   drugs: Drug[]; // every drug the instructor can pick from
   onChange: (values: ChartDataValues) => void; // sends the whole updated section back up
   errors: Partial<Record<keyof ChartDataValues, string>>;
+  readOnly?: boolean;
 }
 
 // Chart Data section of the Create Case page: medications, allergies, and labs.
-export function ChartData({ values, drugs, onChange, errors }: ChartDataProps) {
+export function ChartData({ values, drugs, onChange, errors, readOnly = false, }: ChartDataProps) {
   // Change one field in one medication row.
   const updateMedication = (index: number, field: keyof MedicationRow, value: string) =>
     onChange({
@@ -104,6 +105,7 @@ export function ChartData({ values, drugs, onChange, errors }: ChartDataProps) {
               aria-label="Drug"
               value={row.drugId}
               onChange={(e) => updateMedication(i, "drugId", e.target.value)}
+              disabled={readOnly}
             >
               <option value="">Drug *</option>
               {drugs.map((drug) => (
@@ -115,11 +117,13 @@ export function ChartData({ values, drugs, onChange, errors }: ChartDataProps) {
               placeholder="Dose (e.g. 500 mg)"
               value={row.dose}
               onChange={(e) => updateMedication(i, "dose", e.target.value)}
+              disabled={readOnly}
             />
             <select
               aria-label="Route"
               value={row.route}
               onChange={(e) => updateMedication(i, "route", e.target.value)}
+              disabled={readOnly}
             >
               <option value="">Route</option>
               {ROUTES.map((r) => <option key={r} value={r}>{r}</option>)}
@@ -128,6 +132,7 @@ export function ChartData({ values, drugs, onChange, errors }: ChartDataProps) {
               aria-label="Frequency"
               value={row.frequency}
               onChange={(e) => updateMedication(i, "frequency", e.target.value)}
+              disabled={readOnly}
             >
               <option value="">Frequency</option>
               {FREQUENCIES.map((f) => <option key={f} value={f}>{f}</option>)}
@@ -149,12 +154,14 @@ export function ChartData({ values, drugs, onChange, errors }: ChartDataProps) {
               placeholder="Substance *"
               value={row.substance}
               onChange={(e) => updateAllergy(i, "substance", e.target.value)}
+              disabled={readOnly}
             />
             <input
               aria-label="Reaction"
               placeholder="Reaction"
               value={row.reaction}
               onChange={(e) => updateAllergy(i, "reaction", e.target.value)}
+              disabled={readOnly}
             />
             <button type="button" onClick={() => removeAllergy(i)}>Remove</button>
           </div>
@@ -173,23 +180,27 @@ export function ChartData({ values, drugs, onChange, errors }: ChartDataProps) {
               placeholder="Test *"
               value={row.testName}
               onChange={(e) => updateLab(i, "testName", e.target.value)}
+              disabled={readOnly}
             />
             <input
               aria-label="Result"
               placeholder="Result *"
               value={row.result}
               onChange={(e) => updateLab(i, "result", e.target.value)}
+              disabled={readOnly}
             />
             <input
               aria-label="Unit"
               placeholder="Unit"
               value={row.unit}
               onChange={(e) => updateLab(i, "unit", e.target.value)}
+              disabled={readOnly}
             />
             <select
               aria-label="Flag"
               value={row.flag}
               onChange={(e) => updateLab(i, "flag", e.target.value)}
+              disabled={readOnly}
             >
               <option value="">Flag</option>
               {FLAGS.map((f) => <option key={f} value={f}>{f}</option>)}
@@ -199,6 +210,7 @@ export function ChartData({ values, drugs, onChange, errors }: ChartDataProps) {
               aria-label="Collected at"
               value={row.collectedAt}
               onChange={(e) => updateLab(i, "collectedAt", e.target.value)}
+              disabled={readOnly}
             />
             <button type="button" onClick={() => removeLab(i)}>Remove</button>
           </div>

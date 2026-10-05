@@ -5,8 +5,10 @@ Describes the table already in the database. Must be added in SQL Server before 
 '''
 
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy.orm import relationship
 
 from app.database import Base
+from app.models.cases import Case
 
 class Assignment(Base):
     __tablename__ = "Assignment"
@@ -20,3 +22,24 @@ class Assignment(Base):
     assignment_type = Column("AssignmentType", String(10), server_default = "graded", nullable = False)
     assigned_to = Column("AssignedTo", Integer, ForeignKey("dbo.Staff.StaffId"), nullable = False)
     assigned_by = Column("AssignedBy", Integer, ForeignKey("dbo.Staff.StaffId"), nullable = False)
+
+    # Include patient name and chief complaint to assignment listing
+    case = relationship(Case)
+ 
+    @property
+    def patient_name(self):
+        if self.case:
+            patient = self.case.patient
+        else: 
+            patient = None
+        if patient:
+            return f"{patient.last_name}, {patient.first_name}" 
+        else: 
+            return None
+ 
+    @property
+    def chief_complaint(self):
+        if self.case:
+            return self.case.chief_complaint
+        else: 
+            return None
