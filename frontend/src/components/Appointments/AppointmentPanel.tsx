@@ -17,7 +17,6 @@ const STATUS_OPTIONS = [
 const monthFormat = new Intl.DateTimeFormat("en-US", { month: "short" });
 const timeFormat = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" });
 const dayFormat = new Intl.DateTimeFormat("en-US", { weekday: "long", year: "numeric" });
-const [providerId, setProviderId] = useState("");
 
 export function AppointmentPanel({
   patientId,
@@ -39,6 +38,7 @@ export function AppointmentPanel({
 
   const [appointmentDatetime, setAppointmentDatetime] = useState("");
   const [location, setLocation] = useState("");
+  const [providerId, setProviderId] = useState("");
   const [status, setStatus] = useState("scheduled");
 
   // Soonest first
