@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.models.appointments import Appointment as AppointmentModel
-from app.schemas.appointments import AppointmentCreate
+from app.schemas.appointments import AppointmentCreate, AppointmentUpdate
 
 
 def list_appointments(db: Session, patient_id: int):
@@ -36,7 +36,7 @@ def update_appointment(
     db: Session,
     patient_id: int,
     appointment_id: int,
-    appointment: AppointmentCreate,
+    appointment: AppointmentUpdate,
 ):
     db_appointment = (
         db.query(AppointmentModel)

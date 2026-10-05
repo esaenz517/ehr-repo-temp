@@ -22,6 +22,7 @@ class Appointment(AppointmentBase):
         from_attributes = True
 
 class AppointmentUpdate(BaseModel):
+    provider_id: int
     appointment_datetime: datetime
     location: str
     status: str

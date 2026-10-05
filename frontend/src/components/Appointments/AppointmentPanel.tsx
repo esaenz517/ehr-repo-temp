@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAppointments } from "../../hooks/useAppointments";
+import { useProviders } from "../../hooks/useProviders";
 
 interface AppointmentPanelProps {
   patientId: number;
@@ -17,37 +18,48 @@ export function AppointmentPanel({
     removeAppointment,
   } = useAppointments(patientId);
 
+  const {
+    providers,
+    loading: providersLoading,
+    error: providersError,
+  } = useProviders();
+
   const [appointmentDatetime, setAppointmentDatetime] = useState("");
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState("scheduled");
+  const [providerId, setProviderId] = useState("");
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!appointmentDatetime || !location.trim()) {
+    if (!appointmentDatetime || !location.trim() || !providerId) {
       return;
     }
 
     await createAppointment({
       appointment_datetime: appointmentDatetime,
       location: location.trim(),
+      provider_id: Number(providerId),
       status,
     });
 
     setAppointmentDatetime("");
     setLocation("");
     setStatus("scheduled");
+    setProviderId("");
   };
 
   const handleStatusChange = async (
     appointmentId: number,
     appointmentDatetime: string,
     location: string,
+    providerId: number,
     newStatus: string
   ) => {
     await updateAppointment(appointmentId, {
       appointment_datetime: appointmentDatetime,
       location,
+      provider_id: providerId,
       status: newStatus,
     });
   };
@@ -63,6 +75,9 @@ export function AppointmentPanel({
     >
       <h3>Appointments</h3>
 
+      {providersLoading && <p>Loading providers...</p>}
+      {providersError && <p>{providersError}</p>}
+
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: 8 }}>
           <label>
@@ -75,6 +90,28 @@ export function AppointmentPanel({
               }
               required
             />
+          </label>
+        </div>
+
+        <div style={{ marginBottom: 8 }}>
+          <label>
+            Provider:{" "}
+            <select
+              value={providerId}
+              onChange={(event) => setProviderId(event.target.value)}
+              required
+            >
+              <option value="">Select a provider</option>
+
+              {providers.map((provider) => (
+                <option
+                  key={provider.provider_id}
+                  value={provider.provider_id}
+                >
+                  {provider.first_name} {provider.last_name}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
 
@@ -137,6 +174,7 @@ export function AppointmentPanel({
                       appointment.appointment_id,
                       appointment.appointment_datetime,
                       appointment.location,
+                      appointment.provider_id,
                       event.target.value
                     )
                   }
