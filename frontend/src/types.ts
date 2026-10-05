@@ -148,6 +148,7 @@ export interface Assignment {
   assignment_type?: "graded" | "practice";
   assigned_to: number;
   assigned_by: number;
+  encounter_id: number | null; // set once the student starts the case
   patient_name: string | null; // "Last name, First name"
   chief_complaint: string | null;
 }

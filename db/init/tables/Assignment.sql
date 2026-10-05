@@ -21,3 +21,11 @@ BEGIN
     );
 END
 GO
+
+-- The encounter a student documents this assignment in. Set when the student starts the case.
+IF COL_LENGTH('dbo.Assignment', 'EncounterId') IS NULL
+BEGIN
+    ALTER TABLE dbo.Assignment
+    ADD EncounterId INT NULL REFERENCES dbo.Encounters(EncounterId);
+END
+GO

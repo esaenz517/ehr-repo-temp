@@ -35,6 +35,7 @@ class Assignment(BaseModel):
     assignment_type: AssingmentType
     assigned_to: int
     assigned_by: int
+    encounter_id: int | None = None  # the encounter the student's SOAP note belongs to
     patient_name: str | None = None  # Last name, First name format
     chief_complaint: str | None = None 
 

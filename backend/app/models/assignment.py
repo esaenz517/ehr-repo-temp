@@ -22,6 +22,7 @@ class Assignment(Base):
     assignment_type = Column("AssignmentType", String(10), server_default = "graded", nullable = False)
     assigned_to = Column("AssignedTo", Integer, ForeignKey("dbo.Staff.StaffId"), nullable = False)
     assigned_by = Column("AssignedBy", Integer, ForeignKey("dbo.Staff.StaffId"), nullable = False)
+    encounter_id = Column("EncounterId", Integer, ForeignKey("dbo.Encounters.EncounterId"), nullable = True) # set when the student starts
 
     # Include patient name and chief complaint to assignment listing
     case = relationship(Case)

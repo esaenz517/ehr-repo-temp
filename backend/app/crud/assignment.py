@@ -3,10 +3,13 @@ Assignment CRUD
 DB access functions for assignments - create, list by case/student, update status, delete
 '''
 
+from datetime import datetime, timezone
+
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.assignment import Assignment as AssignmentModel
+from app.models.clinical_notes import ClinicalNote, Encounter
 from app.schemas.assignment import AssignmentRequest, EncounterStatus
 
 # Used to get assignments by parts that need it
@@ -76,3 +79,44 @@ def delete_assignment(db: Session, assignment_id: int):
     db.delete(row)
     db.commit()
     return True
+
+# Starts the case: gives the assignment its own encounter (once) and marks it in progress
+def start_assignment(db: Session, row: AssignmentModel):
+    if row.encounter_status in ("submitted", "signed"):
+        return row  # already turned in: nothing to start
+    if row.encounter_id is None:
+        encounter = Encounter(
+            patient_id = row.case.patient_id,
+            started_at = datetime.now(timezone.utc).replace(tzinfo = None),
+        )
+        db.add(encounter)
+        db.flush()
+        row.encounter_id = encounter.encounter_id
+    if row.encounter_status == "not_started":
+        row.encounter_status = "in_progress"
+    db.commit()
+    db.refresh(row)
+    return row
+
+# The student's SOAP note for this assignment, or None if nothing is saved yet
+def get_note(db: Session, row: AssignmentModel):
+    if row.encounter_id is None:
+        return None
+    return (
+        db.query(ClinicalNote)
+        .filter_by(encounter_id = row.encounter_id, is_archived = False)
+        .order_by(ClinicalNote.created_at)
+        .first()
+    )
+
+# True when the encounter belongs to work that was turned in, so its note can't change
+def is_locked(db: Session, encounter_id: int):
+    return (
+        db.query(AssignmentModel)
+        .filter(
+            AssignmentModel.encounter_id == encounter_id,
+            AssignmentModel.encounter_status.in_(["submitted", "signed"]),
+        )
+        .first()
+        is not None
+    )

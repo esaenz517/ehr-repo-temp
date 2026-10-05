@@ -19,7 +19,7 @@ DATABASE_URL = (
 )
 
 # Engine manages the pool of DB connections; created once at import time.
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)  # drop dead connections after a DB restart
 
 # Session factory - each request gets its own Session from this.
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

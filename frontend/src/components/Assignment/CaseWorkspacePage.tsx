@@ -3,7 +3,7 @@ import { casesApi } from "../../api/cases";
 import { clinicalNotesApi, formatUtc } from "../../api/clinicalNotes";
 import type { ChartContext } from "../../api/clinicalNotes";
 import type { Assignment, Case } from "../../types";
-import { ClinicalNotesPage } from "../ClinicalNotes/ClinicalNotesPage";
+import { AssignmentNote } from "./AssignmentNote";
 import { MedicalHistoryPanel } from "../MedicalHistory/MedicalHistoryPanel";
 
 // One boxed section of the form, with its title in the border.
@@ -179,9 +179,16 @@ export function CaseWorkspacePage({ assignment, onBack }: CaseWorkspacePageProps
               <MedicalHistoryPanel patientId={caseInfo.patient_id} />
             </WorkSection>
   
-            <WorkSection title="Encounter Note">
-              <ClinicalNotesPage initialPatientId={caseInfo.patient_id} />
-            </WorkSection>
+            {chart && (
+              <Section title="SOAP Note">
+                <AssignmentNote
+                  assignment={assignment}
+                  patientId={caseInfo.patient_id}
+                  chiefComplaint={caseInfo.chief_complaint}
+                  chart={chart}
+                />
+              </Section>
+            )}
           </>
         )}
       </div>

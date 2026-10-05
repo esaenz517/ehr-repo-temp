@@ -59,11 +59,12 @@ GO
 :r /init/tables/FamilyHistory.sql
 :r /init/tables/RoomAssignments.sql
 :r /init/tables/Cases.sql
+:r /init/tables/Encounters.sql
 :r /init/tables/Assignment.sql
 
 -- SOAP sprint: encounter identity and chart context. Empty chart tables are intentional:
 -- missing data must never be displayed as a normal result or 'no known allergies'.
-:r /init/tables/Encounters.sql
+-- (Encounters.sql runs above, before Assignment.sql, which references it.)
 :r /init/tables/PatientAllergies.sql
 :r /init/tables/PatientVitals.sql
 :r /init/tables/PatientLabResults.sql
@@ -72,3 +73,7 @@ GO
 :r /init/tables/NoteVersions.sql
 :r /init/tables/BillingCharges.sql
 :r /init/tables/Courses.sql
+
+-- DEMO DATA: needs every table above and the logins from seed/users.sql
+:r /init/seed/chart.sql
+:r /init/seed/cases.sql
