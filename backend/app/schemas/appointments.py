@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 
 class AppointmentBase(BaseModel):
+    provider_id: int
     appointment_datetime: datetime
     location: str
     status: str = "scheduled"

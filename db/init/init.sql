@@ -752,6 +752,8 @@ BEGIN
 
         PatientId INT NOT NULL,
 
+        ProviderId INT NOT NULL,
+
         AppointmentDateTime DATETIME2 NOT NULL,
 
         Location NVARCHAR(200) NOT NULL,
@@ -766,7 +768,11 @@ BEGIN
 
         CONSTRAINT FK_Appointments_Patients
             FOREIGN KEY (PatientId)
-            REFERENCES dbo.Patients(PatientId)
+            REFERENCES dbo.Patients(PatientId),
+
+        CONSTRAINT FK_Appointments_Providers
+            FOREIGN KEY (ProviderId)
+            REFERENCES dbo.Providers(ProviderId)
     );
 END
 GO

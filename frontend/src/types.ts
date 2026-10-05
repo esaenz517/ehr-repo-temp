@@ -107,6 +107,7 @@ export interface Room {
 export interface Appointment {
   appointment_id: number;
   patient_id: number;
+  provider_id: number;
   appointment_datetime: string;
   location: string;
   status: string;
