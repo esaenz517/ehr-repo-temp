@@ -69,7 +69,19 @@ FROM (
         ('FACULTY_INSTRUCTOR', 'room.create'),
         ('FACULTY_INSTRUCTOR', 'room.update'),
         ('FACULTY_INSTRUCTOR', 'room.delete'),
+        ('FACULTY_INSTRUCTOR', 'appointment.read'),  
+        ('FACULTY_INSTRUCTOR', 'billing.read'),      
+        ('FACULTY_INSTRUCTOR', 'history.read'),       
+        ('FACULTY_INSTRUCTOR', 'assignment.read'),
+        ('FACULTY_INSTRUCTOR', 'assignment.update'),
+        ('FACULTY_INSTRUCTOR', 'assignment.manage'),
+        ('FACULTY_INSTRUCTOR', 'course.read'),       
 
+        --Student Permissions
+        ('STUDENT', 'history.read'),
+        ('STUDENT', 'history.create'),
+        ('STUDENT', 'assignment.read'),
+        ('STUDENT', 'assignment.update'),
         ('STUDENT', 'patient.read'),
         ('STUDENT', 'case.read'),
         ('STUDENT', 'drug.read')

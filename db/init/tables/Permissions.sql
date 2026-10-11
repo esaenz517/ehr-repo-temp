@@ -49,6 +49,28 @@ USING (
         ('room.update', 'room',   'update'),
         ('room.delete', 'room',   'delete'),
 
+        ('appointment.read',   'appointment', 'read'),
+        ('appointment.create', 'appointment', 'create'),
+        ('appointment.update', 'appointment', 'update'),
+        ('appointment.delete', 'appointment', 'delete'),
+
+        ('billing.read',   'billing', 'read'),
+        ('billing.create', 'billing', 'create'),
+        ('billing.update', 'billing', 'update'),
+        ('billing.delete', 'billing', 'delete'),
+
+        ('history.read',   'history', 'read'),
+        ('history.create', 'history', 'create'),
+        ('history.delete', 'history', 'delete'),
+
+        ('assignment.read',   'assignment', 'read'),    
+        ('assignment.update', 'assignment', 'update'),  
+        ('assignment.manage', 'assignment', 'manage'),  
+
+        ('course.read',   'course', 'read'),
+        ('course.create', 'course', 'create'),
+        ('course.update', 'course', 'update'),
+
         ('user.read',         'user', 'read'),
         ('user.create',       'user', 'create'),
         ('user.manage_roles', 'user', 'manage_roles'),
