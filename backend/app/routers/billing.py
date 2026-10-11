@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from app.security.authorization import require_permission
 
 from app.crud import billing as crud
 from app.database import get_db
@@ -20,6 +21,7 @@ router = APIRouter(
 def list_patient_charges(
     patient_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(require_permission("billing", "read"))
 ):
     return crud.list_charges(db, patient_id)
 
@@ -33,6 +35,7 @@ def create_patient_charge(
     patient_id: int,
     charge: BillingChargeCreate,
     db: Session = Depends(get_db),
+    current_user=Depends(require_permission("billing", "create"))
 ):
     return crud.create_charge(db, patient_id, charge)
 
@@ -46,6 +49,7 @@ def update_patient_charge(
     charge_id: int,
     charge: BillingChargeUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(require_permission("billing", "update"))
 ):
     updated = crud.update_charge(
         db,
@@ -71,6 +75,7 @@ def delete_patient_charge(
     patient_id: int,
     charge_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(require_permission("billing", "delete"))
 ):
     deleted = crud.delete_charge(
         db,
