@@ -26,6 +26,13 @@ class Appointment(Base):
         nullable=False,
     )
 
+    provider_id = Column(
+        "ProviderId",
+        Integer,
+        ForeignKey("dbo.Providers.ProviderId"),
+        nullable=False,
+    )
+
     appointment_datetime = Column(
         "AppointmentDateTime",
         DateTime,

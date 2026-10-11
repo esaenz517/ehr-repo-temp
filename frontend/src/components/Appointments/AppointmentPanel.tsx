@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAppointments } from "../../hooks/useAppointments";
+import { useProviders } from "../../hooks/useProviders";
 import "./appointments.css";
 
 interface AppointmentPanelProps {
@@ -29,8 +30,15 @@ export function AppointmentPanel({
     removeAppointment,
   } = useAppointments(patientId);
 
+  const {
+    providers,
+    loading: providersLoading,
+    error: providersError,
+  } = useProviders();
+
   const [appointmentDatetime, setAppointmentDatetime] = useState("");
   const [location, setLocation] = useState("");
+  const [providerId, setProviderId] = useState("");
   const [status, setStatus] = useState("scheduled");
 
   // Soonest first
@@ -43,18 +51,20 @@ export function AppointmentPanel({
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!appointmentDatetime || !location.trim()) {
+    if (!appointmentDatetime || !location.trim() || !providerId) {
       return;
     }
 
     await createAppointment({
       appointment_datetime: appointmentDatetime,
       location: location.trim(),
+      provider_id: Number(providerId),
       status,
     });
 
     setAppointmentDatetime("");
     setLocation("");
+    setProviderId("");
     setStatus("scheduled");
   };
 
@@ -62,11 +72,13 @@ export function AppointmentPanel({
     appointmentId: number,
     appointmentDatetime: string,
     location: string,
+    providerId: number,
     newStatus: string
   ) => {
     await updateAppointment(appointmentId, {
       appointment_datetime: appointmentDatetime,
       location,
+      provider_id: providerId,
       status: newStatus,
     });
   };
@@ -81,6 +93,11 @@ export function AppointmentPanel({
       </div>
 
       {error && <p className="ui-error">{error}</p>}
+
+      {providersLoading && (
+        <p className="appointments-muted">Loading providers...</p>
+      )}
+      {providersError && <p className="ui-error">{providersError}</p>}
 
       {loading ? (
         <p className="appointments-muted">Loading appointments...</p>
@@ -118,6 +135,7 @@ export function AppointmentPanel({
                         appointment.appointment_id,
                         appointment.appointment_datetime,
                         appointment.location,
+                        appointment.provider_id,
                         event.target.value
                       )
                     }
@@ -158,7 +176,33 @@ export function AppointmentPanel({
             className="appointments-input"
           />
         </div>
+        <div className="appointments-field">
+          <label
+            htmlFor={`appointment-provider-${patientId}`}
+            className="appointments-label"
+          >
+            Provider
+          </label>
 
+          <select
+            id={`appointment-provider-${patientId}`}
+            value={providerId}
+            onChange={(event) => setProviderId(event.target.value)}
+            required
+            className="appointments-input"
+          >
+            <option value="">Select a provider</option>
+            {providers.map((provider) => (
+              <option
+                key={provider.provider_id}
+                value={provider.provider_id}
+              >
+                {provider.first_name} {provider.last_name}
+              </option>
+            ))}
+          </select>
+        </div>
+        
         <div className="appointments-field appointments-field--location">
           <label htmlFor={`appointment-location-${patientId}`} className="appointments-label">
             Location

@@ -4,6 +4,7 @@ import { apiFetch } from "./client";
 export interface AppointmentInput {
   appointment_datetime: string;
   location: string;
+  provider_id: number;
   status: string;
 }
 
