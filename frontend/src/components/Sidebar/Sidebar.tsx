@@ -4,7 +4,6 @@ import "./sidebar.css";
 
 export type View =
   | "home"
-  | "items"
   | "patients"
   | "staff"
   | "providers"
@@ -46,7 +45,6 @@ function saveCollapsed(value: boolean) {
 
 const NAV_ITEMS: { view: View; label: string }[] = [
   //{ view: "home", label: "Home" },
-  { view: "items", label: "Items" },
   { view: "patients", label: "Patients" },
   { view: "staff", label: "Staff" },
   { view: "providers", label: "Providers" },

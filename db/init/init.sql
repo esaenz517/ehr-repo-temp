@@ -37,7 +37,6 @@ GO
 -- older databases, and seed data. Order matters: a table comes after the tables it
 -- references, and seed data after the rows it depends on.
 -- sqlcmd resolves :r paths from its working directory, so the paths are container paths.
-:r /init/tables/Items.sql
 :r /init/tables/Users.sql
 :r /init/tables/Providers.sql
 :r /init/tables/Roles.sql

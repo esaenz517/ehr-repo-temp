@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { CreateCasePage } from "./components/CreateCasePage";
 import { DrugsPage } from "./components/DrugsPage";
 import { Home } from "./components/Home";
-import { ItemsPage } from "./components/ItemsPage";
 import { PatientsPage } from "./components/PatientsPage";
 import { StaffPage } from "./components/StaffPage";
 import { ProvidersPage } from "./components/ProvidersPage";
@@ -66,7 +65,6 @@ function App() {
 
       <main className="app-main">
         {view === "home" && <Home isStudent={!!allowedViews} />}
-        {view === "items" && canView("items") && <ItemsPage />}
         {view === "patients" && canView("patients") && <PatientsPage />}
         {view === "staff" && canView("staff") && <StaffPage />}
         {view === "providers" && canView("providers") && <ProvidersPage />}

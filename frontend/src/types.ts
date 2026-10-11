@@ -27,13 +27,6 @@ export interface User {
   created_at: string;
 }
 
-export interface Item {
-  id: number;
-  name: string;
-  description: string | null;
-  created_at: string;
-}
-
 export interface Provider {
   provider_id: number;
   first_name: string;
