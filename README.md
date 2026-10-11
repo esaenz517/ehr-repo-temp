@@ -58,6 +58,17 @@ Once everything is up:
 - Backend health check: http://localhost:8000/health
 - CloudBeaver (DB GUI): http://localhost:8081
 
+### Demo logins
+
+Sign in to the frontend at http://localhost:3000 with one of these seeded accounts:
+
+| Role       | Username     | Password        |
+|------------|--------------|-----------------|
+| Student    | `student`    | `student123`    |
+| Instructor | `instructor` | `instructor123` |
+
+These are created by `db/init/init.sql` for local dev only. Change or remove them before deploying anywhere real.
+
 The `db-init` container waits for SQL Server's healthcheck to pass, then runs `db/init/init.sql`, which creates the `AppDb` database, an `Items` table, and two seed rows. It exits once done — that's expected, it's not meant to stay running.
 
 ## Connecting with SSMS

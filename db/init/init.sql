@@ -536,12 +536,12 @@ GO
 IF NOT EXISTS (SELECT * FROM dbo.Staff)
 BEGIN
     INSERT INTO dbo.Staff
-        (StaffId, FirstName, MiddleName, LastName, Student, Admin)
+        (FirstName, MiddleName, LastName, Specialization, Student, Admin)
     VALUES
-        (1, N'Emily',  NULL, N'Carter', 0, 0),
-        (2, N'Daniel', N'J', N'Brooks', 0, 0),
-        (3, N'Sophia', NULL, N'Nguyen', 1, 0),
-        (4, N'Alex',   NULL, N'Morgan', 0, 1);
+        (N'Emily',  NULL, N'Carter', N'General Practice', 0, 0),
+        (N'Daniel', N'J', N'Brooks', N'Cardiology', 0, 0),
+        (N'Sophia', NULL, N'Nguyen', N'Pediatrics', 1, 0),
+        (N'Alex',   NULL, N'Morgan', N' Psychiatry', 0, 1);
 END
 GO
 
