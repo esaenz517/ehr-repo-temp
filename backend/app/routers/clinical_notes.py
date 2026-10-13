@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.crud import clinical_notes as crud
+from app.crud.assignment import is_locked
 from app.crud.patients import get_patient
 from app.crud.rbac import (
     user_has_contextual_permission,
@@ -238,6 +239,12 @@ def create_note(
             detail="Encounter does not belong to this patient",
         )
 
+    if is_locked(db, encounter.encounter_id):
+        raise HTTPException(
+            status_code=409,
+            detail="This assignment was submitted; its note can no longer change",
+        )
+
     provider_id = payload.responsible_provider_id
 
     if (
@@ -316,6 +323,12 @@ def save_note(
         raise HTTPException(
             status_code=403,
             detail="Only the author may edit this draft",
+        )
+
+    if is_locked(db, note.encounter_id):
+        raise HTTPException(
+            status_code=409,
+            detail="This assignment was submitted; its note can no longer change",
         )
 
     result = crud.update_note(

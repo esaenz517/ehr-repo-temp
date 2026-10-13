@@ -25,7 +25,7 @@ repo/
 └── db/init/                # SQL Server schema + seed data (init.sql)
 ```
 
-Each backend feature is 4 matching files — `models/`, `schemas/`, `crud/`, `routers/` — named after the resource (e.g. `items.py` in each). Adding a new feature means copying that same shape.
+Each backend feature is 4 matching files — `models/`, `schemas/`, `crud/`, `routers/` — named after the resource (e.g. `patients.py` in each). Adding a new feature means copying that same shape.
 
 ## Prerequisites
 
@@ -58,7 +58,18 @@ Once everything is up:
 - Backend health check: http://localhost:8000/health
 - CloudBeaver (DB GUI): http://localhost:8081
 
-The `db-init` container waits for SQL Server's healthcheck to pass, then runs `db/init/init.sql`, which creates the `AppDb` database, an `Items` table, and two seed rows. It exits once done — that's expected, it's not meant to stay running.
+### Demo logins
+
+Sign in to the frontend at http://localhost:3000 with one of these seeded accounts:
+
+| Role       | Username     | Password        |
+|------------|--------------|-----------------|
+| Student    | `student`    | `student123`    |
+| Instructor | `instructor` | `instructor123` |
+
+These are created by `db/init/init.sql` for local dev only. Change or remove them before deploying anywhere real.
+
+The `db-init` container waits for SQL Server's healthcheck to pass, then runs `db/init/init.sql`, which creates the `AppDb` database and runs each table script in `db/init/tables/` and the demo data in `db/init/seed/`. It exits once done — that's expected, it's not meant to stay running.
 
 ## Connecting with SSMS
 
@@ -69,7 +80,7 @@ Open SQL Server Management Studio and connect to:
 - **Login:** `dev`
 - **Password:** `dev123` (set in `docker-compose.yml`/`db/init/init.sql` — change it before doing anything beyond local dev)
 
-You'll see the `AppDb` database with a `dbo.Items` table once `db-init` has finished.
+You'll see the `AppDb` database and its tables once `db-init` has finished.
 
 ## Connecting with CloudBeaver
 
@@ -99,12 +110,7 @@ npm run dev
 
 ## API
 
-| Method | Path            | Description       |
-|--------|-----------------|--------------------|
-| GET    | `/items`        | List all items     |
-| GET    | `/items/{id}`   | Get one item       |
-| POST   | `/items`        | Create an item     |
-| DELETE | `/items/{id}`   | Delete an item     |
+Every endpoint is listed in the Swagger UI at http://localhost:8000/docs.
 
 ## Notes / things to change before shipping this anywhere real
 

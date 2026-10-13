@@ -6,7 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import (
     appointments,
     drugs,
-    items,
     login,
     medical_history,
     patients,
@@ -24,7 +23,7 @@ from app.routers import (
     courses
 )
 
-app = FastAPI(title="Simple Items API")
+app = FastAPI(title="EHR API")
 
 origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
 app.add_middleware(
@@ -35,7 +34,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(items.router)
 app.include_router(patients.router)
 app.include_router(providers.router)
 app.include_router(drugs.router)

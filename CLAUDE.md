@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A minimal three-tier reference app: React + TypeScript frontend (Vite, served by nginx), Python FastAPI backend (SQLAlchemy + pyodbc), and SQL Server, each in its own Docker container wired together by `docker-compose.yml`. It currently implements a single `items` resource end-to-end and is meant to be copied as a template for new resources.
+A minimal three-tier reference app: React + TypeScript frontend (Vite, served by nginx), Python FastAPI backend (SQLAlchemy + pyodbc), and SQL Server, each in its own Docker container wired together by `docker-compose.yml`. Each resource (patients, providers, cases, etc.) is implemented end-to-end following the same per-layer file pattern.
 
 ## Commands
 
@@ -39,13 +39,13 @@ npm run preview
 ```
 No test suite or linter is configured for the frontend beyond the TypeScript compiler run as part of `build`.
 
-**Database:** `db-init` waits for SQL Server's healthcheck then runs `db/init/init.sql`, which creates the `AppDb` database, the `dev` login/user (used by the backend and CloudBeaver instead of `sa`), the `dbo.Items` table, and two seed rows. Connect via SSMS or CloudBeaver at `localhost,1433` (or host `db` from inside the compose network), user `dev`, password `dev123`.
+**Database:** `db-init` waits for SQL Server's healthcheck then runs `db/init/init.sql`, which creates the `AppDb` database, the `dev` login/user (used by the backend and CloudBeaver instead of `sa`), then includes each table script in `db/init/tables/` and the demo data in `db/init/seed/` via sqlcmd `:r`. Connect via SSMS or CloudBeaver at `localhost,1433` (or host `db` from inside the compose network), user `dev`, password `dev123`.
 
 ## Architecture
 
 ### Backend: one resource = four matching files
 
-Each backend feature lives across four directories, all named after the resource (e.g. `items.py` in each):
+Each backend feature lives across four directories, all named after the resource (e.g. `patients.py` in each):
 
 ```
 backend/app/
@@ -57,7 +57,7 @@ backend/app/
 └── routers/<resource>.py   # APIRouter endpoints, call crud, use schemas for I/O
 ```
 
-To add a new resource: create the table in `db/init/init.sql` first (models describe tables that must already exist in SQL Server — they don't create them), then add matching `models/`, `schemas/`, `crud/`, `routers/` files following `items.py` as the template in each, and register the new router in `main.py` (`app.include_router(...)`).
+To add a new resource: create the table in a new `db/init/tables/<Table>.sql` and add a `:r` line for it in `db/init/init.sql` first (models describe tables that must already exist in SQL Server — they don't create them), then add matching `models/`, `schemas/`, `crud/`, `routers/` files following an existing resource such as `patients.py` in each, and register the new router in `main.py` (`app.include_router(...)`).
 
 DB config (`DB_SERVER`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`) and CORS origins (`CORS_ORIGINS`) come from env vars set in `docker-compose.yml`, with local defaults in `database.py`/`main.py`.
 

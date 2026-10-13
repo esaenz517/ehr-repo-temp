@@ -6,6 +6,7 @@ API endpoints for managing patient medical and family history.
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from app.security.authorization import require_permission
 
 from app.crud import medical_history as crud
 from app.crud import patients as patient_crud
@@ -24,7 +25,10 @@ router = APIRouter(prefix="/patients", tags=["medical-history"])
 # Medical History
 
 @router.get("/{patient_id}/medical-history", response_model=list[MedicalHistory])
-def list_medical_history(patient_id: int, db: Session = Depends(get_db)):
+def list_medical_history(patient_id: int, 
+        db: Session = Depends(get_db), 
+        current_user=Depends(require_permission("history", "read"))):
+    
     patient = patient_crud.get_patient(db, patient_id)
 
     if patient is None:
@@ -42,7 +46,7 @@ def create_medical_history(
     patient_id: int,
     history: MedicalHistoryCreate,
     db: Session = Depends(get_db),
-):
+    current_user=Depends(require_permission("history", "create"))):
     patient = patient_crud.get_patient(db, patient_id)
 
     if patient is None:
@@ -59,7 +63,7 @@ def delete_medical_history(
     patient_id: int,
     medical_history_id: int,
     db: Session = Depends(get_db),
-):
+    current_user=Depends(require_permission("history", "delete"))):
     deleted = crud.delete_medical_history(db, medical_history_id)
 
     if not deleted:
@@ -71,7 +75,10 @@ def delete_medical_history(
 # -------------------------
 
 @router.get("/{patient_id}/family-history", response_model=list[FamilyHistory])
-def list_family_history(patient_id: int, db: Session = Depends(get_db)):
+def list_family_history(patient_id: int, 
+        db: Session = Depends(get_db), 
+        current_user=Depends(require_permission("history", "read"))):
+    
     patient = patient_crud.get_patient(db, patient_id)
 
     if patient is None:
@@ -89,7 +96,8 @@ def create_family_history(
     patient_id: int,
     history: FamilyHistoryCreate,
     db: Session = Depends(get_db),
-):
+    current_user=Depends(require_permission("history", "create"))):
+    
     patient = patient_crud.get_patient(db, patient_id)
 
     if patient is None:
@@ -106,7 +114,8 @@ def delete_family_history(
     patient_id: int,
     family_history_id: int,
     db: Session = Depends(get_db),
-):
+    current_user=Depends(require_permission("history", "delete"))):
+    
     deleted = crud.delete_family_history(db, family_history_id)
 
     if not deleted:

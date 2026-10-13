@@ -11,15 +11,21 @@ interface MyAssignmentsPageProps {
 }
 
 export function MyAssignmentsPage({ studentId, onOpen }: MyAssignmentsPageProps) {
-  const { assignments, loading, error, reload, updateStatus } = useAssignments(studentId);
+  const { assignments, loading, error, reload, start } = useAssignments(studentId);
 
-  // Progress of the assignment
+  // Starting a case opens it straight into the workspace. Submitting happens there,
+  // next to the SOAP note, so a case can't be turned in without a saved note.
+  const startAndOpen = async (a: Assignment) => {
+    const updated = await start(a.assignment_id);
+    if (updated) onOpen(updated);
+  };
+
   const actions = (a: Assignment) => {
     if (a.encounter_status === "not_started") {
-      return <button onClick={() => updateStatus(a.assignment_id, "in_progress")}>Start</button>;
+      return <button onClick={() => startAndOpen(a)}>Start</button>;
     }
     if (a.encounter_status === "in_progress") {
-      return <button onClick={() => updateStatus(a.assignment_id, "submitted")}>Submit</button>;
+      return <button onClick={() => onOpen(a)}>Continue</button>;
     }
     return null;
   };
