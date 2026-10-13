@@ -27,7 +27,7 @@ router = APIRouter(prefix="/patients", tags=["medical-history"])
 @router.get("/{patient_id}/medical-history", response_model=list[MedicalHistory])
 def list_medical_history(patient_id: int, 
         db: Session = Depends(get_db), 
-        current_user=Depends(require_permission("medical_history", "read"))):
+        current_user=Depends(require_permission("history", "read"))):
     
     patient = patient_crud.get_patient(db, patient_id)
 
@@ -46,7 +46,7 @@ def create_medical_history(
     patient_id: int,
     history: MedicalHistoryCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("medical_history", "create"))):
+    current_user=Depends(require_permission("history", "create"))):
     patient = patient_crud.get_patient(db, patient_id)
 
     if patient is None:
@@ -63,7 +63,7 @@ def delete_medical_history(
     patient_id: int,
     medical_history_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("medical_history", "delete"))):
+    current_user=Depends(require_permission("history", "delete"))):
     deleted = crud.delete_medical_history(db, medical_history_id)
 
     if not deleted:
@@ -77,7 +77,7 @@ def delete_medical_history(
 @router.get("/{patient_id}/family-history", response_model=list[FamilyHistory])
 def list_family_history(patient_id: int, 
         db: Session = Depends(get_db), 
-        current_user=Depends(require_permission("family_history", "read"))):
+        current_user=Depends(require_permission("history", "read"))):
     
     patient = patient_crud.get_patient(db, patient_id)
 
@@ -96,7 +96,7 @@ def create_family_history(
     patient_id: int,
     history: FamilyHistoryCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("family_history", "create"))):
+    current_user=Depends(require_permission("history", "create"))):
     
     patient = patient_crud.get_patient(db, patient_id)
 
@@ -114,7 +114,7 @@ def delete_family_history(
     patient_id: int,
     family_history_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("family_history", "delete"))):
+    current_user=Depends(require_permission("history", "delete"))):
     
     deleted = crud.delete_family_history(db, family_history_id)
 
