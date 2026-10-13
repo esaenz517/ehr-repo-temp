@@ -1,0 +1,66 @@
+/* Student SOAP note inside the case workspace. Classes are prefixed "assignment-note-". */
+
+.assignment-note-start {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.assignment-note-start p {
+  margin: 0;
+}
+
+.assignment-note-banner {
+  margin: 0 0 16px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-bg);
+  color: var(--color-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.assignment-note-message {
+  margin: 0 0 16px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  border-left: 3px solid var(--color-success);
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  font-size: 13px;
+}
+
+/* Sticks to the bottom of the screen so Save/Submit stay reachable on a long note */
+.assignment-note-actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.assignment-note-actions .ui-muted {
+  margin-right: auto;
+  font-size: 13px;
+}
+
+/* Instructor view: status line plus Refresh / Sign off / Send back above the note */
+.assignment-note-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.assignment-note-toolbar .ui-muted {
+  margin-right: auto;
+  font-size: 13px;
+}
