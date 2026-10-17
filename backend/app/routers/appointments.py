@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from app.security.authorization import require_permission
 
 from app.crud import appointments as crud
 from app.database import get_db
@@ -20,6 +21,7 @@ router = APIRouter(
 def list_patient_appointments(
     patient_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(require_permission("appointments", "read"))
 ):
     return crud.list_appointments(db, patient_id)
 
@@ -33,6 +35,7 @@ def create_patient_appointment(
     patient_id: int,
     appointment: AppointmentCreate,
     db: Session = Depends(get_db),
+    current_user=Depends(require_permission("appointments", "create"))
 ):
     return crud.create_appointment(db, patient_id, appointment)
 
@@ -45,6 +48,7 @@ def update_patient_appointment(
     appointment_id: int,
     appointment: AppointmentUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(require_permission("appointments", "update"))
 ):
     updated = crud.update_appointment(
         db,
@@ -69,6 +73,7 @@ def delete_patient_appointment(
     patient_id: int,
     appointment_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(require_permission("appointments", "delete"))
 ):
     deleted = crud.delete_appointment(
         db,

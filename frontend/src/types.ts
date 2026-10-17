@@ -27,13 +27,6 @@ export interface User {
   created_at: string;
 }
 
-export interface Item {
-  id: number;
-  name: string;
-  description: string | null;
-  created_at: string;
-}
-
 export interface Provider {
   provider_id: number;
   first_name: string;
@@ -149,6 +142,7 @@ export interface Assignment {
   assignment_type?: "graded" | "practice";
   assigned_to: number;
   assigned_by: number;
+  encounter_id: number | null; // set once the student starts the case
   patient_name: string | null; // "Last name, First name"
   chief_complaint: string | null;
 }

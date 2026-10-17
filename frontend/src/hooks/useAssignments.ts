@@ -47,5 +47,20 @@ export function useAssignments(staffId: number, scope: AssignmentScope = "studen
     }
   };
 
-  return { assignments, loading, error, reload: load, updateStatus };
+  // Student starts a case; returns the updated assignment so the page can open it
+  const start = async (assignmentId: number) => {
+    try {
+      const updated = await assignmentApi.start(assignmentId);
+      setAssignments((prev) =>
+        prev.map((a) => (a.assignment_id === assignmentId ? updated : a))
+      );
+      setError(null);
+      return updated;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to start assignment");
+      return null;
+    }
+  };
+
+  return { assignments, loading, error, reload: load, updateStatus, start };
 }

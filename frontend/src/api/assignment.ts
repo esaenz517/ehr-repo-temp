@@ -1,4 +1,5 @@
 import type { Assignment, EncounterStatus } from "../types";
+import type { ClinicalNote } from "./clinicalNotes";
 import { apiFetch } from "./client";
 
 export interface AssignmentRequest {
@@ -25,4 +26,10 @@ export const assignmentApi = {
         }),
     remove: (assignmentId: number) =>
         apiFetch<void>(`/assignments/${assignmentId}`, {method: "DELETE"}),
+    start: (assignmentId: number) =>
+        apiFetch<Assignment>(`/assignments/${assignmentId}/start`, { method: "POST" }),
+    note: (assignmentId: number) =>
+        apiFetch<ClinicalNote | null>(`/assignments/${assignmentId}/note`),
+    submit: (assignmentId: number) =>
+        apiFetch<Assignment>(`/assignments/${assignmentId}/submit`, { method: "POST" }),
   };
