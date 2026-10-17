@@ -44,7 +44,7 @@ function saveCollapsed(value: boolean) {
 }
 
 const NAV_ITEMS: { view: View; label: string }[] = [
-  //{ view: "home", label: "Home" },
+  { view: "home", label: "Dashboard" }, // students only, see below
   { view: "patients", label: "Patients" },
   { view: "staff", label: "Staff" },
   { view: "providers", label: "Providers" },
@@ -58,9 +58,10 @@ const NAV_ITEMS: { view: View; label: string }[] = [
 ];
 
 export function Sidebar({ active, onNavigate, username, onLogout, allowedViews }: SidebarProps) {
+    // Staff have no Home link; students get one to return to their dashboard
     const items = allowedViews
     ? NAV_ITEMS.filter(({ view }) => allowedViews.includes(view))
-    : NAV_ITEMS;
+    : NAV_ITEMS.filter(({ view }) => view !== "home");
   const [collapsed, setCollapsed] = useState(readCollapsed);
 
   const toggleCollapsed = () => {
