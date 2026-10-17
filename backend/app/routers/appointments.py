@@ -21,7 +21,7 @@ router = APIRouter(
 def list_patient_appointments(
     patient_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("appointments", "read"))
+    current_user=Depends(require_permission("appointment", "read"))
 ):
     return crud.list_appointments(db, patient_id)
 
@@ -35,7 +35,7 @@ def create_patient_appointment(
     patient_id: int,
     appointment: AppointmentCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("appointments", "create"))
+    current_user=Depends(require_permission("appointment", "create"))
 ):
     return crud.create_appointment(db, patient_id, appointment)
 
@@ -48,7 +48,7 @@ def update_patient_appointment(
     appointment_id: int,
     appointment: AppointmentUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("appointments", "update"))
+    current_user=Depends(require_permission("appointment", "update"))
 ):
     updated = crud.update_appointment(
         db,
@@ -73,7 +73,7 @@ def delete_patient_appointment(
     patient_id: int,
     appointment_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("appointments", "delete"))
+    current_user=Depends(require_permission("appointment", "delete"))
 ):
     deleted = crud.delete_appointment(
         db,
