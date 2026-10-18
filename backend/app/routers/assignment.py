@@ -3,6 +3,7 @@ Assignment Router
 This file defines API endpoints for assigning cases to students: create assignments,
 list them by student or by case, update their status, and delete them.
 Students start, write their SOAP note in, and submit their own assignments.
+Instructors write feedback on submitted work, then sign it off or send it back.
 '''
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -14,7 +15,7 @@ from app.crud import assignment as crud
 from app.crud.clinical_notes import note_data
 from app.database import get_db
 from app.models.login import Login
-from app.schemas.assignment import AssignmentRequest, AssignmentStatus, Assignment
+from app.schemas.assignment import AssignmentRequest, AssignmentStatus, Assignment, AssignmentFeedback
 from app.schemas.clinical_notes import NoteOut
 from app.security.current_user import get_current_login
 
@@ -31,6 +32,12 @@ def assignment_for(db: Session, assignment_id: int, login: Login, *, student = F
         raise HTTPException(status_code = 403, detail = "This is not your assignment")
     return row
 
+# What student sees of their assignment; feedback stays hidden until work is submitted
+def student_view(row):
+    data = Assignment.model_validate(row)
+    if row.encounter_status == "submitted":
+        data = data.model_copy(update = {"feedback": None, "feedback_updated_at": None})
+    return data
 
 @router.post("", response_model = list[Assignment], status_code = 201)
 def create_assignment(request: AssignmentRequest, db: Session = Depends(get_db), current_user=Depends(require_permission("assignment", "manage"))):
@@ -42,7 +49,7 @@ def create_assignment(request: AssignmentRequest, db: Session = Depends(get_db),
 
 @router.get("/student/{student_id}", response_model = list[Assignment])
 def list_for_student(student_id: int, db: Session = Depends(get_db), current_user=Depends(require_permission("assignment", "read"))):
-    return crud.list_for_student(db, student_id)
+    return [student_view(row) for row in crud.list_for_student(db, student_id)]
 
 
 @router.get("/assigned-by/{staff_id}", response_model = list[Assignment])
@@ -59,7 +66,7 @@ def list_for_case(case_id: int, db: Session = Depends(get_db), current_user=Depe
 @router.post("/{assignment_id}/start", response_model = Assignment)
 def start_assignment(assignment_id: int, db: Session = Depends(get_db), current_user=Depends(require_permission("assignment", "update")), login: Login = Depends(get_current_login)):
     row = assignment_for(db, assignment_id, login, student = True)
-    return crud.start_assignment(db, row)
+    return student_view(crud.start_assignment(db, row))
 
 
 # Student or instructor: the SOAP note written for this assignment (null until the first save)
@@ -78,15 +85,22 @@ def submit_assignment(assignment_id: int, db: Session = Depends(get_db), current
         raise HTTPException(status_code = 409, detail = "Only an in-progress assignment can be submitted")
     if crud.get_note(db, row) is None:
         raise HTTPException(status_code = 409, detail = "Save a SOAP note before submitting")
-    return crud.update_status(db, assignment_id, "submitted")
+    return student_view(crud.update_status(db, assignment_id, "submitted"))
 
+# Instructor: save feedback on submitted work.
+@router.put("/{assignment_id}/feedback", response_model = Assignment)
+def save_feedback(assignment_id: int, body: AssignmentFeedback, db: Session = Depends(get_db), current_user=Depends(require_permission("assignment", "update")), login: Login = Depends(get_current_login)):
+    row = assignment_for(db, assignment_id, login, instructor = True)
+    if row.encounter_status not in ("submitted", "signed"):
+        raise HTTPException(status_code = 409, detail = "Feedback can only be written on submitted work")
+    return crud.save_feedback(db, row, body.feedback)
 
-# Instructor: sign off on submitted work, or send it back ("in_progress") for re-work.
+# Instructor: sign off on submitted work, or send it back ("in_progress") for re-work, including feedback
 # Students also hold assignment.update, so the instructor check is what stops self sign-off.
 @router.patch("/{assignment_id}/status", response_model = Assignment)
 def update_status(assignment_id: int, body: AssignmentStatus, db: Session = Depends(get_db), current_user=Depends(require_permission("assignment", "update")), login: Login = Depends(get_current_login)):
     assignment_for(db, assignment_id, login, instructor = True)
-    return crud.update_status(db, assignment_id, body.encounter_status)
+    return crud.update_status(db, assignment_id, body.encounter_status, body.feedback)
 
 
 @router.delete("/{assignment_id}", status_code = 204)

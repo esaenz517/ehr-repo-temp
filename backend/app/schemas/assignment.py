@@ -24,6 +24,11 @@ class AssignmentRequest(BaseModel):
 # What is sent to change Assignment Status 
 class AssignmentStatus(BaseModel): 
     encounter_status: EncounterStatus
+    feedback: str | None = None
+
+# What instructor sends to save feedback
+class AssignmentFeedback(BaseModel):
+    feedback: str
 
 # What API returns for one assignment
 class Assignment(BaseModel):
@@ -38,6 +43,8 @@ class Assignment(BaseModel):
     encounter_id: int | None = None  # the encounter the student's SOAP note belongs to
     patient_name: str | None = None  # Last name, First name format
     chief_complaint: str | None = None 
+    feedback: str | None = None # Instructor feedback
+    feedback_updated_at: datetime | None = None # feedback change-logging
 
     class Config:
         from_attributes = True

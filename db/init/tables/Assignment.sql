@@ -29,3 +29,19 @@ BEGIN
     ADD EncounterId INT NULL REFERENCES dbo.Encounters(EncounterId);
 END
 GO
+
+--Instructor feedback on submitted work
+IF COL_LENGTH('dbo.assignment', 'Feedback') IS NULL
+BEGIN
+    ALTER TABLE dbo.Assignment
+    ADD Feedback NVARCHAR(MAX) NULL;
+END
+GO
+
+-- Instructor Feedback logging
+IF COL_LENGTH('dbo.assignment', 'FeedbackUpdatedAt') IS NULL
+BEGIN
+    ALTER TABLE dbo.Assignment
+    ADD FeedbackUpdatedAt DATETIME2 NULL;
+END
+GO
