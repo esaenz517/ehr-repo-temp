@@ -53,7 +53,7 @@ function App() {
         allowedViews={allowedViews}
         onLogout={() => {
           loginApi.logout()
-            .catch(() => {}) // sign out locally even if the server call fails
+            .catch(() => { }) // sign out locally even if the server call fails
             .finally(() => {
               setUser(null);
               setView("home");
@@ -80,8 +80,9 @@ function App() {
           />
         )}
         {view === "patients" && canView("patients") && <PatientsPage />}
-        {view === "staff" && canView("staff") && <StaffPage />}
-        {view === "providers" && canView("providers") && <ProvidersPage />}
+        {view === "staff" && canView("staff") && (
+          <StaffPage canBatchImport={user.admin} />
+        )}        {view === "providers" && canView("providers") && <ProvidersPage />}
         {view === "drugs" && canView("drugs") && <DrugsPage />}
         {view === "rooms" && canView("rooms") && <RoomsPage />}
         {view === "courses" && canView("courses") && <CoursesPage />}
