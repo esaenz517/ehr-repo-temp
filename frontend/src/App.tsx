@@ -31,6 +31,7 @@ function App() {
 
   const [openAssignment, setOpenAssignment] = useState<Assignment | null>(null); // Case opens from My Assignments list
   const [caseOpenedFrom, setCaseOpenedFrom] = useState<View>("assignments");
+  const [reviewId, setReviewId] = useState<number | null>(null); // Instructor dashboard opens a note in Assigned Cases
 
   if (checkingSession) {
     return null;
@@ -48,6 +49,7 @@ function App() {
       <Sidebar active={view} username={user.username}
         onNavigate={(v) => {
           setOpenAssignment(null); // Clicking out of a case closes it
+          setReviewId(null);
           setView(v);
         }}
         allowedViews={allowedViews}
@@ -77,6 +79,10 @@ function App() {
               setView("assignments");
             }}
             onViewAssignments={() => setView("assignments")}
+            onReviewAssignment={(a) => {
+              setReviewId(a.assignment_id);
+              setView("assignedCases");
+            }}
           />
         )}
         {view === "patients" && canView("patients") && <PatientsPage />}
@@ -107,7 +113,7 @@ function App() {
               }}
             />
           ))}
-        {view === "assignedCases" && canView("assignedCases") && <AssignedCasesPage staffId={user.staffid} />}
+        {view === "assignedCases" && canView("assignedCases") && <AssignedCasesPage staffId={user.staffid} initialViewingId={reviewId} />}
         {view === "clinicalNotes" && canView("clinicalNotes") && <ClinicalNotesPage />}
       </main>
     </div>
