@@ -1,0 +1,158 @@
+/* Instructor dashboard. Lists and buttons use the shared ui- classes;
+   only the pieces unique to this page live here. */
+
+.idash {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.idash-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.idash-header .ui-page-title,
+.idash-filters .ui-filter {
+  margin: 0;
+}
+
+.idash-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.idash-section-title {
+  margin: 0 0 10px;
+  font-size: 18px;
+  color: var(--color-primary);
+}
+
+/* ---------- Stat tiles ---------- */
+
+.idash-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.idash-stat {
+  --tone: var(--color-primary);
+  padding: 14px 16px;
+  border-top: 4px solid var(--tone);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: var(--shadow);
+}
+
+.idash-stat--review { --tone: #1565c0; }
+.idash-stat--late   { --tone: var(--color-error); }
+.idash-stat--week   { --tone: var(--color-accent); }
+.idash-stat--done   { --tone: var(--color-success); }
+
+.idash-stat-value {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.idash-stat-label {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Progress by case ---------- */
+
+.idash-case {
+  margin-bottom: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.idash-case-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 16px;
+  cursor: pointer;
+}
+
+.idash-case-summary:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.idash-case-title {
+  flex: 1 1 240px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.idash-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 260px;
+}
+
+.idash-bar {
+  display: flex;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-bg);
+}
+
+.idash-progress-text {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.idash-case-students {
+  margin: 0;
+  padding: 0 16px 8px;
+  list-style: none;
+}
+
+.idash-case-student {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--color-bg);
+}
+
+/* Status chips and bar segments share colors (same as the Assigned Cases list) */
+.idash-status {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.idash-status--not_started { background: #c62828; color: #fff; }
+.idash-status--in_progress { background: #f9a825; color: #222; }
+.idash-status--submitted   { background: #1565c0; color: #fff; }
+.idash-status--signed      { background: #2e7d32; color: #fff; }
+
+@media (max-width: 900px) {
+  .idash-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .idash-case-student {
+    grid-template-columns: 1fr auto;
+  }
+}
