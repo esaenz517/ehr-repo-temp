@@ -41,5 +41,5 @@ export function useStaff() {
     }
   };
 
-  return { staff, loading, error, create, remove };
+  return { staff, loading, error, create, remove, reload: load };
 }
