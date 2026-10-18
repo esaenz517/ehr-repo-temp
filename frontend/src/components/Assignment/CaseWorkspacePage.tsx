@@ -40,9 +40,10 @@ return (
 interface CaseWorkspacePageProps {
   assignment: Assignment;
   onBack: () => void;
+  backLabel?: string; // where the back button returns to
 }
 
-export function CaseWorkspacePage({ assignment, onBack }: CaseWorkspacePageProps) {
+export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignments" }: CaseWorkspacePageProps) {
     const [caseInfo, setCaseInfo] = useState<Case | null>(null);
     const [chart, setChart] = useState<ChartContext | null>(null);
     const [loading, setLoading] = useState(true);
@@ -77,7 +78,7 @@ export function CaseWorkspacePage({ assignment, onBack }: CaseWorkspacePageProps
     return (
       <div>
         <button type="button" onClick={onBack} style={{ marginBottom: 16 }}>
-          ← Back to My Assignments
+          ← Back to {backLabel}
         </button>
   
         <h1>
@@ -194,7 +195,3 @@ export function CaseWorkspacePage({ assignment, onBack }: CaseWorkspacePageProps
       </div>
     );
 }
-  
-
-
-
