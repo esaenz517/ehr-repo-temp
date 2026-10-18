@@ -20,9 +20,14 @@ export const assignmentApi = {
         apiFetch<Assignment[]>(`/assignments/assigned-by/${staffId}`),
     listForCase: (caseId: number) =>
         apiFetch<Assignment[]>(`/assignments/case/${caseId}`),
-    updateStatus: (assignmentId: number, status: EncounterStatus) =>
+    // Feedback saved in same step as sign off/send back
+    updateStatus: (assignmentId: number, status: EncounterStatus, feedback?: string) =>
         apiFetch<Assignment>(`/assignments/${assignmentId}/status`, { method: "PATCH",
-            body: JSON.stringify({ encounter_status: status }),
+            body: JSON.stringify({ encounter_status: status, feedback }),
+        }),
+    saveFeedback: (assignmentId: number, feedback: string) =>
+        apiFetch<Assignment>(`/assignments/${assignmentId}/feedback`, { method: "PUT",
+            body: JSON.stringify({ feedback }),
         }),
     remove: (assignmentId: number) =>
         apiFetch<void>(`/assignments/${assignmentId}`, {method: "DELETE"}),

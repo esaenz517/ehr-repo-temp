@@ -145,6 +145,8 @@ export interface Assignment {
   encounter_id: number | null; // set once the student starts the case
   patient_name: string | null; // "Last name, First name"
   chief_complaint: string | null;
+  feedback: string | null; // instructor feedback; visible to student only after submitting
+  feedback_updated_at: string | null; // instructor feedback logging
 }
 
 export interface Case {

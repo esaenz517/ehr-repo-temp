@@ -12,13 +12,14 @@ interface StudentNoteViewProps {
   assignment: Assignment;
   studentName: string;
   actions?: ReactNode; // Sign off / Send back, when the work is submitted
+  review?: ReactNode; // instructor feedback / Sign off / Send back, shown under the note
   onRefresh?: () => void; // also reload the assignment, in case its status changed
   onBack: () => void;
 }
 
 // Instructor view of a student's SOAP note: the latest saved draft, read-only.
 // Unsaved typing on the student's side isn't visible until they save.
-export function StudentNoteView({ assignment, studentName, actions, onRefresh, onBack }: StudentNoteViewProps) {
+export function StudentNoteView({ assignment, studentName, actions, review, onRefresh, onBack }: StudentNoteViewProps) {
   const [note, setNote] = useState<ClinicalNote | null>(null);
   const [chart, setChart] = useState<ChartContext | null>(null);
   const [loading, setLoading] = useState(true);
@@ -83,6 +84,8 @@ export function StudentNoteView({ assignment, studentName, actions, onRefresh, o
           </div>
         </>
       )}
+
+      {!loading && review}
     </div>
   );
 }

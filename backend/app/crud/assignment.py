@@ -62,11 +62,13 @@ def list_for_case(db: Session, case_id: int):
     )
 
 # Updates the status of an assignment
-def update_status(db: Session, assignment_id: int, status: EncounterStatus):
+def update_status(db: Session, assignment_id: int, status: EncounterStatus, feedback: str | None = None):
     row = get_assignment(db, assignment_id)
     if row is None:
         return None
     row.encounter_status = status
+    if feedback is not None:
+        set_feedback(row, feedback)
     db.commit()
     db.refresh(row)
     return row
@@ -120,3 +122,15 @@ def is_locked(db: Session, encounter_id: int):
         .first()
         is not None
     )
+
+# Sets instructor feedback on assignment
+def set_feedback(row: AssignmentModel, feedback: str):
+    row.feedback = feedback.strip() or None
+    row.feedback_updated_at = datetime.now(timezone.utc).replace(tzinfo = None)
+
+# Saves instructor feedback on assignment (doesn't change status)
+def save_feedback(db: Session, row: AssignmentModel, feedback: str):
+    set_feedback(row, feedback)
+    db.commit()
+    db.refresh(row)
+    return row

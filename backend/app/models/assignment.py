@@ -4,7 +4,7 @@ SQLAlchemy ORM class mapped to the dbo.Assignment table.
 Describes the table already in the database. Must be added in SQL Server before declaring it here.
 '''
 
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, UnicodeText
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -23,6 +23,8 @@ class Assignment(Base):
     assigned_to = Column("AssignedTo", Integer, ForeignKey("dbo.Staff.StaffId"), nullable = False)
     assigned_by = Column("AssignedBy", Integer, ForeignKey("dbo.Staff.StaffId"), nullable = False)
     encounter_id = Column("EncounterId", Integer, ForeignKey("dbo.Encounters.EncounterId"), nullable = True) # set when the student starts
+    feedback = Column("Feedback", UnicodeText, nullable = True) # instructor comments on submitted assignments
+    feedback_updated_at = Column("FeedbackUpdatedAt", DateTime, nullable = True) # feedback logging
 
     # Include patient name and chief complaint to assignment listing
     case = relationship(Case)

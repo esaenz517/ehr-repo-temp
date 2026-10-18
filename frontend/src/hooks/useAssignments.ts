@@ -3,7 +3,7 @@ import { assignmentApi } from "../api/assignment";
 import type { Assignment, EncounterStatus } from "../types";
 
 //AI was used to assist in building this section as dev assigned to it is 
-// unfamiliar with how this works. 
+// unfamiliar with frontend development. 
 
 // "student": assignments given to this staff member.
 // "instructor": assignments this staff member handed out.
@@ -35,15 +35,31 @@ export function useAssignments(staffId: number, scope: AssignmentScope = "studen
     load();
   }, [load]);
 
-  const updateStatus = async (assignmentId: number, status: EncounterStatus) => {
+  const replace = (updated: Assignment) =>
+    setAssignments((prev) =>
+      prev.map((a) => (a.assignment_id === updated.assignment_id ? updated : a))
+    );
+
+  const updateStatus = async (assignmentId: number, status: EncounterStatus, feedback?: string) => {
     try {
-      const updated = await assignmentApi.updateStatus(assignmentId, status);
-      setAssignments((prev) =>
-        prev.map((a) => (a.assignment_id === assignmentId ? updated : a))
-      );
+      replace(await assignmentApi.updateStatus(assignmentId, status, feedback));
       setError(null);
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update assignment");
+      return false;
+    }
+  };
+
+  // Instructor saves feedback without signing off or sending back; returns true when saved
+  const saveFeedback = async (assignmentId: number, feedback: string) => {
+    try {
+      replace(await assignmentApi.saveFeedback(assignmentId, feedback));
+      setError(null);
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save feedback");
+      return false;
     }
   };
 
@@ -62,5 +78,5 @@ export function useAssignments(staffId: number, scope: AssignmentScope = "studen
     }
   };
 
-  return { assignments, loading, error, reload: load, updateStatus, start };
+  return { assignments, loading, error, reload: load, updateStatus, saveFeedback, start };
 }

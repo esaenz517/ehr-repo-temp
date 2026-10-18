@@ -64,3 +64,43 @@
   margin-right: auto;
   font-size: 13px;
 }
+
+/* Instructor feedback: the instructor's box under a student's note, and what the student sees */
+.assignment-feedback {
+  margin: 16px 0;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.assignment-feedback h2 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.assignment-feedback > .ui-muted {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.assignment-feedback-text {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.assignment-feedback-input {
+  box-sizing: border-box;
+  padding: 8px;
+  font: inherit;
+  resize: vertical;
+}
+
+.assignment-feedback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
