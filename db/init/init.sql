@@ -60,6 +60,7 @@ GO
 :r /init/tables/Cases.sql
 :r /init/tables/Encounters.sql
 :r /init/tables/Assignment.sql
+:r /init/tables/AssignmentGrades.sql
 :r /init/tables/CaseRubric.sql
 
 -- SOAP sprint: encounter identity and chart context. Empty chart tables are intentional:
