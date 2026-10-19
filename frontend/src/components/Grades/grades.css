@@ -1,0 +1,121 @@
+.grades-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 24px;
+}
+
+.grades-summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    background: var(--surface, #f5f6f8);
+    border-radius: 10px;
+}
+
+.grades-summary strong {
+    font-size: 26px;
+}
+
+.grades-panel {
+    margin: 18px 0;
+    padding: 16px;
+    border: 1px solid #cfd5db;
+    border-radius: 8px;
+}
+
+.grades-panel summary {
+    cursor: pointer;
+}
+
+.grades-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.grades-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 14px;
+}
+
+.grades-table th,
+.grades-table td {
+    text-align: left;
+    padding: 9px;
+    border-bottom: 1px solid #dce1e6;
+    vertical-align: middle;
+}
+
+.grades-table input {
+    width: 100%;
+    min-width: 65px;
+    box-sizing: border-box;
+    padding: 7px;
+}
+
+.grades-table td:first-child input {
+    min-width: 140px;
+}
+
+.grades-adjust {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 14px 0;
+}
+
+.grades-adjust label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 150px;
+}
+
+.grades-adjust label:last-child {
+    flex: 1;
+}
+
+.grades-adjust input {
+    padding: 7px;
+}
+
+.grades-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin: 14px 0;
+}
+
+.progress-stats {
+    display: grid;
+    grid-template-columns:
+        repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.progress-stats>div {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    border: 1px solid #dce1e6;
+    border-radius: 8px;
+}
+
+.progress-stats strong {
+    font-size: 24px;
+}
+
+.progress-stats span {
+    font-size: 13px;
+}
+
+.progress-alert {
+    font-weight: 700;
+    color: #a13b18;
+}
