@@ -48,6 +48,13 @@ export interface ClinicalNote {
     is_archived: boolean;
 }
 
+export interface NoteAddendum {
+    addendum_id: number;
+    note_id: number;
+    author_user_id: number;
+    content: string;
+    created_at: string;
+}
 export interface NoteVersion {
     version_id: number;
     note_id: number;
@@ -181,6 +188,20 @@ export const clinicalNotesApi = {
     versions: (noteId: number) =>
         apiFetch<NoteVersion[]>(
             `/clinical-notes/${noteId}/versions`
+        ),
+
+    addenda: (noteId: number) =>
+        apiFetch<NoteAddendum[]>(
+            `/clinical-notes/${noteId}/addenda`
+        ),
+
+    createAddendum: (noteId: number, content: string) =>
+        apiFetch<NoteAddendum>(
+            `/clinical-notes/${noteId}/addenda`,
+            {
+                method: "POST",
+                body: JSON.stringify({ content }),
+            }
         ),
 
     archive: (noteId: number) =>
