@@ -1,4 +1,5 @@
 import type { Assignment } from "../types";
+import { InstructorDashboard } from "./Dashboard/InstructorDashboard";
 import { StudentDashboard } from "./Dashboard/StudentDashboard";
 
 interface HomeProps  {
@@ -7,9 +8,10 @@ interface HomeProps  {
   staffId: number;
   onOpenAssignment: (assignment: Assignment) => void;
   onViewAssignments: () => void;
+  onReviewAssignment: (assignment: Assignment) => void; // instructor opens a student's note
 }
 
-export function Home ({ isStudent = false, username, staffId, onOpenAssignment, onViewAssignments }: HomeProps){
+export function Home ({ isStudent = false, username, staffId, onOpenAssignment, onViewAssignments, onReviewAssignment }: HomeProps){
   if (isStudent) {
     return (
       <StudentDashboard
@@ -21,10 +23,5 @@ export function Home ({ isStudent = false, username, staffId, onOpenAssignment, 
     );
   }
 
-  return (
-    <div>
-      <h1>Home</h1>
-      <p>Pick a feature from the sidebar to view and manage its data.</p>
-    </div>
-  );
+  return <InstructorDashboard staffId={staffId} onReview={onReviewAssignment} />;
 }

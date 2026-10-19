@@ -20,7 +20,10 @@ from app.routers import (
     billing,
     clinical_notes,
     cases,
-    courses
+    courses,
+    batch_students,
+    grades_progress,
+    rubric
 )
 
 app = FastAPI(title="EHR API")
@@ -38,6 +41,8 @@ app.include_router(patients.router)
 app.include_router(providers.router)
 app.include_router(drugs.router)
 app.include_router(staff.router)
+app.include_router(batch_students.router)
+app.include_router(grades_progress.router)
 app.include_router(login.router)
 app.include_router(medical_history.router)
 app.include_router(rooms.router)
@@ -50,6 +55,7 @@ app.include_router(users.router)
 app.include_router(roles.router)
 app.include_router(permissions.router)
 app.include_router(assignment.router)
+app.include_router(rubric.router)
 
 app.include_router(clinical_notes.router)
 

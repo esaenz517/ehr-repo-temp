@@ -5,6 +5,7 @@ import type { ChartContext } from "../../api/clinicalNotes";
 import { useAssignmentNote } from "../../hooks/useAssignmentNote";
 import type { Assignment } from "../../types";
 import { SoapEditor } from "../ClinicalNotes/SoapEditor";
+import { GradeBreakdown } from "./GradeBreakdown";
 import "../ClinicalNotes/clinicalNotes.css";
 import "./assignmentNote.css";
 
@@ -103,8 +104,22 @@ export function AssignmentNote({ assignment, patientId, chiefComplaint, chart }:
     }
   };
 
+   // The server only sends feedback once the work is signed off or sent back
+   const feedback = n.assignment.feedback;
+
   return (
     <div className="assignment-note">
+      {n.assignment.encounter_status === "signed" && <GradeBreakdown assignmentId={n.assignment.assignment_id} />}
+      {feedback && (
+        <section className="assignment-feedback">
+          <h2>
+            {n.assignment.encounter_status === "signed"
+              ? "Instructor feedback"
+              : "Sent back by your instructor"}
+          </h2>
+          <p className="assignment-feedback-text">{feedback}</p>
+        </section>
+      )}
       {n.locked && (
         <p className="assignment-note-banner">
           {n.assignment.encounter_status === "signed"

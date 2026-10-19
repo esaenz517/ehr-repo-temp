@@ -5,6 +5,7 @@ from pydantic import BaseModel
 #from app.schemas.drugs import Drug
 #from app.schemas.providers import Provider
 from app.schemas.patients import Patient
+from app.schemas.rubric import RubricItemCreate
 
 #Creating an Allergy
 class AllergyCreate(BaseModel):
@@ -36,6 +37,7 @@ class CaseCreate(CaseBase):
     allergies: list[AllergyCreate] = []
     labs: list[LabResultCreate] = []
     medications: list[MedicationCreate] = []
+    rubric_items: list[RubricItemCreate] = []
 
 class Case(CaseBase):
     case_id: int

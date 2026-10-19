@@ -171,6 +171,7 @@
 
 /* Phones: sidebar becomes a top bar with wrapping links */
 @media (max-width: 640px) {
+
   .sidebar,
   .sidebar--collapsed {
     width: 100%;
@@ -244,4 +245,44 @@
     align-items: center;
     justify-content: space-between;
   }
+}
+
+
+/* Instructor progress notification counter.
+   Displays the number of assignments requiring attention. */
+
+.sidebar-progress-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 20px;
+  height: 20px;
+
+  margin-left: 9px;
+  padding: 2px 6px;
+
+  border-radius: 12px;
+
+  background-color: #b43d2b;
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+
+  white-space: nowrap;
+}
+
+/* Keep the navigation label and counter aligned. */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Hide the counter when the sidebar is collapsed,
+   matching the hidden navigation labels. */
+.sidebar--collapsed .sidebar-progress-count {
+  display: none;
 }

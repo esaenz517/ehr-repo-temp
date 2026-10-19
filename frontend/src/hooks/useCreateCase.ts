@@ -5,6 +5,7 @@ import { patientsApi } from "../api/patients";
 import { AssignmentValues, EMPTY_ASSIGNMENT } from "../components/Assignment/AssignmentSection";
 import { CaseContentValues, EMPTY_CASE_CONTENT } from "../components/Cases/CaseContent";
 import { ChartDataValues, EMPTY_CHART_DATA } from "../components/Cases/ChartData";
+import { parsePoints, RubricRow } from "../components/Cases/RubricEditor";
 import { DemographicsValues, EMPTY_DEMOGRAPHICS } from "../components/Patients/PatientDemographics";
 import type { Case } from "../types";
 import { usePatients } from "./usePatients";
@@ -14,7 +15,7 @@ export type PatientMode = "existing" | "new";
 // One error message per form field, keyed by the field's name.
 // "patient" is used by the Start Form patient selector.
 export type CaseFieldErrors = Partial<
-  Record<keyof DemographicsValues | keyof CaseContentValues | keyof ChartDataValues | "patient", string>
+  Record<keyof DemographicsValues | keyof CaseContentValues | keyof ChartDataValues | "patient" | "rubric", string>
 >;
 
 
@@ -32,6 +33,7 @@ export function useCreateCase() {
   // TODO (Chart Data): add medications / allergies / labs state here.
   const [assignment, setAssignment] = useState<AssignmentValues>(EMPTY_ASSIGNMENT);
   const [chartData, setChartData] = useState<ChartDataValues>(EMPTY_CHART_DATA);
+  const [rubric, setRubric] = useState<RubricRow[]>([]); // grading markers for the case
 
   const [fieldErrors, setFieldErrors] = useState<CaseFieldErrors>({});
   const [submitting, setSubmitting] = useState(false); // true while saving
@@ -185,6 +187,13 @@ export function useCreateCase() {
       errors.chiefComplaint = "Enter a chief complaint.";
     }
 
+    // Every rubric item needs a description and a whole number of points above 0.
+    if (rubric.some((r) => !r.label.trim())) {
+      errors.rubric = "Every rubric item needs a description.";
+    } else if (rubric.some((r) => parsePoints(r.points) === null)) {
+      errors.rubric = "Every rubric item needs a whole number of points (1 or more).";
+    }
+
     return errors;
   };
 
@@ -196,6 +205,7 @@ export function useCreateCase() {
     setCaseContent(EMPTY_CASE_CONTENT);
     setAssignment(EMPTY_ASSIGNMENT);
     setChartData(EMPTY_CHART_DATA);
+    setRubric([]);
     setFieldErrors({});
   };
 
@@ -302,6 +312,14 @@ export function useCreateCase() {
               collected_at: l.collectedAt,
             }))
             : [],
+
+        // The grading rubric is saved with the case in the same request.
+        rubric_items: rubric.map((r) => ({
+          category: r.category,
+          label: r.label.trim(),
+          points: parsePoints(r.points) as number,
+          guidance: r.guidance.trim() || null,
+        })),
       });
 
       // TODO (Chart Data): save that section here, using newCase.case_id.
@@ -353,6 +371,8 @@ export function useCreateCase() {
     assignment,
     chartData,
     setChartData,
+    rubric,
+    setRubric,
     fieldErrors,
     submitting,
     error,

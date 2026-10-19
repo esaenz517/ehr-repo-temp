@@ -15,6 +15,9 @@ import { MyAssignmentsPage } from "./components/Assignment/MyAssignmentsPage";
 import { AssignedCasesPage } from "./components/Assignment/AssignedCasesPage";
 import { ClinicalNotesPage } from "./components/ClinicalNotes/ClinicalNotesPage";
 import { CaseWorkspacePage } from "./components/Assignment/CaseWorkspacePage";
+import { StudentGradesPage } from "./components/Grades/StudentGradesPage";
+import { InstructorProgressPage } from "./components/Progress/InstructorProgressPage";
+import { gradesApi } from "./api/grades";
 
 function App() {
   const [view, setView] = useState<View>("home");
@@ -31,6 +34,47 @@ function App() {
 
   const [openAssignment, setOpenAssignment] = useState<Assignment | null>(null); // Case opens from My Assignments list
   const [caseOpenedFrom, setCaseOpenedFrom] = useState<View>("assignments");
+  const [reviewId, setReviewId] = useState<number | null>(null); // Instructor dashboard opens a note in Assigned Cases
+
+  const [progressAlertCount, setProgressAlertCount] =
+    useState(0);
+
+  useEffect(() => {
+    if (!user || (user.student && !user.admin)) {
+      setProgressAlertCount(0);
+      return;
+    }
+
+    let active = true;
+
+    const checkProgress = async () => {
+      try {
+        const report = await gradesApi.progress();
+
+        if (active) {
+          setProgressAlertCount(
+            report.inactive + report.overdue
+          );
+        }
+      } catch {
+        if (active) {
+          setProgressAlertCount(0);
+        }
+      }
+    };
+
+    void checkProgress();
+
+    // Recheck alerts every 60 seconds.
+    const timer = window.setInterval(() => {
+      void checkProgress();
+    }, 60000);
+
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [user?.staffid, user?.student, user?.admin]);
 
   if (checkingSession) {
     return null;
@@ -46,14 +90,16 @@ function App() {
   return (
     <div className="app-layout">
       <Sidebar active={view} username={user.username}
+        progressAlertCount={progressAlertCount}
         onNavigate={(v) => {
           setOpenAssignment(null); // Clicking out of a case closes it
+          setReviewId(null);
           setView(v);
         }}
         allowedViews={allowedViews}
         onLogout={() => {
           loginApi.logout()
-            .catch(() => {}) // sign out locally even if the server call fails
+            .catch(() => { }) // sign out locally even if the server call fails
             .finally(() => {
               setUser(null);
               setView("home");
@@ -77,11 +123,16 @@ function App() {
               setView("assignments");
             }}
             onViewAssignments={() => setView("assignments")}
+            onReviewAssignment={(a) => {
+              setReviewId(a.assignment_id);
+              setView("assignedCases");
+            }}
           />
         )}
         {view === "patients" && canView("patients") && <PatientsPage />}
-        {view === "staff" && canView("staff") && <StaffPage />}
-        {view === "providers" && canView("providers") && <ProvidersPage />}
+        {view === "staff" && canView("staff") && (
+          <StaffPage canBatchImport={user.admin} />
+        )}        {view === "providers" && canView("providers") && <ProvidersPage />}
         {view === "drugs" && canView("drugs") && <DrugsPage />}
         {view === "rooms" && canView("rooms") && <RoomsPage />}
         {view === "courses" && canView("courses") && <CoursesPage />}
@@ -106,8 +157,17 @@ function App() {
               }}
             />
           ))}
-        {view === "assignedCases" && canView("assignedCases") && <AssignedCasesPage staffId={user.staffid} />}
+        {view === "assignedCases" && canView("assignedCases") && <AssignedCasesPage staffId={user.staffid} initialViewingId={reviewId} />}
         {view === "clinicalNotes" && canView("clinicalNotes") && <ClinicalNotesPage />}
+        {view === "grades" &&
+          canView("grades") && (
+            <StudentGradesPage />
+          )}
+
+        {view === "progress" &&
+          canView("progress") && (
+            <InstructorProgressPage />
+          )}
       </main>
     </div>
   );
