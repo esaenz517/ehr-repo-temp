@@ -48,7 +48,7 @@ export function RubricEditor({ rows, onChange, error }: RubricEditorProps) {
   return (
     <div className="form-stack">
       <p className="field-hint">
-        Write traps as the correct behavior, e.g. "Avoided NSAIDs (patient on warfarin)". Students see each
+        Write trap avoidance as correct behavior, e.g. "Avoided NSAIDs (patient on warfarin)". Students see each
         label and its points after you sign off; grading notes stay private to instructors.
       </p>
 
