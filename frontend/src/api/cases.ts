@@ -1,4 +1,4 @@
-import type { Case } from "../types";
+import type { Case, RubricCategory } from "../types";
 import { apiFetch } from "./client";
 
 // One medication saved to the case's patient.
@@ -24,6 +24,14 @@ export interface LabResultInput {
   collected_at: string;
 }
 
+// One grading marker saved with the case.
+export interface RubricItemInput {
+  category: RubricCategory;
+  label: string;
+  points: number;
+  guidance: string | null; // instructor-only
+}
+
 // Shape of the data sent to the backend when creating a case.
 // The patient must already exist (create it with patientsApi first).
 export interface CreateCaseInput {
@@ -34,6 +42,7 @@ export interface CreateCaseInput {
   medications: MedicationInput[];
   allergies: AllergyInput[];
   labs: LabResultInput[];
+  rubric_items: RubricItemInput[];
 }
 
 // One function per backend endpoint under /cases.

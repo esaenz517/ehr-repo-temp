@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.models.assignment import Assignment as AssignmentModel
 from app.models.clinical_notes import ClinicalNote, Encounter
+from app.models.rubric import AssignmentRubricScore
 from app.schemas.assignment import AssignmentRequest, EncounterStatus
 
 # Used to get assignments by parts that need it
@@ -78,6 +79,7 @@ def delete_assignment(db: Session, assignment_id: int):
     row = get_assignment(db, assignment_id)
     if row is None:
         return False
+    db.query(AssignmentRubricScore).filter(AssignmentRubricScore.assignment_id == assignment_id).delete()
     db.delete(row)
     db.commit()
     return True

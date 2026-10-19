@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.security.authorization import require_permission
 
 from app.crud import assignment as crud
+from app.crud import rubric as rubric_crud
 from app.crud.clinical_notes import note_data
 from app.database import get_db
 from app.models.login import Login
@@ -95,11 +96,14 @@ def save_feedback(assignment_id: int, body: AssignmentFeedback, db: Session = De
         raise HTTPException(status_code = 409, detail = "Feedback can only be written on submitted work")
     return crud.save_feedback(db, row, body.feedback)
 
-# Instructor: sign off on submitted work, or send it back ("in_progress") for re-work, including feedback
+# Instructor: sign off on submitted work, or send it back ("in_progress") for re-work, including feedback.
+# Signing off requires every rubric item scored.
 # Students also hold assignment.update, so the instructor check is what stops self sign-off.
 @router.patch("/{assignment_id}/status", response_model = Assignment)
 def update_status(assignment_id: int, body: AssignmentStatus, db: Session = Depends(get_db), current_user=Depends(require_permission("assignment", "update")), login: Login = Depends(get_current_login)):
-    assignment_for(db, assignment_id, login, instructor = True)
+    row = assignment_for(db, assignment_id, login, instructor = True)
+    if body.encounter_status == "signed" and not rubric_crud.fully_scored(db, row):
+        raise HTTPException(status_code = 409, detail = "Score every rubric item before signing off")
     return crud.update_status(db, assignment_id, body.encounter_status, body.feedback)
 
 

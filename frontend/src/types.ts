@@ -115,22 +115,6 @@ export interface BillingCharge {
   charge_amount: string;
 }
 
-export interface MedicalHistory {
-  medical_history_id: number;
-  patient_id: number;
-  condition: string;
-  diagnosis_date: string | null;
-  notes: string | null;
-}
-
-export interface FamilyHistory {
-  family_history_id: number;
-  patient_id: number;
-  relationship: string;
-  condition: string;
-  notes: string | null;
-}
-
 export type EncounterStatus = "not_started" | "in_progress" | "submitted" | "signed";  //for use with Assignment interface
 
 export interface Assignment {
@@ -147,6 +131,30 @@ export interface Assignment {
   chief_complaint: string | null;
   feedback: string | null; // instructor feedback; visible to student only after submitting
   feedback_updated_at: string | null; // instructor feedback logging
+}
+
+// Rubric markers instructors set on a case.
+export type RubricCategory = "diagnosis" | "medication_conflict" | "screening" | "trap" | "other";
+
+// One rubric line in an assignment's grade
+export interface GradeItem {
+  rubric_item_id: number;
+  category: RubricCategory;
+  label: string;
+  points: number;
+  guidance: string | null; // Instructor-only; always null for students
+  points_awarded: number | null;
+  comment: string | null;
+}
+
+// Assignment's rubric and score
+export interface AssignmentGrade {
+  assignment_id: number;
+  released: boolean;
+  items: GradeItem[];
+  total_points: number | null;
+  points_awarded: number | null;
+  scored_count: number | null;
 }
 
 export interface Case {

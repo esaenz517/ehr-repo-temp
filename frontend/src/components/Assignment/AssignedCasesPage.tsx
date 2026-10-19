@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AssignmentList } from "./AssignmentList";
-import { InstructorFeedback } from "./InstructorFeedback";
+import { AssignmentReview } from "./AssignmentReview";
 import { StudentNoteView } from "./StudentNoteView";
 import { useAssignments } from "../../hooks/useAssignments";
 import { useStaff } from "../../hooks/useStaff";
@@ -13,7 +13,8 @@ interface AssignedCasesPageProps {
 
 // Instructor view: every assignment this staff member handed out, with each
 // student's progress. Started work can be opened to read the student's saved
-// SOAP note; submitted work can be signed off or sent back for re-work.
+// SOAP note; submitted work is scored on the case's rubric, given feedback, 
+// then signed off or sent back for re-work.
 export function AssignedCasesPage({ staffId, initialViewingId = null }: AssignedCasesPageProps) {
   const { assignments, loading, error, reload, updateStatus, saveFeedback } = useAssignments(staffId, "instructor");
   const { staff } = useStaff();
@@ -40,10 +41,10 @@ export function AssignedCasesPage({ staffId, initialViewingId = null }: Assigned
         assignment={viewing}
         studentName={studentName(viewing.assigned_to)}
         review={
-          <InstructorFeedback
+          <AssignmentReview
             assignment={viewing}
             error={error}
-            onSave={(text) => saveFeedback(viewing.assignment_id, text)}
+            onSaveFeedback={(text) => saveFeedback(viewing.assignment_id, text)}
             onDecision={(status, text) => updateStatus(viewing.assignment_id, status, text)}
           />
         }
