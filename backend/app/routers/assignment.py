@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.security.authorization import require_permission
 
 from app.crud import assignment as crud
+from app.crud import rubric as rubric_crud
 from app.crud.clinical_notes import note_data
 from app.crud import grades as grades_crud
 from app.database import get_db
@@ -254,6 +255,15 @@ def update_status(
             db.commit()
 
     return updated
+# Instructor: sign off on submitted work, or send it back ("in_progress") for re-work, including feedback.
+# Signing off requires every rubric item scored.
+# Students also hold assignment.update, so the instructor check is what stops self sign-off.
+@router.patch("/{assignment_id}/status", response_model = Assignment)
+def update_status(assignment_id: int, body: AssignmentStatus, db: Session = Depends(get_db), current_user=Depends(require_permission("assignment", "update")), login: Login = Depends(get_current_login)):
+    row = assignment_for(db, assignment_id, login, instructor = True)
+    if body.encounter_status == "signed" and not rubric_crud.fully_scored(db, row):
+        raise HTTPException(status_code = 409, detail = "Score every rubric item before signing off")
+    return crud.update_status(db, assignment_id, body.encounter_status, body.feedback)
 
 
 @router.delete("/{assignment_id}", status_code=204)

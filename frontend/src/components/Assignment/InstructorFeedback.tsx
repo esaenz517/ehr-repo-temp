@@ -9,6 +9,7 @@ import "./assignmentNote.css";
 interface InstructorFeedbackProps {
   assignment: Assignment;
   error?: string | null;
+  signOffBlocked?: string | null; // Ensure all rubric items scored
   onSave: (feedback: string) => Promise<boolean>;
   onDecision: (status: EncounterStatus, feedback: string) => Promise<boolean>;
 }
@@ -16,7 +17,7 @@ interface InstructorFeedbackProps {
 // Instructor's feedback box under a student's note. While the work is submitted the
 // instructor can save a draft (the student can't see it yet), then sign off or send it
 // back; either one saves the feedback with it. Signed work can still have its feedback edited.
-export function InstructorFeedback({ assignment, error, onSave, onDecision }: InstructorFeedbackProps) {
+export function InstructorFeedback({ assignment, error, signOffBlocked, onSave, onDecision }: InstructorFeedbackProps) {
   const [text, setText] = useState(assignment.feedback ?? "");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -79,6 +80,7 @@ export function InstructorFeedback({ assignment, error, onSave, onDecision }: In
 
       {error && <p className="ui-error">{error}</p>}
       {message && <p className="assignment-note-message">{message}</p>}
+      {status === "submitted" && signOffBlocked && <p className="ui-muted">{signOffBlocked}</p>}
 
       <div className="assignment-feedback-actions">
         <button
