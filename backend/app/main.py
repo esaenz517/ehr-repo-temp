@@ -22,6 +22,7 @@ from app.routers import (
     cases,
     courses,
     batch_students,
+    rubric
 )
 
 app = FastAPI(title="EHR API")
@@ -52,6 +53,7 @@ app.include_router(users.router)
 app.include_router(roles.router)
 app.include_router(permissions.router)
 app.include_router(assignment.router)
+app.include_router(rubric.router)
 
 app.include_router(clinical_notes.router)
 

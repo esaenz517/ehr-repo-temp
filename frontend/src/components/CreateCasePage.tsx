@@ -6,6 +6,7 @@ import { ChartData } from "./Cases/ChartData";
 import { PatientDemographics } from "./Patients/PatientDemographics";
 import { CasePatientSelector } from "./Patients/CasePatientSelector";
 import { AssignmentSection } from "./Assignment/AssignmentSection";
+import { RubricEditor } from "./Cases/RubricEditor";
 
 // One boxed section of the form, with its title in the border.
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -90,6 +91,10 @@ export function CreateCasePage({ staffId }: CreateCasePageProps) {
           errors={createCase.fieldErrors}
           readOnly={createCase.patientMode == "existing"}
         />
+      </Section>
+
+      <Section title="Grading Rubric">
+        <RubricEditor rows={createCase.rubric} onChange={createCase.setRubric} error={createCase.fieldErrors.rubric} />
       </Section>
 
       <Section title="Assignment">

@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.models.cases import Case as CaseModel
 from app.models.clinical_notes import PatientAllergy, PatientLabResult
 from app.models.patients import PatientDrug
+from app.crud import rubric as rubric_crud
 
 from app.schemas.cases import CaseCreate
 
@@ -32,6 +33,10 @@ def create_case(db: Session, case: CaseCreate):
     )
     
     db.add(db_case)
+    db.flush() # Gives case its ID which is need by rubric items
+
+    #Save cases grading rubric
+    rubric_crud.add_items(db, db_case.case_id, case.rubric_items)
     
     # Save each allergy for patient
     for a in case.allergies:
