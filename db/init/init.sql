@@ -72,6 +72,8 @@ GO
 :r /init/tables/ClinicalNotes.sql
 :r /init/tables/Appointments.sql
 :r /init/tables/NoteVersions.sql
+:r /init/tables/NoteAddenda.sql
+:r /init/tables/NoteAuditEvents.sql
 :r /init/tables/BillingCharges.sql
 :r /init/tables/Courses.sql
 

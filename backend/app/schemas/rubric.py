@@ -1,6 +1,6 @@
 '''
 Rubric Schemas
-Request/response shapes for the case rubrics and assignment rubric scores 
+Request/response shapes for the case rubrics and assignment rubric scores
 '''
 
 from typing import Annotated, Literal
@@ -43,4 +43,3 @@ class AssignmentGrade(BaseModel):
     total_points: int | None = None
     points_awarded: int | None = None
     scored_count: int | None = None
-    

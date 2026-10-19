@@ -193,7 +193,7 @@ export function useCreateCase() {
     } else if (rubric.some((r) => parsePoints(r.points) === null)) {
       errors.rubric = "Every rubric item needs a whole number of points (1 or more).";
     }
-    
+
     return errors;
   };
 

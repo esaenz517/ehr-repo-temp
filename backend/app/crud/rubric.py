@@ -83,7 +83,7 @@ def save_scores(db: Session, row: AssignmentModel, scores: list[RubricScoreInput
             return f"Rubric item {score.rubric_item_id} is not part of this case"
         if score.points_awarded > item.points:
             return f"'{item.label}' is worth at most {item.points} points"
-    
+
     for score in scores:
         comment = (score.comment or "").strip() or None
         current = existing.get(score.rubric_item_id)
@@ -105,6 +105,3 @@ def save_scores(db: Session, row: AssignmentModel, scores: list[RubricScoreInput
 # Remove assignment scores
 def delete_scores(db: Session, assignment_id: int):
     db.query(AssignmentRubricScore).filter(AssignmentRubricScore.assignment_id == assignment_id).delete()
-
-
-

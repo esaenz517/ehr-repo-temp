@@ -3,8 +3,8 @@ import type { Assignment, EncounterStatus } from "../../types";
 import { InstructorFeedback } from "./InstructorFeedback";
 import { RubricScoring } from "./RubricScoring";
 
-//AI was used to assist in building this section as dev assigned to it is 
-// unfamiliar with frontend development. 
+//AI was used to assist in building this section as dev assigned to it is
+// unfamiliar with frontend development.
 
 interface AssignmentReviewProps {
   assignment: Assignment;

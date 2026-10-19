@@ -123,6 +123,14 @@ class ClinicalNote(Base):
     current_version = Column("CurrentVersion", Integer, nullable=False)
     is_archived = Column("IsArchived", Boolean, nullable=False)
 
+    approved_at = Column("ApprovedAt", DateTime, nullable=True)
+    approved_by_user_id = Column(
+        "ApprovedByUserId",
+        Integer,
+        ForeignKey("dbo.Users.UserId"),
+        nullable=True,
+    )
+
 
 class NoteVersion(Base):
     __tablename__ = "NoteVersions"

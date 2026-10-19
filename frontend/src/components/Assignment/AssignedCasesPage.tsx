@@ -13,7 +13,7 @@ interface AssignedCasesPageProps {
 
 // Instructor view: every assignment this staff member handed out, with each
 // student's progress. Started work can be opened to read the student's saved
-// SOAP note; submitted work is scored on the case's rubric, given feedback, 
+// SOAP note; submitted work is scored on the case's rubric, given feedback,
 // then signed off or sent back for re-work.
 export function AssignedCasesPage({ staffId, initialViewingId = null }: AssignedCasesPageProps) {
   const { assignments, loading, error, reload, updateStatus, saveFeedback } = useAssignments(staffId, "instructor");

@@ -26,3 +26,19 @@ BEGIN
         ON dbo.ClinicalNotes(PatientId, EncounterId);
 END
 GO
+
+-- Preserve instructor approval even if assignment status changes.
+IF COL_LENGTH('dbo.ClinicalNotes', 'ApprovedAt') IS NULL
+BEGIN
+    ALTER TABLE dbo.ClinicalNotes
+    ADD ApprovedAt DATETIME2 NULL;
+END
+GO
+
+IF COL_LENGTH('dbo.ClinicalNotes', 'ApprovedByUserId') IS NULL
+BEGIN
+    ALTER TABLE dbo.ClinicalNotes
+    ADD ApprovedByUserId INT NULL
+        REFERENCES dbo.Users(UserId);
+END
+GO

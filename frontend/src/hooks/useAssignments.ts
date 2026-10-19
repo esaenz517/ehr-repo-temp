@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { assignmentApi } from "../api/assignment";
 import type { Assignment, EncounterStatus } from "../types";
 
-//AI was used to assist in building this section as dev assigned to it is 
-// unfamiliar with frontend development. 
+//AI was used to assist in building this section as dev assigned to it is
+// unfamiliar with frontend development.
 
 // "student": assignments given to this staff member.
 // "instructor": assignments this staff member handed out.

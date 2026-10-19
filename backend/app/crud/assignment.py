@@ -63,15 +63,31 @@ def list_for_case(db: Session, case_id: int):
     )
 
 # Updates the status of an assignment
-def update_status(db: Session, assignment_id: int, status: EncounterStatus, feedback: str | None = None):
+def update_status(
+    db: Session,
+    assignment_id: int,
+    status: EncounterStatus,
+    feedback: str | None = None,
+    *,
+    commit: bool = True,
+):
+
     row = get_assignment(db, assignment_id)
+
     if row is None:
         return None
+
     row.encounter_status = status
+
     if feedback is not None:
         set_feedback(row, feedback)
-    db.commit()
-    db.refresh(row)
+
+    if commit:
+        db.commit()
+        db.refresh(row)
+    else:
+        db.flush()
+
     return row
 
 # Deletes assignments

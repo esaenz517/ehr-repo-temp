@@ -3,8 +3,8 @@ import { formatUtc } from "../../api/clinicalNotes";
 import type { Assignment, EncounterStatus } from "../../types";
 import "./assignmentNote.css";
 
-//AI was used to assist in building this section as dev assigned to it is 
-// unfamiliar with frontend development. 
+//AI was used to assist in building this section as dev assigned to it is
+// unfamiliar with frontend development.
 
 interface InstructorFeedbackProps {
   assignment: Assignment;

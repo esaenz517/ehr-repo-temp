@@ -4,8 +4,8 @@ import type { AssignmentGrade } from "../../types";
 import { RUBRIC_CATEGORY_LABELS } from "../Cases/RubricEditor";
 import "./rubric.css";
 
-//AI was used to assist in building this section as dev assigned to it is 
-// unfamiliar with frontend development. 
+//AI was used to assist in building this section as dev assigned to it is
+// unfamiliar with frontend development.
 
 interface GradeBreakdownProps {
   assignmentId: number;

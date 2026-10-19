@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.crud import clinical_notes as crud
+from app.crud import note_addenda as addenda_crud
 from app.crud.assignment import is_locked
 from app.crud.patients import get_patient
 from app.crud.rbac import (
@@ -15,6 +16,8 @@ from app.crud.rbac import (
 from app.database import get_db
 from app.models.clinical_notes import ClinicalNote, Encounter, NoteVersion
 from app.models.providers import Provider
+from app.models.note_addenda import NoteAddendum
+from app.schemas.note_addenda import NoteAddendumCreate, NoteAddendumOut
 from app.schemas.clinical_notes import (
     ChartContext,
     EncounterOut,
@@ -325,7 +328,7 @@ def save_note(
             detail="Only the author may edit this draft",
         )
 
-    if is_locked(db, note.encounter_id):
+    if note.approved_at is not None or is_locked(db, note.encounter_id):
         raise HTTPException(
             status_code=409,
             detail="This assignment was submitted; its note can no longer change",
@@ -407,7 +410,91 @@ def archive_note(
             detail="Only the author may archive this draft",
         )
 
+    if note.approved_at is not None or is_locked(db, note.encounter_id):
+        raise HTTPException(
+            status_code=409,
+            detail="Submitted or approved clinical notes cannot be archived",
+        )
+
     note.is_archived = True
     note.last_modified_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
     db.commit()
+
+@router.post(
+    "/clinical-notes/{note_id}/addenda",
+    response_model=NoteAddendumOut,
+    status_code=201,
+)
+def create_note_addendum(
+    note_id: int,
+    payload: NoteAddendumCreate,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    note = note_or_404(db, note_id)
+
+    permitted(
+        db,
+        user,
+        "update",
+        note.sensitivity_classification,
+        note.note_type,
+    )
+
+    if note.author_user_id != user.user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Only the original author may add a correction",
+        )
+
+    if note.approved_at is None:
+        raise HTTPException(
+            status_code=409,
+            detail="Corrections require instructor approval first",
+        )
+
+    try:
+        addendum = addenda_crud.create_addendum(
+            db,
+            note_id=note.note_id,
+            author_user_id=user.user_id,
+            content=payload.content,
+        )
+
+        db.commit()
+        db.refresh(addendum)
+        return addendum
+
+    except Exception:
+        db.rollback()
+        raise
+
+@router.get(
+    "/clinical-notes/{note_id}/addenda",
+    response_model=list[NoteAddendumOut],
+)
+def list_note_addenda(
+    note_id: int,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    note = note_or_404(db, note_id)
+
+    permitted(
+        db,
+        user,
+        "read",
+        note.sensitivity_classification,
+        note.note_type,
+    )
+
+    return (
+        db.query(NoteAddendum)
+        .filter(NoteAddendum.note_id == note.note_id)
+        .order_by(
+            NoteAddendum.created_at,
+            NoteAddendum.addendum_id,
+        )
+        .all()
+    )

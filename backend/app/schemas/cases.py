@@ -37,7 +37,7 @@ class CaseCreate(CaseBase):
     allergies: list[AllergyCreate] = []
     labs: list[LabResultCreate] = []
     medications: list[MedicationCreate] = []
-    rubric_items: list[RubricItemCreate] = [] 
+    rubric_items: list[RubricItemCreate] = []
 
 class Case(CaseBase):
     case_id: int
