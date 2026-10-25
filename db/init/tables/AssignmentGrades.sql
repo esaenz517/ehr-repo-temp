@@ -53,15 +53,18 @@ BEGIN
         PossiblePoints DECIMAL(9,2) NOT NULL
             CHECK (PossiblePoints > 0),
 
-        EarnedPoints DECIMAL(9,2) NOT NULL
-            CHECK (
-                EarnedPoints >= 0
-                AND EarnedPoints <= PossiblePoints
-            ),
+        EarnedPoints DECIMAL(9,2) NOT NULL,
 
         Comment NVARCHAR(500) NULL,
 
         SortOrder INT NOT NULL,
+
+        -- Table-level because it compares two columns (a column CHECK can't).
+        CONSTRAINT CK_AssignmentGradeItems_EarnedPoints
+            CHECK (
+                EarnedPoints >= 0
+                AND EarnedPoints <= PossiblePoints
+            ),
 
         CONSTRAINT UQ_AssignmentGradeItems_Key
             UNIQUE (AssignmentId, CriterionKey),
