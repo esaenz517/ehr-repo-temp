@@ -50,7 +50,7 @@ services:
       # If Render gives the backend a different URL, update this destination.
       - type: rewrite
         source: /api/*
-        destination: https://ehr-backend.onrender.com/*
+        destination: https://ehr-backend-k63q.onrender.com/*
       # Let React handle every other path.
       - type: rewrite
         source: /*

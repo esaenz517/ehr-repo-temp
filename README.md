@@ -84,20 +84,11 @@ You'll see the `AppDb` database and its tables once `db-init` has finished.
 
 ## Connecting to Azure Server
 - **Server name:** `ehrserver.database.windows.net`
-- **Location:** `(US) West US`
+- **Location:** `(Asia Pacific)`
 - **Authentication:** SQL Authentication
+- **Database Name:** `AppDb`
 - **Login:** `dev`
 - **Password:** `UTEP123#` 
-
-## Deploying (Render + Azure SQL)
-
-The hosted app runs on Render and uses the Azure SQL database above. Local development keeps using the `db` container: the backend reads its connection from env vars, which `docker-compose.yml` sets locally and Render sets in production, so no code changes between the two.
-
-- **Config:** `render.yaml` (a Render Blueprint) defines the backend (Docker web service) and frontend (static site). Render redeploys both on every push to `main`.
-- **Secrets:** `DB_USER`, `DB_PASSWORD` and `CORS_ORIGINS` are entered in the Render dashboard, never committed.
-- **API calls:** the frontend calls `/api/...` on its own domain and Render proxies them to the backend, so the session cookie stays same-origin.
-- **Firewall:** add the backend's outbound IPs (Render → ehr-backend → Connect → Outbound) as firewall rules on the Azure SQL server.
-- **Schema changes** don't deploy with the code. Run them against Azure with sqlcmd (command in the header of `db/init/init-azure.sql`); the scripts are safe to rerun.
 
 ## Connecting with CloudBeaver
 
