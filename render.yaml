@@ -1,0 +1,62 @@
+# Render Blueprint: deploys the backend and frontend from this repo on every push
+# to main. The database is Azure SQL (ehrserver.database.windows.net), not a
+# container. Local development still uses docker-compose.yml and is unaffected.
+#
+# Values marked "sync: false" are secrets or depend on the deployed URLs. Render
+# asks for them when the Blueprint is first created and never stores them in git.
+
+services:
+  # FastAPI backend, built from backend/Dockerfile.
+  - type: web
+    name: ehr-backend
+    runtime: docker
+    plan: free
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: DB_SERVER
+        value: ehrserver.database.windows.net
+      - key: DB_PORT
+        value: "1433"
+      - key: DB_NAME
+        value: AppDb
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_TRUST_CERT
+        value: "no"
+      - key: DB_LOGIN_TIMEOUT
+        value: "60"
+      - key: COOKIE_SECURE
+        value: "true"
+      # The frontend's Render URL, e.g. https://ehr-frontend.onrender.com
+      - key: CORS_ORIGINS
+        sync: false
+
+  # React frontend, built by Vite and served as a static site.
+  - type: web
+    name: ehr-frontend
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      # API calls go to /api on the frontend's own domain, so the session cookie
+      # stays same-origin. Render proxies them to the backend (first route below).
+      - key: VITE_API_URL
+        value: /api
+    routes:
+      # If Render gives the backend a different URL, update this destination.
+      - type: rewrite
+        source: /api/*
+        destination: https://ehr-backend-k63q.onrender.com/*
+      # Let React handle every other path.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      # Same as nginx.conf: always re-check index.html so a reload picks up a new build.
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache

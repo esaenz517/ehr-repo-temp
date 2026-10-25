@@ -82,6 +82,14 @@ Open SQL Server Management Studio and connect to:
 
 You'll see the `AppDb` database and its tables once `db-init` has finished.
 
+## Connecting to Azure Server
+- **Server name:** `ehrserver.database.windows.net`
+- **Location:** `(Asia Pacific)`
+- **Authentication:** SQL Authentication
+- **Database Name:** `AppDb`
+- **Login:** `dev`
+- **Password:** `UTEP123#` 
+
 ## Connecting with CloudBeaver
 
 CloudBeaver is a web-based DB GUI, handy if you don't want to install SSMS/Azure Data Studio.
