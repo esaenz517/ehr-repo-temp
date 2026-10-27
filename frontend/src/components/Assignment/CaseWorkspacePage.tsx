@@ -164,13 +164,54 @@ export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignme
                   <p style={{ color: "#888" }}>None recorded.</p>
                 ) : (
                   <ul>
-                    {chart.recent_labs.map((l, i) => (
-                      <li key={i}>
-                        {l.test_name}: {l.result}
-                        {l.unit && ` ${l.unit}`}
-                        {l.flag && ` (${l.flag})`}
-                      </li>
-                    ))}
+                    {chart.recent_labs.map((l, i) => {
+                      const flag = l.flag?.trim() ?? "";
+                      const isAbnormal =
+                        flag !== "" &&
+                        !["normal", "none", "n", "within range"].includes(
+                          flag.toLowerCase()
+                        );
+
+                      return (
+                        <li
+                          key={i}
+                          style={{
+                            marginBottom: 8,
+                            padding: 10,
+                            borderRadius: 6,
+                            border: isAbnormal
+                              ? "1px solid #dc2626"
+                              : "1px solid #ddd",
+                            backgroundColor: isAbnormal
+                              ? "#fef2f2"
+                              : "#fff",
+                          }}
+                        >
+                          <strong>{l.test_name}</strong>: {l.result}
+                          {l.unit && ` ${l.unit}`}
+
+                          {flag && (
+                            <span
+                              role={isAbnormal ? "alert" : undefined}
+                              style={{
+                                marginLeft: 10,
+                                padding: "3px 8px",
+                                borderRadius: 4,
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: isAbnormal ? "#991b1b" : "#166534",
+                                backgroundColor: isAbnormal
+                                  ? "#fee2e2"
+                                  : "#dcfce7",
+                              }}
+                            >
+                              {isAbnormal ? "⚠ " : ""}
+                              {flag}
+                            </span>
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </Section>

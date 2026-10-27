@@ -122,12 +122,31 @@ export function MedicalHistoryPanel({
               </label>
               <input
                 id={`medical-condition-${patientId}`}
+                list={`medical-condition-options-${patientId}`}
                 value={condition}
                 onChange={(e) => setCondition(e.target.value)}
-                placeholder="e.g. Hypertension"
+                placeholder="Search or enter a medical condition"
                 required
                 className="history-input"
               />
+
+              <datalist id={`medical-condition-options-${patientId}`}>
+                <option value="Hypertension" />
+                <option value="Type 1 diabetes mellitus" />
+                <option value="Type 2 diabetes mellitus" />
+                <option value="Asthma" />
+                <option value="Chronic obstructive pulmonary disease (COPD)" />
+                <option value="Coronary artery disease" />
+                <option value="Heart failure" />
+                <option value="Chronic kidney disease" />
+                <option value="Hyperlipidemia" />
+                <option value="Hypothyroidism" />
+                <option value="Anemia" />
+                <option value="Arthritis" />
+                <option value="Depression" />
+                <option value="Anxiety disorder" />
+                <option value="Migraine" />
+              </datalist>
             </div>
 
             <div className="history-field">
@@ -218,12 +237,31 @@ export function MedicalHistoryPanel({
               </label>
               <input
                 id={`family-condition-${patientId}`}
+                list={`family-condition-options-${patientId}`}
                 value={familyCondition}
                 onChange={(e) => setFamilyCondition(e.target.value)}
-                placeholder="e.g. Type 2 diabetes"
+                placeholder="Search or enter a family condition"
                 required
                 className="history-input"
               />
+
+              <datalist id={`family-condition-options-${patientId}`}>
+                <option value="Type 1 diabetes mellitus" />
+                <option value="Type 2 diabetes mellitus" />
+                <option value="Hypertension" />
+                <option value="Coronary artery disease" />
+                <option value="Heart disease" />
+                <option value="Stroke" />
+                <option value="Breast cancer" />
+                <option value="Colon cancer" />
+                <option value="Lung cancer" />
+                <option value="Asthma" />
+                <option value="Hyperlipidemia" />
+                <option value="Chronic kidney disease" />
+                <option value="Alzheimer's disease" />
+                <option value="Osteoporosis" />
+                <option value="Thyroid disease" />
+              </datalist>
             </div>
 
             <div className="history-field history-field--full">
