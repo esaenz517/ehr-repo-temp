@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { gradesApi } from "../../api/grades";
 import type { Grade } from "../../api/grades";
 
+import { ScoreBars, ScoreRing } from "../Charts/Charts";
 import "./grades.css";
 
 
@@ -44,10 +45,10 @@ export function StudentGradesPage() {
 
 
     return (
-        <div className="ui-page grades-page">
-            <h1>My Grades</h1>
+        <div className="ui-page">
+            <h1 className="ui-page-title">My Grades</h1>
 
-            <p className="ui-muted">
+            <p className="ui-page-intro">
                 Only instructor-published grades appear here.
                 Practice cases do not affect the
                 points-based average.
@@ -60,27 +61,50 @@ export function StudentGradesPage() {
             )}
 
             {loading ? (
-                <p>Loading grades...</p>
+                <p className="ui-muted">Loading grades...</p>
             ) : error ? null : (
                 <>
-                    <section className="grades-summary">
-                        <strong>
-                            {possible
-                                ? `${(
-                                    (points / possible) * 100
-                                ).toFixed(1)}%`
-                                : "No graded scores yet"}
-                        </strong>
+                    <section className="ui-card grades-summary">
+                        <ScoreRing
+                            value={possible ? (points / possible) * 100 : null}
+                            label="Average"
+                        />
 
-                        <span>
-                            {possible
-                                ? `${points.toFixed(2)} of ${possible.toFixed(2)} points earned across graded cases`
-                                : "Your instructor has not published a graded case score."}
-                        </span>
+                        <div className="grades-summary-text">
+                            <strong>
+                                {possible
+                                    ? `${(
+                                        (points / possible) * 100
+                                    ).toFixed(1)}%`
+                                    : "No graded scores yet"}
+                            </strong>
+
+                            <span className="ui-muted">
+                                {possible
+                                    ? `${points.toFixed(2)} of ${possible.toFixed(2)} points earned across graded cases`
+                                    : "Your instructor has not published a graded case score."}
+                            </span>
+                        </div>
                     </section>
 
+                    {grades.length > 0 && (
+                        <section className="ui-card">
+                            <h2 className="ui-card-title">Score by case</h2>
+                            <p className="ui-muted">Each published case as a percentage of its points.</p>
+                            <ScoreBars
+                                label="Score percentage by case"
+                                items={grades.map((grade) => ({
+                                    key: grade.assignment_id,
+                                    label: `Case #${grade.case_id}${grade.assignment_type === "practice" ? " (practice)" : ""}`,
+                                    value: grade.percentage,
+                                    detail: `${grade.final_points.toFixed(2)} / ${grade.possible_points.toFixed(2)} points`,
+                                }))}
+                            />
+                        </section>
+                    )}
+
                     {!grades.length && (
-                        <p>No published grades yet.</p>
+                        <p className="ui-row-empty">No published grades yet.</p>
                     )}
 
                     {grades.map((grade) => (
@@ -111,7 +135,8 @@ export function StudentGradesPage() {
                                     : ""}
                             </summary>
 
-                            <table className="grades-table">
+                            <div className="ui-table-wrap">
+                            <table className="ui-table grades-table">
                                 <thead>
                                     <tr>
                                         <th>Rubric criterion</th>
@@ -141,6 +166,7 @@ export function StudentGradesPage() {
                                     ))}
                                 </tbody>
                             </table>
+                            </div>
 
                             {grade.adjustment_points !== 0 && (
                                 <p>

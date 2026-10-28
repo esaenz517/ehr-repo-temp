@@ -12,6 +12,8 @@ import type {
 } from "../../api/grades";
 
 import { GradeEditor } from "../Grades/GradeEditor";
+import { ScoreBars, StatusBreakdown } from "../Charts/Charts";
+import { StatusBadge } from "../StatusBadge";
 
 import "../Grades/grades.css";
 
@@ -151,10 +153,10 @@ export function InstructorProgressPage() {
 
 
     return (
-        <div className="ui-page grades-page">
-            <h1>Student Progress</h1>
+        <div className="ui-page">
+            <h1 className="ui-page-title">Student Progress</h1>
 
-            <p className="ui-muted">
+            <p className="ui-page-intro">
                 Based on saved SOAP notes and assignment status.
                 Unsaved typing is not recorded as progress.
             </p>
@@ -166,48 +168,63 @@ export function InstructorProgressPage() {
             )}
 
             {loading && !report ? (
-                <p>Loading progress...</p>
+                <p className="ui-muted">Loading progress...</p>
             ) : (
                 <>
                     {report && (
                         <div
-                            className="progress-stats"
+                            className="ui-stats"
                             aria-label="Assignment progress summary"
                         >
-                            <div>
-                                <strong>{report.total}</strong>
-                                <span>Total cases</span>
+                            <div className="ui-stat">
+                                <span className="ui-stat-value">{report.total}</span>
+                                <span className="ui-stat-label">Total cases</span>
                             </div>
 
-                            <div>
-                                <strong>{report.in_progress}</strong>
-                                <span>In progress</span>
+                            <div className="ui-stat ui-stat--accent">
+                                <span className="ui-stat-value">{report.in_progress}</span>
+                                <span className="ui-stat-label">In progress</span>
                             </div>
 
-                            <div>
-                                <strong>
+                            <div className="ui-stat ui-stat--success">
+                                <span className="ui-stat-value">
                                     {report.submitted + report.signed}
-                                </strong>
-                                <span>Submitted or signed</span>
+                                </span>
+                                <span className="ui-stat-label">Submitted or signed</span>
                             </div>
 
-                            <div>
-                                <strong>{report.inactive}</strong>
-                                <span>Inactive alerts</span>
+                            <div className="ui-stat ui-stat--error">
+                                <span className="ui-stat-value">{report.inactive}</span>
+                                <span className="ui-stat-label">Inactive alerts</span>
                             </div>
 
-                            <div>
-                                <strong>{report.overdue}</strong>
-                                <span>Overdue alerts</span>
+                            <div className="ui-stat ui-stat--error">
+                                <span className="ui-stat-value">{report.overdue}</span>
+                                <span className="ui-stat-label">Overdue alerts</span>
                             </div>
                         </div>
+                    )}
+
+                    {report && report.total > 0 && (
+                        <section className="ui-card">
+                            <h2 className="ui-card-title">Where every case stands</h2>
+                            <p className="ui-muted">Share of assigned cases in each status.</p>
+                            <StatusBreakdown
+                                counts={{
+                                    not_started: report.not_started,
+                                    in_progress: report.in_progress,
+                                    submitted: report.submitted,
+                                    signed: report.signed,
+                                }}
+                            />
+                        </section>
                     )}
 
                     {report &&
                         (report.inactive > 0 ||
                             report.overdue > 0) && (
                             <p
-                                className="progress-alert"
+                                className="progress-alert progress-alert-banner"
                                 role="status"
                             >
                                 Attention needed:{" "}
@@ -218,8 +235,8 @@ export function InstructorProgressPage() {
                             </p>
                         )}
 
-                    <div className="grades-actions">
-                        <label>
+                    <div className="ui-toolbar">
+                        <label className="ui-checkbox">
                             <input
                                 type="checkbox"
                                 checked={onlyAlerts}
@@ -228,12 +245,12 @@ export function InstructorProgressPage() {
                                 }
                             />
 
-                            {" "}
                             Show alerts only
                         </label>
 
                         <button
                             type="button"
+                            className="ui-button ui-button--secondary"
                             onClick={() => {
                                 void reload();
                             }}
@@ -243,7 +260,7 @@ export function InstructorProgressPage() {
                     </div>
 
                     {report && !shown.length && (
-                        <p>
+                        <p className="ui-row-empty">
                             {onlyAlerts
                                 ? "No current inactivity or overdue alerts."
                                 : "No cases assigned by your account."}
@@ -251,8 +268,8 @@ export function InstructorProgressPage() {
                     )}
 
                     {shown.length > 0 && (
-                        <div className="grades-table-wrap">
-                            <table className="grades-table">
+                        <div className="ui-card ui-table-wrap">
+                            <table className="ui-table">
                                 <thead>
                                     <tr>
                                         <th>Student</th>
@@ -288,10 +305,7 @@ export function InstructorProgressPage() {
                                                 </td>
 
                                                 <td>
-                                                    {assignment.encounter_status.replace(
-                                                        /_/g,
-                                                        " "
-                                                    )}
+                                                    <StatusBadge status={assignment.encounter_status} />
                                                 </td>
 
                                                 <td>
@@ -340,6 +354,7 @@ export function InstructorProgressPage() {
                                                 <td>
                                                     <button
                                                         type="button"
+                                                        className="ui-button ui-button--secondary ui-button--small"
                                                         disabled={
                                                             ![
                                                                 "submitted",
@@ -370,8 +385,8 @@ export function InstructorProgressPage() {
                     )}
 
                     {studentScores.size > 0 && (
-                        <section className="grades-panel">
-                            <h2>Published scores by student</h2>
+                        <section className="ui-card">
+                            <h2 className="ui-card-title">Published scores by student</h2>
 
                             <p className="ui-muted">
                                 Points-based summary across published
@@ -379,7 +394,20 @@ export function InstructorProgressPage() {
                                 course grade.
                             </p>
 
-                            <table className="grades-table">
+                            <ScoreBars
+                                label="Published score percentage by student"
+                                items={Array.from(studentScores.entries())
+                                    .filter(([, score]) => score.possible > 0)
+                                    .map(([id, score]) => ({
+                                        key: id,
+                                        label: score.name,
+                                        value: (score.earned / score.possible) * 100,
+                                        detail: `${score.earned.toFixed(2)} / ${score.possible.toFixed(2)} points`,
+                                    }))}
+                            />
+
+                            <div className="ui-table-wrap">
+                            <table className="ui-table">
                                 <thead>
                                     <tr>
                                         <th>Student</th>
@@ -420,6 +448,7 @@ export function InstructorProgressPage() {
                                     )}
                                 </tbody>
                             </table>
+                            </div>
                         </section>
                     )}
 

@@ -4,33 +4,64 @@
   /* Brand */
   --color-primary: #041e42;      /* UTEP blue */
   --color-primary-dark: #021430; /* hover / pressed */
+  --color-primary-light: #1a4f9c; /* gradients, avatars */
+  --color-primary-tint: #e6ecf5; /* soft blue background */
   --color-accent: #ff8200;       /* UTEP orange: accents only, not body text */
+  --color-accent-dark: #e67300;  /* orange hover */
+  --color-accent-tint: #fff1e0;  /* soft orange background */
   --color-silver: #b1b3b3;       /* UTEP silver: borders, dividers */
 
   /* Neutrals */
   --color-surface: #ffffff;
   --color-bg: #f4f6f9;
+  --color-bg-strong: #e6e9ef;    /* skeletons, chart tracks */
   --color-text: #1c2430;
   --color-text-muted: #5f6b7a;
   --color-border: var(--color-silver);
+  --color-border-light: #dce1e6; /* table rows, inner dividers */
 
   /* Text/lines on top of the blue (sidebar, etc.) */
   --color-on-primary: #ffffff;
   --color-on-primary-muted: rgba(255, 255, 255, 0.75);
   --color-on-primary-faint: rgba(255, 255, 255, 0.12);
 
-  /* Status */
+  /* Feedback: dark text color + light background */
   --color-error: #b3261e;
   --color-error-bg: #fcebea;
+  --color-error-border: #ebaea9;
   --color-success: #1a6841;
   --color-success-bg: #e1f1e7;
+  --color-success-border: #a0d1b3;
+  --color-warning: #8a4600;
+  --color-warning-bg: #fff1e0;
+  --color-info: #1a4f9c;
+  --color-info-bg: #e3ecf8;
+
+  /* Assignment status. Chips use text + bg, chart bars use fill.
+     Every page that shows a status uses these so it looks the same everywhere. */
+  --status-not-started-text: var(--color-error);
+  --status-not-started-bg: var(--color-error-bg);
+  --status-not-started-fill: #c4314b;
+  --status-in-progress-text: var(--color-warning);
+  --status-in-progress-bg: var(--color-warning-bg);
+  --status-in-progress-fill: #e07800;
+  --status-submitted-text: var(--color-info);
+  --status-submitted-bg: var(--color-info-bg);
+  --status-submitted-fill: #2f6fb5;
+  --status-signed-text: var(--color-success);
+  --status-signed-bg: var(--color-success-bg);
+  --status-signed-fill: #1a7f4b;
 
   /* Layout */
   --sidebar-width: 220px;
   --sidebar-width-collapsed: 72px;
 
   /* Shape and type */
-  --radius: 6px;
+  --radius: 6px;        /* inputs, buttons, small boxes */
+  --radius-lg: 12px;    /* cards, panels */
+  --radius-pill: 999px; /* chips, badges */
   --shadow: 0 4px 16px rgba(4, 30, 66, 0.08);
+  --shadow-hover: 0 10px 24px rgba(4, 30, 66, 0.14);
+  --focus-ring: 0 0 0 3px rgba(255, 130, 0, 0.35); /* orange focus ring */
   --font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }

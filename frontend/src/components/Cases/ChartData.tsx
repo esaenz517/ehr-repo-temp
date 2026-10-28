@@ -43,12 +43,6 @@ const EMPTY_MEDICATION: MedicationRow = { drugId: "", dose: "", route: "", frequ
 const EMPTY_ALLERGY: AllergyRow = { substance: "", reaction: "" };
 const EMPTY_LAB: LabRow = { testName: "", result: "", unit: "", flag: "", collectedAt: "" };
 
-// Lays out one row of inputs side by side.
-const rowStyle = { display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: 8 };
-
-// Small heading above each list.
-const headingStyle = { fontSize: 14, margin: "0 0 8px" };
-
 interface ChartDataProps {
   values: ChartDataValues;
   drugs: Drug[]; // every drug the instructor can pick from
@@ -97,11 +91,12 @@ export function ChartData({ values, drugs, onChange, errors, readOnly = false, }
     <div className="form-stack">
       {/* Medications: one row per drug, picked from the drugs already in the system */}
       <div>
-        <h3 style={headingStyle}>Medications</h3>
+        <h3 className="ui-subheading">Medications</h3>
         {drugs.length === 0 && <p className="field-hint">No drugs yet. Add them on the Drugs page.</p>}
         {values.medications.map((row, i) => (
-          <div key={i} style={rowStyle}>
+          <div key={i} className="ui-form-row ui-form-row--spaced">
             <select
+              className="ui-input"
               aria-label="Drug"
               value={row.drugId}
               onChange={(e) => updateMedication(i, "drugId", e.target.value)}
@@ -113,6 +108,7 @@ export function ChartData({ values, drugs, onChange, errors, readOnly = false, }
               ))}
             </select>
             <input
+              className="ui-input"
               aria-label="Dose"
               placeholder="Dose (e.g. 500 mg)"
               value={row.dose}
@@ -120,6 +116,7 @@ export function ChartData({ values, drugs, onChange, errors, readOnly = false, }
               disabled={readOnly}
             />
             <select
+              className="ui-input"
               aria-label="Route"
               value={row.route}
               onChange={(e) => updateMedication(i, "route", e.target.value)}
@@ -129,6 +126,7 @@ export function ChartData({ values, drugs, onChange, errors, readOnly = false, }
               {ROUTES.map((r) => <option key={r} value={r}>{r}</option>)}
             </select>
             <select
+              className="ui-input"
               aria-label="Frequency"
               value={row.frequency}
               onChange={(e) => updateMedication(i, "frequency", e.target.value)}
@@ -137,19 +135,20 @@ export function ChartData({ values, drugs, onChange, errors, readOnly = false, }
               <option value="">Frequency</option>
               {FREQUENCIES.map((f) => <option key={f} value={f}>{f}</option>)}
             </select>
-            <button type="button" onClick={() => removeMedication(i)}>Remove</button>
+            <button type="button" className="ui-button ui-button--danger ui-button--small" onClick={() => removeMedication(i)}>Remove</button>
           </div>
         ))}
         {errors.medications && <p className="field-error">{errors.medications}</p>}
-        <button type="button" onClick={addMedication}>Add medication</button>
+        <button type="button" className="ui-button ui-button--secondary" onClick={addMedication}>Add medication</button>
       </div>
 
       {/* Allergies: one row per allergy */}
       <div>
-        <h3 style={headingStyle}>Allergies</h3>
+        <h3 className="ui-subheading">Allergies</h3>
         {values.allergies.map((row, i) => (
-          <div key={i} style={rowStyle}>
+          <div key={i} className="ui-form-row ui-form-row--spaced">
             <input
+              className="ui-input"
               aria-label="Substance"
               placeholder="Substance *"
               value={row.substance}
@@ -157,25 +156,27 @@ export function ChartData({ values, drugs, onChange, errors, readOnly = false, }
               disabled={readOnly}
             />
             <input
+              className="ui-input"
               aria-label="Reaction"
               placeholder="Reaction"
               value={row.reaction}
               onChange={(e) => updateAllergy(i, "reaction", e.target.value)}
               disabled={readOnly}
             />
-            <button type="button" onClick={() => removeAllergy(i)}>Remove</button>
+            <button type="button" className="ui-button ui-button--danger ui-button--small" onClick={() => removeAllergy(i)}>Remove</button>
           </div>
         ))}
         {errors.allergies && <p className="field-error">{errors.allergies}</p>}
-        <button type="button" onClick={addAllergy}>Add allergy</button>
+        <button type="button" className="ui-button ui-button--secondary" onClick={addAllergy}>Add allergy</button>
       </div>
 
       {/* Labs: one row per lab result */}
       <div>
-        <h3 style={headingStyle}>Labs</h3>
+        <h3 className="ui-subheading">Labs</h3>
         {values.labs.map((row, i) => (
-          <div key={i} style={rowStyle}>
+          <div key={i} className="ui-form-row ui-form-row--spaced">
             <input
+              className="ui-input"
               aria-label="Test name"
               placeholder="Test *"
               value={row.testName}
@@ -183,6 +184,7 @@ export function ChartData({ values, drugs, onChange, errors, readOnly = false, }
               disabled={readOnly}
             />
             <input
+              className="ui-input"
               aria-label="Result"
               placeholder="Result *"
               value={row.result}
@@ -190,6 +192,7 @@ export function ChartData({ values, drugs, onChange, errors, readOnly = false, }
               disabled={readOnly}
             />
             <input
+              className="ui-input"
               aria-label="Unit"
               placeholder="Unit"
               value={row.unit}
@@ -197,6 +200,7 @@ export function ChartData({ values, drugs, onChange, errors, readOnly = false, }
               disabled={readOnly}
             />
             <select
+              className="ui-input"
               aria-label="Flag"
               value={row.flag}
               onChange={(e) => updateLab(i, "flag", e.target.value)}
@@ -206,17 +210,18 @@ export function ChartData({ values, drugs, onChange, errors, readOnly = false, }
               {FLAGS.map((f) => <option key={f} value={f}>{f}</option>)}
             </select>
             <input
+              className="ui-input"
               type="datetime-local"
               aria-label="Collected at"
               value={row.collectedAt}
               onChange={(e) => updateLab(i, "collectedAt", e.target.value)}
               disabled={readOnly}
             />
-            <button type="button" onClick={() => removeLab(i)}>Remove</button>
+            <button type="button" className="ui-button ui-button--danger ui-button--small" onClick={() => removeLab(i)}>Remove</button>
           </div>
         ))}
         {errors.labs && <p className="field-error">{errors.labs}</p>}
-        <button type="button" onClick={addLab}>Add lab</button>
+        <button type="button" className="ui-button ui-button--secondary" onClick={addLab}>Add lab</button>
       </div>
     </div>
   );

@@ -338,7 +338,7 @@ export function SoapEditor({
                 </h3>
 
                 {context.recent_labs.length ? (
-                    <ul>
+                    <ul className="ui-lab-list">
                         {context.recent_labs.map((l, i) => {
                             const flag = l.flag?.trim() ?? "";
                             const isAbnormal =
@@ -350,30 +350,20 @@ export function SoapEditor({
                             return (
                                 <li
                                     key={i}
-                                    style={{
-                                        borderLeft: isAbnormal
-                                            ? "4px solid #dc2626"
-                                            : undefined,
-                                        backgroundColor: isAbnormal
-                                            ? "#fef2f2"
-                                            : undefined,
-                                        padding: "8px",
-                                        marginBottom: "6px",
-                                        borderRadius: "4px",
-                                    }}
+                                    className={`ui-lab${isAbnormal ? " ui-lab--abnormal" : ""}`}
                                 >
                                     {l.test_name}: {l.result} {l.unit || ""}
 
                                     {isAbnormal ? (
                                         <strong
                                             role="alert"
-                                            style={{ color: "#b91c1c" }}
+                                            className="ui-badge ui-badge--error"
                                         >
-                                            {" "}⚠ {flag}
+                                            ⚠ {flag}
                                         </strong>
                                     ) : flag ? (
-                                        <span style={{ color: "#15803d" }}>
-                                            {" "}({flag})
+                                        <span className="ui-badge ui-badge--success">
+                                            {flag}
                                         </span>
                                     ) : null}
 

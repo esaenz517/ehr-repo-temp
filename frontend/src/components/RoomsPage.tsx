@@ -7,12 +7,12 @@ export function RoomsPage() {
     const { rooms, availablePatients, loading, error, create, remove, assign, unassign } = useRooms();
 
     return (
-        <div className="rooms-page">
-              <h1 className="rooms-title">Rooms</h1>
+        <div className="ui-page rooms-page">
+              <h1 className="ui-page-title">Rooms</h1>
 
-              {error && <p className="rooms-error">{error}</p>}
+              {error && <p className="ui-error">{error}</p>}
               {loading ? (
-                <p className="rooms-muted">Loading...</p>
+                <p className="ui-muted">Loading...</p>
               ) : (
                 <RoomList
                   rooms={rooms}

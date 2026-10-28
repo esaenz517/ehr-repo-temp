@@ -25,7 +25,7 @@
 
 .billing-total-badge {
   padding: 4px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-primary);
   color: var(--color-on-primary);
   font-size: 13px;
@@ -150,7 +150,7 @@
 .billing-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(255, 130, 0, 0.35); /* orange focus ring */
+  box-shadow: var(--focus-ring);
 }
 
 /* "$" sits inside the left edge of the amount input */

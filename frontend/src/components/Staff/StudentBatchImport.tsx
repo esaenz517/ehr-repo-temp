@@ -201,13 +201,12 @@ export function StudentBatchImport({ onImported }: Props) {
             className="ui-form-panel"
             aria-label="Batch student import"
         >
-            <h2 style={{ margin: 0 }}>
+            <h2 className="ui-form-panel-title">
                 Batch Import Students
             </h2>
 
             <p
-                className="ui-muted"
-                style={{ margin: 0 }}
+                className="ui-muted ui-flush"
             >
                 Upload a CSV with FirstName, LastName,
                 Specialization, and Email (or UserPrincipalName).
@@ -266,8 +265,7 @@ export function StudentBatchImport({ onImported }: Props) {
             {report && (
                 <>
                     <p
-                        className="ui-muted"
-                        style={{ margin: 0 }}
+                        className="ui-muted ui-flush"
                     >
                         Ready: {report.ready}
                         {" · "}
@@ -305,12 +303,7 @@ export function StudentBatchImport({ onImported }: Props) {
                         </div>
                     )}
 
-                    <div
-                        style={{
-                            maxHeight: 260,
-                            overflow: "auto",
-                        }}
-                    >
+                    <div className="ui-scroll">
                         <ul className="ui-row-list">
                             {report.rows.map((row) => (
                                 <li

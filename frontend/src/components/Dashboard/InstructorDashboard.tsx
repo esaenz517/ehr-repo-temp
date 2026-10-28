@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAssignments } from "../../hooks/useAssignments";
 import { useStaff } from "../../hooks/useStaff";
 import type { Assignment, EncounterStatus } from "../../types";
+import { STATUS_LABELS, StatusBadge } from "../StatusBadge";
 import "./instructorDashboard.css";
 
 interface InstructorDashboardProps {
@@ -12,13 +13,6 @@ interface InstructorDashboardProps {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const STATUSES: EncounterStatus[] = ["not_started", "in_progress", "submitted", "signed"];
-
-const STATUS_LABELS: Record<EncounterStatus, string> = {
-  not_started: "Not started",
-  in_progress: "In progress",
-  submitted: "Submitted",
-  signed: "Signed",
-};
 
 // Due dates are stored in UTC without a time zone marker, so add "Z" before converting.
 const dueTime = (a: Assignment) => (a.due_date ? new Date(a.due_date + "Z").getTime() : null);
@@ -145,7 +139,7 @@ export function InstructorDashboard({ staffId, onReview }: InstructorDashboardPr
                 <li key={a.assignment_id} className="idash-case-student">
                   <span>{studentName(a.assigned_to)}</span>
                   <span className="ui-muted">Due {formatDue(a)}</span>
-                  <span className={`idash-status idash-status--${a.encounter_status}`}>{statusLabel(a)}</span>
+                  <StatusBadge status={a.encounter_status} label={statusLabel(a)} />
                   {a.encounter_status !== "not_started" && (
                     <button className="ui-button ui-button--secondary" onClick={() => onReview(a)}>
                       {a.encounter_status === "submitted" ? "Review" : "View note"}
@@ -185,7 +179,7 @@ function ProgressBar({ rows }: { rows: Assignment[] }) {
     <span className="idash-progress">
       <span className="idash-bar" role="img" aria-label={text}>
         {counts.map((c) => c.n > 0 && (
-          <span key={c.status} className={`idash-bar-part idash-status--${c.status}`} style={{ flexGrow: c.n }} />
+          <span key={c.status} className={`idash-bar-part idash-bar-part--${c.status}`} title={`${c.n} ${STATUS_LABELS[c.status].toLowerCase()}`} style={{ flexGrow: c.n }} />
         ))}
       </span>
       <span className="idash-progress-text">{text}</span>

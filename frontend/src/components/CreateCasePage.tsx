@@ -1,4 +1,4 @@
-import { FormEvent, ReactNode } from "react";
+import { FormEvent } from "react";
 import { useCreateCase } from "../hooks/useCreateCase";
 import { useDrugs } from "../hooks/useDrugs";
 import { CaseContent } from "./Cases/CaseContent";
@@ -7,16 +7,7 @@ import { PatientDemographics } from "./Patients/PatientDemographics";
 import { CasePatientSelector } from "./Patients/CasePatientSelector";
 import { AssignmentSection } from "./Assignment/AssignmentSection";
 import { RubricEditor } from "./Cases/RubricEditor";
-
-// One boxed section of the form, with its title in the border.
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <fieldset style={{ border: "1px solid #ddd", borderRadius: 4, marginBottom: 16, padding: 16 }}>
-      <legend style={{ fontWeight: 600, padding: "0 4px" }}>{title}</legend>
-      {children}
-    </fieldset>
-  );
-}
+import { Section } from "./Section";
 
 interface CreateCasePageProps {
   staffId: number; // the logged-in instructor; saved as the case's creator
@@ -38,8 +29,8 @@ export function CreateCasePage({ staffId }: CreateCasePageProps) {
 
   return (
     // noValidate: we show our own error messages instead of the browser's pop-ups.
-    <form onSubmit={handleSubmit} noValidate>
-      <h1>Create Case</h1>
+    <form className="ui-page" onSubmit={handleSubmit} noValidate>
+      <h1 className="ui-page-title">Create Case</h1>
 
       {/* Success and error messages from the last save */}
       {createCase.created && (
@@ -101,7 +92,7 @@ export function CreateCasePage({ staffId }: CreateCasePageProps) {
         <AssignmentSection values={createCase.assignment} onChange={createCase.updateAssignment} />
       </Section>
 
-      <button type="submit" disabled={createCase.submitting}>
+      <button type="submit" className="ui-button" disabled={createCase.submitting}>
         {createCase.submitting ? "Creating…" : "Create case"}
       </button>
     </form>

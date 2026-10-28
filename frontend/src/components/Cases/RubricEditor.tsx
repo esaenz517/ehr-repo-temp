@@ -26,8 +26,6 @@ export function parsePoints(text: string): number | null {
   return text.trim() !== "" && Number.isInteger(n) && n > 0 ? n : null;
 }
 
-const rowStyle = { display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: 8 };
-
 interface RubricEditorProps {
   rows: RubricRow[];
   onChange: (rows: RubricRow[]) => void; // sends the whole updated list back up
@@ -53,8 +51,9 @@ export function RubricEditor({ rows, onChange, error }: RubricEditorProps) {
       </p>
 
       {rows.map((row, i) => (
-        <div key={i} style={rowStyle}>
+        <div key={i} className="ui-form-row ui-form-row--spaced">
           <select
+            className="ui-input"
             aria-label="Category"
             value={row.category}
             onChange={(e) => update(i, "category", e.target.value)}
@@ -69,7 +68,7 @@ export function RubricEditor({ rows, onChange, error }: RubricEditorProps) {
             value={row.label}
             maxLength={300}
             onChange={(e) => update(i, "label", e.target.value)}
-            style={{ flex: "2 1 240px" }}
+            className="ui-input ui-input--wide"
           />
           <input
             aria-label="Points"
@@ -79,7 +78,7 @@ export function RubricEditor({ rows, onChange, error }: RubricEditorProps) {
             step={1}
             value={row.points}
             onChange={(e) => update(i, "points", e.target.value)}
-            style={{ width: 90 }}
+            className="ui-input ui-input--narrow"
           />
           <input
             aria-label="Grading notes (instructors only)"
@@ -87,15 +86,15 @@ export function RubricEditor({ rows, onChange, error }: RubricEditorProps) {
             value={row.guidance}
             maxLength={1000}
             onChange={(e) => update(i, "guidance", e.target.value)}
-            style={{ flex: "2 1 200px" }}
+            className="ui-input ui-input--wide"
           />
-          <button type="button" onClick={() => remove(i)}>Remove</button>
+          <button type="button" className="ui-button ui-button--danger ui-button--small" onClick={() => remove(i)}>Remove</button>
         </div>
       ))}
 
       {error && <p className="field-error">{error}</p>}
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <button type="button" onClick={add}>Add rubric item</button>
+      <div className="ui-toolbar">
+        <button type="button" className="ui-button ui-button--secondary" onClick={add}>Add rubric item</button>
         {rows.length > 0 && <span className="field-hint">Total: {total} points</span>}
       </div>
     </div>

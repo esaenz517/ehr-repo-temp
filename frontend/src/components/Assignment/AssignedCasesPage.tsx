@@ -30,7 +30,7 @@ export function AssignedCasesPage({ staffId, initialViewingId = null }: Assigned
   // Sign off / Send back happen inside the note view, next to the feedback box
   const actions = (a: Assignment) =>
     a.encounter_status !== "not_started" && (
-      <button onClick={() => setViewingId(a.assignment_id)}>
+      <button className={`ui-button${a.encounter_status === "submitted" ? "" : " ui-button--secondary"}`} onClick={() => setViewingId(a.assignment_id)}>
         {a.encounter_status === "submitted" ? "Review" : "View note"}
       </button>
     );
@@ -55,15 +55,17 @@ export function AssignedCasesPage({ staffId, initialViewingId = null }: Assigned
   }
 
   return (
-    <div>
-      <h1>Assigned Cases</h1>
-      <button onClick={reload} style={{ marginBottom: 16 }}>Refresh</button>
+    <div className="ui-page">
+      <h1 className="ui-page-title">Assigned Cases</h1>
+      <div className="ui-toolbar">
+        <button className="ui-button ui-button--secondary" onClick={reload}>Refresh</button>
+      </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="ui-error">{error}</p>}
       {loading ? (
-        <p>Loading...</p>
+        <p className="ui-muted">Loading...</p>
       ) : assignments.length === 0 ? (
-        <p style={{ color: "#888" }}>You haven't assigned any cases yet.</p>
+        <p className="ui-row-empty">You haven't assigned any cases yet.</p>
       ) : (
         <AssignmentList assignments={assignments} studentName={studentName} actions={actions} />
       )}

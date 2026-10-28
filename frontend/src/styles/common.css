@@ -82,6 +82,33 @@
   gap: 8px;
 }
 
+/* Heading at the top of a .ui-form-panel */
+.ui-form-panel-title {
+  margin: 0;
+  font-size: 18px;
+}
+
+/* Submit row at the bottom of a form */
+.ui-form-row--actions {
+  margin-top: 16px;
+}
+
+/* Remove a paragraph's default margins inside a panel */
+.ui-flush {
+  margin: 0;
+}
+
+/* Box that scrolls once its content is taller than 260px (long result lists) */
+.ui-scroll {
+  max-height: 260px;
+  overflow: auto;
+}
+
+/* A row in a repeating list of rows (medications, rubric items) */
+.ui-form-row--spaced {
+  margin-bottom: 8px;
+}
+
 /* Inputs/selects grow to fill the row and wrap once narrower than 140px */
 .ui-input {
   flex: 1 1 140px;
@@ -94,7 +121,7 @@
 .ui-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(255, 130, 0, 0.35); /* orange focus ring */
+  box-shadow: var(--focus-ring);
 }
 
 /* Give a field twice the room of its neighbours (e.g. a description) */
@@ -137,9 +164,226 @@
   accent-color: var(--color-primary);
 }
 
+/* ---------- Page header ---------- */
+
+/* Grey intro line right under a page title */
+.ui-page-intro {
+  margin: -12px 0 20px;
+  color: var(--color-text-muted);
+}
+
+/* Row of page-level buttons/filters above the content (Refresh, Show alerts only) */
+.ui-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* "← Back to ..." button above a detail page's title */
+.ui-back {
+  margin-bottom: 16px;
+}
+
+/* ---------- Sections and cards ---------- */
+
+/* Boxed form/detail section with its title in the border (Create Case, case workspace) */
+.ui-section {
+  margin: 0 0 16px;
+  padding: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  min-width: 0;
+}
+
+.ui-section-title {
+  padding: 0 6px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* Content revealed under a section's Open button */
+.ui-section-body {
+  margin-top: 12px;
+}
+
+/* Small heading inside a section (Medications, Allergies, Labs) */
+.ui-subheading {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* White panel for a block of content (summary, table, chart) */
+.ui-card {
+  margin: 0 0 20px;
+  padding: 16px 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.ui-card-title {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
+.ui-card-title + .ui-muted {
+  margin-top: 0;
+}
+
+/* Label: value pairs (patient demographics) */
+.ui-detail-list {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 6px 16px;
+  margin: 0;
+}
+
+.ui-detail-list dt {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.ui-detail-list dd {
+  margin: 0;
+}
+
+/* Text that keeps the line breaks the author typed (case narrative) */
+.ui-prewrap {
+  white-space: pre-wrap;
+}
+
+/* ---------- Stat tiles ---------- */
+
+.ui-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 0 0 20px;
+}
+
+.ui-stat {
+  --tone: var(--color-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  background: var(--color-surface);
+  border-top: 4px solid var(--tone);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.ui-stat-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.ui-stat-label {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.ui-stat--info    { --tone: var(--color-info); }
+.ui-stat--accent  { --tone: var(--color-accent); }
+.ui-stat--success { --tone: var(--color-success); }
+.ui-stat--error   { --tone: var(--color-error); }
+
+/* ---------- Badges (status chips) ---------- */
+
+.ui-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-tint);
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ui-badge--not_started { background: var(--status-not-started-bg); color: var(--status-not-started-text); }
+.ui-badge--in_progress { background: var(--status-in-progress-bg); color: var(--status-in-progress-text); }
+.ui-badge--submitted   { background: var(--status-submitted-bg); color: var(--status-submitted-text); }
+.ui-badge--signed      { background: var(--status-signed-bg); color: var(--status-signed-text); }
+.ui-badge--error       { background: var(--color-error-bg); color: var(--color-error); }
+.ui-badge--warning     { background: var(--color-warning-bg); color: var(--color-warning); }
+.ui-badge--success     { background: var(--color-success-bg); color: var(--color-success); }
+
+/* ---------- Lab results (normal vs abnormal flag) ---------- */
+
+.ui-lab-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.ui-lab {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border-light);
+  border-left: 4px solid var(--color-border-light);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.ui-lab--abnormal {
+  border-color: var(--color-error-border);
+  border-left-color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+.ui-lab .ui-badge {
+  margin-left: 8px;
+}
+
+/* ---------- Tables ---------- */
+
+.ui-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.ui-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  overflow-wrap: normal; /* break between words, not inside them (.app-main uses anywhere) */
+}
+
+.ui-table th,
+.ui-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border-light);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.ui-table th {
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ui-table tbody tr:hover {
+  background: var(--color-bg);
+}
+
 /* ---------- Buttons ---------- */
 
 .ui-button {
+  white-space: nowrap;
   border: 1px solid var(--color-primary);
   border-radius: var(--radius);
   background: var(--color-primary);
@@ -169,6 +413,12 @@
 
 .ui-button--secondary:hover:not(:disabled) {
   background: var(--color-bg);
+}
+
+/* Shorter button for inline row actions (Remove) */
+.ui-button--small {
+  padding: 3px 10px;
+  font-size: 13px;
 }
 
 /* White button with red outline (Delete) */
@@ -221,6 +471,20 @@
 
 .ui-row:hover {
   background: var(--color-bg);
+}
+
+/* Row whose main area opens the item when clicked */
+.ui-row-main--link {
+  cursor: pointer;
+}
+
+.ui-row-main--link:hover .ui-row-title {
+  text-decoration: underline;
+}
+
+.ui-row-main--link:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 /* Left side: title + optional subtitle lines. Takes the free space; in a

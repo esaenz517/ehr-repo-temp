@@ -77,20 +77,22 @@ export function AssignmentSection({ values, onChange }: AssignmentSectionProps) 
       <div className="form-field">
         <label>Students</label>
         {loading ? (
-          <p>Loading...</p>
+          <p className="ui-muted">Loading...</p>
         ) : students.length === 0 ? (
-          <p style={{ color: "#888" }}>No students found.</p>
+          <p className="ui-muted">No students found.</p>
         ) : (
-          students.map((s) => (
-            <label key={s.staffid} style={{ fontWeight: 400 }}>
-              <input
-                type="checkbox"
-                checked={values.studentIds.includes(s.staffid)}
-                onChange={() => toggleStudent(s.staffid)}
-              />{" "}
-              {s.last_name}, {s.first_name}
-            </label>
-          ))
+          <div className="ui-checkbox-group">
+            {students.map((s) => (
+              <label key={s.staffid} className="ui-checkbox">
+                <input
+                  type="checkbox"
+                  checked={values.studentIds.includes(s.staffid)}
+                  onChange={() => toggleStudent(s.staffid)}
+                />
+                {s.last_name}, {s.first_name}
+              </label>
+            ))}
+          </div>
         )}
         <span className="field-hint">Leave empty to create the case without assigning it.</span>
       </div>
