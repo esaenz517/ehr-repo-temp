@@ -49,6 +49,7 @@
   font-size: 14px;
   font-weight: 600;
   color: var(--color-text-muted);
+  white-space: nowrap;
 }
 
 /* ---------- Add form bar: one row of inputs that wraps on small screens ---------- */
@@ -179,6 +180,11 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
+}
+
+/* Filters sitting side by side in a toolbar share its spacing */
+.ui-toolbar .ui-filter {
+  margin-bottom: 0;
 }
 
 /* "← Back to ..." button above a detail page's title */

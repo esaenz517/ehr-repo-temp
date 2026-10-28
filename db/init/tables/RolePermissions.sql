@@ -75,7 +75,9 @@ FROM (
         ('FACULTY_INSTRUCTOR', 'assignment.read'),
         ('FACULTY_INSTRUCTOR', 'assignment.update'),
         ('FACULTY_INSTRUCTOR', 'assignment.manage'),
-        ('FACULTY_INSTRUCTOR', 'course.read'),       
+        ('FACULTY_INSTRUCTOR', 'course.read'),
+        ('FACULTY_INSTRUCTOR', 'course.create'),
+        ('FACULTY_INSTRUCTOR', 'course.update'),
 
         --Student Permissions
         ('STUDENT', 'history.read'),
