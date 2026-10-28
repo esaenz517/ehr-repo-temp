@@ -339,18 +339,48 @@ export function SoapEditor({
 
                 {context.recent_labs.length ? (
                     <ul>
-                        {context.recent_labs.map(
-                            (l, i) => (
-                                <li key={i}>
-                                    {l.test_name}: {l.result}{" "}
-                                    {l.unit || ""}
-                                    {l.flag
-                                        ? ` (${l.flag})`
-                                        : ""}{" "}
-                                    · {formatUtc(l.collected_at)}
+                        {context.recent_labs.map((l, i) => {
+                            const flag = l.flag?.trim() ?? "";
+                            const isAbnormal =
+                                flag !== "" &&
+                                !["normal", "none", "n", "within range"].includes(
+                                    flag.toLowerCase()
+                                );
+
+                            return (
+                                <li
+                                    key={i}
+                                    style={{
+                                        borderLeft: isAbnormal
+                                            ? "4px solid #dc2626"
+                                            : undefined,
+                                        backgroundColor: isAbnormal
+                                            ? "#fef2f2"
+                                            : undefined,
+                                        padding: "8px",
+                                        marginBottom: "6px",
+                                        borderRadius: "4px",
+                                    }}
+                                >
+                                    {l.test_name}: {l.result} {l.unit || ""}
+
+                                    {isAbnormal ? (
+                                        <strong
+                                            role="alert"
+                                            style={{ color: "#b91c1c" }}
+                                        >
+                                            {" "}⚠ {flag}
+                                        </strong>
+                                    ) : flag ? (
+                                        <span style={{ color: "#15803d" }}>
+                                            {" "}({flag})
+                                        </span>
+                                    ) : null}
+
+                                    {" "}· {formatUtc(l.collected_at)}
                                 </li>
-                            )
-                        )}
+                            );
+                        })}
                     </ul>
                 ) : (
                     <p className="note-empty">
