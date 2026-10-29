@@ -1,5 +1,6 @@
 import { Field } from "../FormField";
 import { useStaff } from "../../hooks/useStaff";
+import "../Cases/cases.css";
 
 //AI was used to assist in building this section as dev assigned to it is unfamiliar with how this works.
 
@@ -20,6 +21,11 @@ export const EMPTY_ASSIGNMENT: AssignmentValues = {
   assignmentType: "graded",
   studentIds: [],
 };
+
+const MODES: { value: AssignmentType; label: string }[] = [
+  { value: "graded", label: "Graded" },
+  { value: "practice", label: "Practice" },
+];
 
 interface AssignmentSectionProps {
   values: AssignmentValues;
@@ -62,36 +68,45 @@ export function AssignmentSection({ values, onChange }: AssignmentSectionProps) 
           />
         </Field>
 
-        <Field id="assign-mode" label="Mode">
-          <select
-            id="assign-mode"
-            value={values.assignmentType}
-            onChange={(e) => onChange("assignmentType", e.target.value as AssignmentType)}
-          >
-            <option value="graded">Graded</option>
-            <option value="practice">Practice</option>
-          </select>
-        </Field>
+        <div className="form-field">
+          <span id="assign-mode-label" className="case-field-label">Mode</span>
+          <div className="case-segmented" role="radiogroup" aria-labelledby="assign-mode-label">
+            {MODES.map((mode) => (
+              <label
+                key={mode.value}
+                className={`case-segmented-option${values.assignmentType === mode.value ? " case-segmented-option--selected" : ""}`}
+              >
+                <input
+                  type="radio"
+                  name="assign-mode"
+                  value={mode.value}
+                  checked={values.assignmentType === mode.value}
+                  onChange={() => onChange("assignmentType", mode.value)}
+                />
+                {mode.label}
+              </label>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="form-field">
-        <label>Students</label>
+        <span className="case-field-label">Students</span>
         {loading ? (
           <p className="ui-muted">Loading...</p>
         ) : students.length === 0 ? (
-          <p className="ui-muted">No students found.</p>
+          <p className="case-empty">No students found.</p>
         ) : (
-          <div className="ui-checkbox-group">
-            {students.map((s) => (
-              <label key={s.staffid} className="ui-checkbox">
-                <input
-                  type="checkbox"
-                  checked={values.studentIds.includes(s.staffid)}
-                  onChange={() => toggleStudent(s.staffid)}
-                />
-                {s.last_name}, {s.first_name}
-              </label>
-            ))}
+          <div className="case-students">
+            {students.map((s) => {
+              const selected = values.studentIds.includes(s.staffid);
+              return (
+                <label key={s.staffid} className={`case-student${selected ? " case-student--selected" : ""}`}>
+                  <input type="checkbox" checked={selected} onChange={() => toggleStudent(s.staffid)} />
+                  {s.last_name}, {s.first_name}
+                </label>
+              );
+            })}
           </div>
         )}
         <span className="field-hint">Leave empty to create the case without assigning it.</span>

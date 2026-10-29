@@ -126,6 +126,17 @@ export function useCreateCase() {
     }
   };
 
+  // Switch to picking an existing patient. Demographics and chart data stay
+  // empty until one is chosen; submitting before then shows "Select an existing patient."
+  const startExistingPatient = () => {
+    setPatientMode("existing");
+    setSelectedPatientId(null);
+    setDemographics(EMPTY_DEMOGRAPHICS);
+    setChartData(EMPTY_CHART_DATA);
+    setFieldErrors({});
+    setError(null);
+  };
+
   // Switch the form back to creating a brand-new patient.
   const selectNewPatient = () => {
     setPatientMode("new");
@@ -381,6 +392,7 @@ export function useCreateCase() {
     updateCaseContent,
     updateAssignment,
     selectExistingPatient,
+    startExistingPatient,
     selectNewPatient,
     submit,
   };

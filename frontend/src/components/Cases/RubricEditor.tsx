@@ -1,4 +1,5 @@
 import type { RubricCategory } from "../../types";
+import { RemoveButton, RowGroup } from "./RowGroup";
 
 // Display names for the rubric categories (also used when scoring and in the student's grade).
 export const RUBRIC_CATEGORY_LABELS: Record<RubricCategory, string> = {
@@ -42,61 +43,67 @@ export function RubricEditor({ rows, onChange, error }: RubricEditorProps) {
 
   const total = rows.reduce((sum, row) => sum + (parsePoints(row.points) ?? 0), 0);
 
-  // Every button below is type="button" so it doesn't submit the whole form.
+  // Remove buttons are type="button" (inside RemoveButton) so they don't submit the whole form.
   return (
     <div className="form-stack">
-      <p className="field-hint">
+      <p className="field-hint ui-flush">
         Write trap avoidance as correct behavior, e.g. "Avoided NSAIDs (patient on warfarin)". Students see each
         label and its points after you sign off; grading notes stay private to instructors.
       </p>
 
-      {rows.map((row, i) => (
-        <div key={i} className="ui-form-row ui-form-row--spaced">
-          <select
-            className="ui-input"
-            aria-label="Category"
-            value={row.category}
-            onChange={(e) => update(i, "category", e.target.value)}
-          >
-            {(Object.keys(RUBRIC_CATEGORY_LABELS) as RubricCategory[]).map((c) => (
-              <option key={c} value={c}>{RUBRIC_CATEGORY_LABELS[c]}</option>
-            ))}
-          </select>
-          <input
-            aria-label="What the student should do"
-            placeholder="What the student should do *"
-            value={row.label}
-            maxLength={300}
-            onChange={(e) => update(i, "label", e.target.value)}
-            className="ui-input ui-input--wide"
-          />
-          <input
-            aria-label="Points"
-            placeholder="Points *"
-            type="number"
-            min={1}
-            step={1}
-            value={row.points}
-            onChange={(e) => update(i, "points", e.target.value)}
-            className="ui-input ui-input--narrow"
-          />
-          <input
-            aria-label="Grading notes (instructors only)"
-            placeholder="Grading notes (instructors only)"
-            value={row.guidance}
-            maxLength={1000}
-            onChange={(e) => update(i, "guidance", e.target.value)}
-            className="ui-input ui-input--wide"
-          />
-          <button type="button" className="ui-button ui-button--danger ui-button--small" onClick={() => remove(i)}>Remove</button>
-        </div>
-      ))}
-
-      {error && <p className="field-error">{error}</p>}
-      <div className="ui-toolbar">
-        <button type="button" className="ui-button ui-button--secondary" onClick={add}>Add rubric item</button>
-        {rows.length > 0 && <span className="field-hint">Total: {total} points</span>}
-      </div>
+      <RowGroup
+        title="Rubric items"
+        count={rows.length}
+        columns={["Category", "What the student should do *", "Points *", "Grading notes (instructors only)"]}
+        layout="rubric"
+        emptyText="No rubric items yet. Add the markers students are graded on."
+        addLabel="Add rubric item"
+        onAdd={add}
+        extra={rows.length > 0 && `Total: ${total} points`}
+        error={error}
+      >
+        {rows.map((row, i) => (
+          <div key={i} className="case-grid-row">
+            <select
+              className="ui-input"
+              aria-label="Category"
+              value={row.category}
+              onChange={(e) => update(i, "category", e.target.value)}
+            >
+              {(Object.keys(RUBRIC_CATEGORY_LABELS) as RubricCategory[]).map((c) => (
+                <option key={c} value={c}>{RUBRIC_CATEGORY_LABELS[c]}</option>
+              ))}
+            </select>
+            <input
+              aria-label="What the student should do"
+              placeholder="e.g. Identified the drug interaction"
+              value={row.label}
+              maxLength={300}
+              onChange={(e) => update(i, "label", e.target.value)}
+              className="ui-input"
+            />
+            <input
+              aria-label="Points"
+              placeholder="Pts"
+              type="number"
+              min={1}
+              step={1}
+              value={row.points}
+              onChange={(e) => update(i, "points", e.target.value)}
+              className="ui-input"
+            />
+            <input
+              aria-label="Grading notes (instructors only)"
+              placeholder="Optional"
+              value={row.guidance}
+              maxLength={1000}
+              onChange={(e) => update(i, "guidance", e.target.value)}
+              className="ui-input"
+            />
+            <RemoveButton label={`Remove rubric item ${i + 1}`} onClick={() => remove(i)} />
+          </div>
+        ))}
+      </RowGroup>
     </div>
   );
 }

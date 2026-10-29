@@ -42,6 +42,7 @@ USING (
 
         ('drug.read',   'drug',   'read'),
         ('drug.create', 'drug',   'create'),
+        ('drug.update', 'drug',   'update'),
         ('drug.delete', 'drug',   'delete'),
 
         ('room.read',   'room',   'read'),

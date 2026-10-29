@@ -3,7 +3,7 @@ import { DrugList } from "./Drugs/DrugList";
 import { useDrugs } from "../hooks/useDrugs";
 
 export function DrugsPage() {
-  const { drugs, loading, error, create, remove } = useDrugs();
+  const { drugs, loading, error, create, update, remove } = useDrugs();
 
   return (
     <div className="ui-page">
@@ -12,7 +12,7 @@ export function DrugsPage() {
       <DrugForm onSubmit={create} />
 
       {error && <p className="ui-error">{error}</p>}
-      {loading ? <p className="ui-muted">Loading...</p> : <DrugList drugs={drugs} onDelete={remove} />}
+      {loading ? <p className="ui-muted">Loading...</p> : <DrugList drugs={drugs} onUpdate={update} onDelete={remove} />}
     </div>
   );
 }

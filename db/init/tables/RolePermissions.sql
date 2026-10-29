@@ -64,6 +64,7 @@ FROM (
         ('FACULTY_INSTRUCTOR', 'provider.delete'),
         ('FACULTY_INSTRUCTOR', 'drug.read'),
         ('FACULTY_INSTRUCTOR', 'drug.create'),
+        ('FACULTY_INSTRUCTOR', 'drug.update'),
         ('FACULTY_INSTRUCTOR', 'drug.delete'),
         ('FACULTY_INSTRUCTOR', 'room.read'),
         ('FACULTY_INSTRUCTOR', 'room.create'),
