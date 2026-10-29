@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { CreateStaffInput, staffApi } from "../api/staff";
+import { CreateStaffInput, staffApi, UpdateStaffInput } from "../api/staff";
 import type { Staff } from "../types";
 
 export function useStaff() {
@@ -32,6 +32,18 @@ export function useStaff() {
     }
   };
 
+  // Returns true when saved, so the list knows to close the edit row.
+  const update = async (staffId: number, changes: UpdateStaffInput) => {
+    try {
+      await staffApi.update(staffId, changes);
+      await load();
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update staff member");
+      return false;
+    }
+  };
+
   const remove = async (staffId: number) => {
     try {
       await staffApi.remove(staffId);
@@ -41,5 +53,5 @@ export function useStaff() {
     }
   };
 
-  return { staff, loading, error, create, remove, reload: load };
+  return { staff, loading, error, create, update, remove, reload: load };
 }

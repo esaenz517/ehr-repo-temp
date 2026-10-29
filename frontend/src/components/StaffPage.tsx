@@ -20,6 +20,7 @@ export function StaffPage({
     loading,
     error,
     create,
+    update,
     remove,
     reload,
   } = useStaff();
@@ -71,6 +72,7 @@ export function StaffPage({
       ) : (
         <StaffList
           staff={staff}
+          onUpdate={update}
           onDelete={remove}
         />
       )}

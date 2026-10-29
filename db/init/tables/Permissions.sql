@@ -34,6 +34,7 @@ USING (
 
         ('staff.read',     'staff',     'read'),
         ('staff.create',   'staff',     'create'),
+        ('staff.update',   'staff',     'update'),
         ('staff.delete',   'staff',     'delete'),
 
         ('provider.read',   'provider',   'read'),
