@@ -3,7 +3,7 @@ import { ProviderList } from "./Providers/ProviderList";
 import { useProviders } from "../hooks/useProviders";
 
 export function ProvidersPage() {
-  const { providers, loading, error, create, remove } = useProviders();
+  const { providers, loading, error, create, update, remove } = useProviders();
 
   return (
     <div className="ui-page">
@@ -12,7 +12,7 @@ export function ProvidersPage() {
       <ProviderForm onSubmit={create} />
 
       {error && <p className="ui-error">{error}</p>}
-      {loading ? <p className="ui-muted">Loading...</p> : <ProviderList providers={providers} onDelete={remove} />}
+      {loading ? <p className="ui-muted">Loading...</p> : <ProviderList providers={providers} onUpdate={update} onDelete={remove} />}
     </div>
   );
 }

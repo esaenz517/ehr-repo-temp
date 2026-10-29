@@ -38,6 +38,7 @@ USING (
 
         ('provider.read',   'provider',   'read'),
         ('provider.create', 'provider',   'create'),
+        ('provider.update', 'provider',   'update'),
         ('provider.delete', 'provider',   'delete'),
 
         ('drug.read',   'drug',   'read'),

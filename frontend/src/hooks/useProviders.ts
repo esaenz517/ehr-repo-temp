@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { CreateProviderInput, providersApi } from "../api/providers";
+import { CreateProviderInput, providersApi, UpdateProviderInput } from "../api/providers";
 import type { Provider } from "../types";
 
 export function useProviders() {
@@ -32,6 +32,18 @@ export function useProviders() {
     }
   };
 
+  // Returns true when saved, so the list knows to close the edit row.
+  const update = async (providerId: number, changes: UpdateProviderInput) => {
+    try {
+      await providersApi.update(providerId, changes);
+      await load();
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update provider");
+      return false;
+    }
+  };
+
   const remove = async (providerId: number) => {
     try {
       await providersApi.remove(providerId);
@@ -41,5 +53,5 @@ export function useProviders() {
     }
   };
 
-  return { providers, loading, error, create, remove };
+  return { providers, loading, error, create, update, remove };
 }

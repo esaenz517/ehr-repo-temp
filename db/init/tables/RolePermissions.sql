@@ -61,6 +61,7 @@ FROM (
         ('FACULTY_INSTRUCTOR', 'staff.read'),
         ('FACULTY_INSTRUCTOR', 'provider.read'),
         ('FACULTY_INSTRUCTOR', 'provider.create'),
+        ('FACULTY_INSTRUCTOR', 'provider.update'),
         ('FACULTY_INSTRUCTOR', 'provider.delete'),
         ('FACULTY_INSTRUCTOR', 'drug.read'),
         ('FACULTY_INSTRUCTOR', 'drug.create'),
