@@ -123,5 +123,14 @@
 .patients-form-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
   margin-top: 16px;
+}
+
+/* Edit form opened under a patient's row: the row panel already draws the box */
+.patients-form--edit {
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-shadow: none;
 }

@@ -1,18 +1,24 @@
 import { useState } from "react";
-import type { Patient } from "../../types";
+import type { UpdatePatientInput } from "../../api/patients";
+import type { Drug, Patient, Provider } from "../../types";
 import { MedicalHistoryPanel } from "../MedicalHistory/MedicalHistoryPanel";
 import { AppointmentPanel } from "../Appointments/AppointmentPanel";
 import { BillingChargePanel } from "../Billing/BillingChargePanel";
+import { PatientForm } from "./PatientForm";
 
 interface PatientListProps {
   patients: Patient[];
+  providers: Provider[]; // options for the edit form
+  drugs: Drug[];
+  onUpdate: (patientId: number, changes: UpdatePatientInput) => Promise<boolean>;
   onDelete: (patientId: number) => void;
 }
 
 // Toggle buttons are outlined while closed and solid blue while their panel is open
 const toggleClass = (open: boolean) => (open ? "ui-button" : "ui-button ui-button--secondary");
 
-export function PatientList({ patients, onDelete }: PatientListProps) {
+export function PatientList({ patients, providers, drugs, onUpdate, onDelete }: PatientListProps) {
+  const [editingPatientId, setEditingPatientId] = useState<number | null>(null);
   const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
 
   const [appointmentPatientId, setAppointmentPatientId] =
@@ -31,6 +37,7 @@ export function PatientList({ patients, onDelete }: PatientListProps) {
         const historyOpen = selectedPatientId === patient.patient_id;
         const appointmentsOpen = appointmentPatientId === patient.patient_id;
         const chargesOpen = billingPatientId === patient.patient_id;
+        const editing = editingPatientId === patient.patient_id;
 
         return (
           <li key={patient.patient_id} className="ui-row ui-row--wrap">
@@ -64,6 +71,13 @@ export function PatientList({ patients, onDelete }: PatientListProps) {
 
             <div className="ui-row-actions">
               <button
+                className={toggleClass(editing)}
+                onClick={() => setEditingPatientId(editing ? null : patient.patient_id)}
+              >
+                {editing ? "Close Edit" : "Edit"}
+              </button>
+
+              <button
                 className={toggleClass(historyOpen)}
                 onClick={() => setSelectedPatientId(historyOpen ? null : patient.patient_id)}
               >
@@ -92,6 +106,19 @@ export function PatientList({ patients, onDelete }: PatientListProps) {
               </button>
             </div>
 
+            {editing && (
+              <div className="ui-row-detail">
+                <PatientForm
+                  patient={patient}
+                  providers={providers}
+                  drugs={drugs}
+                  onSubmit={async (input) => {
+                    if (await onUpdate(patient.patient_id, input)) setEditingPatientId(null);
+                  }}
+                  onCancel={() => setEditingPatientId(null)}
+                />
+              </div>
+            )}
             {historyOpen && (
               <div className="ui-row-detail">
                 <MedicalHistoryPanel patientId={patient.patient_id} />

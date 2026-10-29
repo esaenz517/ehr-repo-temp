@@ -5,7 +5,7 @@ import { usePatients } from "../hooks/usePatients";
 import { useProviders } from "../hooks/useProviders";
 
 export function PatientsPage() {
-  const { patients, loading, error, create, remove } = usePatients();
+  const { patients, loading, error, create, update, remove } = usePatients();
   const { providers } = useProviders();
   const { drugs } = useDrugs();
 
@@ -16,7 +16,11 @@ export function PatientsPage() {
       <PatientForm providers={providers} drugs={drugs} onSubmit={create} />
 
       {error && <p className="ui-error">{error}</p>}
-      {loading ? <p className="ui-muted">Loading...</p> : <PatientList patients={patients} onDelete={remove} />}
+      {loading ? (
+        <p className="ui-muted">Loading...</p>
+      ) : (
+        <PatientList patients={patients} providers={providers} drugs={drugs} onUpdate={update} onDelete={remove} />
+      )}
     </div>
   );
 }

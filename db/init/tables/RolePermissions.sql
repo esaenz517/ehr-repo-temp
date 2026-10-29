@@ -54,6 +54,7 @@ FROM (
     VALUES
         ('FACULTY_INSTRUCTOR', 'patient.read'),
         ('FACULTY_INSTRUCTOR', 'patient.create'),
+        ('FACULTY_INSTRUCTOR', 'patient.update'),
         ('FACULTY_INSTRUCTOR', 'patient.delete'),
         ('FACULTY_INSTRUCTOR', 'case.read'),
         ('FACULTY_INSTRUCTOR', 'case.create'),

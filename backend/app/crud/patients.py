@@ -1,13 +1,16 @@
 '''
 Patients CRUD
-DB access functions for patients - list, get, create, delete.
+DB access functions for patients - list, get, create, update, delete.
 '''
 
 from sqlalchemy.orm import Session
 
 from app.models.drugs import Drug as DrugModel
 from app.models.patients import Patient as PatientModel
-from app.schemas.patients import PatientCreate
+from app.schemas.patients import PatientCreate, PatientUpdate
+
+# Columns that may be set back to NULL. Every other column is NOT NULL.
+NULLABLE_FIELDS = {"mrn", "middle_name", "preferred_name", "provider_id"}
 
 
 # Gets all patients from the DB.
@@ -39,6 +42,31 @@ def create_patient(db: Session, patient: PatientCreate):
         db_patient.drugs = db.query(DrugModel).filter(DrugModel.drug_id.in_(patient.drug_ids)).all()
     
     db.add(db_patient)
+    db.commit()
+    db.refresh(db_patient)
+    return db_patient
+
+
+# Changes only the fields that were sent. Returns None if the patient doesn't exist.
+# Raises IntegrityError if the new MRN or provider is invalid (the router turns it into a 409).
+def update_patient(db: Session, patient_id: int, changes: PatientUpdate):
+    db_patient = get_patient(db, patient_id)
+    if db_patient is None:
+        return None
+
+    data = changes.model_dump(exclude_unset=True)
+    drug_ids = data.pop("drug_ids", None)
+
+    for field, value in data.items():
+        if value is None and field not in NULLABLE_FIELDS:
+            continue
+        setattr(db_patient, field, value)
+
+    # Replacing the list only adds/removes the drugs that changed, so drugs the
+    # patient keeps also keep their dose, route, and frequency.
+    if drug_ids is not None:
+        db_patient.drugs = db.query(DrugModel).filter(DrugModel.drug_id.in_(drug_ids)).all() if drug_ids else []
+
     db.commit()
     db.refresh(db_patient)
     return db_patient

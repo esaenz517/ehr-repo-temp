@@ -26,6 +26,7 @@ USING (
     VALUES
         ('patient.read',   'patient',   'read'),
         ('patient.create', 'patient',   'create'),
+        ('patient.update', 'patient',   'update'),
         ('patient.delete', 'patient',   'delete'),
 
         ('case.read',   'case',   'read'),
