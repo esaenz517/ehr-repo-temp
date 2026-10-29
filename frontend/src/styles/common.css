@@ -52,6 +52,84 @@
   white-space: nowrap;
 }
 
+/* ---------- Filter bar: labeled dropdowns above a list, with a result count ---------- */
+
+.ui-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius);
+}
+
+.ui-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
+}
+
+/* .ui-input's flex-basis is meant for rows; in this column it would set the height */
+.ui-filter-field .ui-input {
+  flex: none;
+}
+
+.ui-filter-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* A filter that is narrowing the list stands out */
+.ui-filter-field--active .ui-filter-label {
+  color: var(--color-primary);
+}
+
+.ui-filter-field--active .ui-input {
+  border-color: var(--color-primary);
+  background: var(--color-primary-tint);
+  font-weight: 600;
+}
+
+/* Clear button right after the last dropdown, same height as the dropdowns */
+.ui-filter-clear {
+  height: 32px;
+}
+
+/* Result count, pushed to the right end of the bar */
+.ui-filter-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  min-height: 32px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.ui-filter-summary strong {
+  color: var(--color-primary);
+}
+
+@media (max-width: 640px) {
+  .ui-filter-field {
+    flex: 1 1 140px;
+  }
+
+  .ui-filter-summary {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
 /* ---------- Add form bar: one row of inputs that wraps on small screens ---------- */
 
 .ui-form-bar {
@@ -180,11 +258,6 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
-}
-
-/* Filters sitting side by side in a toolbar share its spacing */
-.ui-toolbar .ui-filter {
-  margin-bottom: 0;
 }
 
 /* "← Back to ..." button above a detail page's title */
@@ -321,6 +394,7 @@
 .ui-badge--error       { background: var(--color-error-bg); color: var(--color-error); }
 .ui-badge--warning     { background: var(--color-warning-bg); color: var(--color-warning); }
 .ui-badge--success     { background: var(--color-success-bg); color: var(--color-success); }
+.ui-badge--muted       { background: var(--color-bg-strong); color: var(--color-text-muted); }
 
 /* ---------- Lab results (normal vs abnormal flag) ---------- */
 
@@ -368,13 +442,18 @@
 .ui-table th,
 .ui-table td {
   padding: 10px 12px;
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-bg); /* same row divider as .ui-row */
   text-align: left;
   vertical-align: middle;
 }
 
+.ui-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 .ui-table th {
-  background: var(--color-bg);
+  background: var(--color-surface);
+  border-bottom-color: var(--color-border-light);
   color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 700;
@@ -384,6 +463,27 @@
 
 .ui-table tbody tr:hover {
   background: var(--color-bg);
+}
+
+/* Frame for a page-level table: same look as .ui-row-list (silver border, orange top) */
+.ui-table-card {
+  margin: 0 0 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-top: 4px solid var(--color-accent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* Line the outer columns up with .ui-row's 16px side padding */
+.ui-table-card .ui-table th:first-child,
+.ui-table-card .ui-table td:first-child {
+  padding-left: 16px;
+}
+
+.ui-table-card .ui-table th:last-child,
+.ui-table-card .ui-table td:last-child {
+  padding-right: 16px;
 }
 
 /* ---------- Buttons ---------- */

@@ -4,9 +4,9 @@ import { CourseList } from "./Courses/CourseList";
 import { CourseFilter, useCourses } from "../hooks/useCourses";
 
 const FILTERS: { value: CourseFilter; label: string }[] = [
-  { value: "all", label: "All" },
+  { value: "all", label: "All statuses" },
   { value: "active", label: "Active" },
-  { value: "inactive", label: "Deactivated" },
+  { value: "inactive", label: "Inactive" },
 ];
 
 // Create, list, filter, rename, and deactivate/reactivate courses.
@@ -22,15 +22,22 @@ export function CoursesPage() {
     (c) => (year === "all" || c.term_year === Number(year)) && (term === "all" || c.term === term)
   );
 
+  const filtering = filter !== "all" || year !== "all" || term !== "all";
+  const clearFilters = () => {
+    setFilter("all");
+    setYear("all");
+    setTerm("all");
+  };
+
   return (
     <div className="ui-page">
       <h1 className="ui-page-title">Courses</h1>
 
       <CourseForm onSubmit={create} />
 
-      <div className="ui-toolbar">
-        <label className="ui-filter">
-          Show
+      <div className="ui-filter-bar" role="search" aria-label="Filter courses">
+        <label className={`ui-filter-field${filter !== "all" ? " ui-filter-field--active" : ""}`}>
+          <span className="ui-filter-label">Status</span>
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as CourseFilter)}
@@ -42,8 +49,8 @@ export function CoursesPage() {
           </select>
         </label>
 
-        <label className="ui-filter">
-          Year
+        <label className={`ui-filter-field${year !== "all" ? " ui-filter-field--active" : ""}`}>
+          <span className="ui-filter-label">Year</span>
           <select value={year} onChange={(e) => setYear(e.target.value)} className="ui-input">
             <option value="all">All years</option>
             {yearOptions.map((y) => (
@@ -52,8 +59,8 @@ export function CoursesPage() {
           </select>
         </label>
 
-        <label className="ui-filter">
-          Semester
+        <label className={`ui-filter-field${term !== "all" ? " ui-filter-field--active" : ""}`}>
+          <span className="ui-filter-label">Semester</span>
           <select value={term} onChange={(e) => setTerm(e.target.value)} className="ui-input">
             <option value="all">All semesters</option>
             {TERMS.map((t) => (
@@ -61,6 +68,20 @@ export function CoursesPage() {
             ))}
           </select>
         </label>
+
+        {filtering && (
+          <button type="button" className="ui-button ui-button--secondary ui-filter-clear" onClick={clearFilters}>
+            Clear filters
+          </button>
+        )}
+
+        <div className="ui-filter-summary">
+          {!loading && (
+            <span aria-live="polite">
+              Showing <strong>{shown.length}</strong> of {courses.length} course{courses.length === 1 ? "" : "s"}
+            </span>
+          )}
+        </div>
       </div>
 
       {error && <p className="ui-error">{error}</p>}

@@ -268,7 +268,7 @@ export function InstructorProgressPage() {
                     )}
 
                     {shown.length > 0 && (
-                        <div className="ui-card ui-table-wrap">
+                        <div className="ui-table-card ui-table-wrap">
                             <table className="ui-table">
                                 <thead>
                                     <tr>
