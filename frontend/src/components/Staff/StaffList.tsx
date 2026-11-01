@@ -4,6 +4,7 @@ import type { Staff } from "../../types";
 
 interface StaffListProps {
   staff: Staff[];
+  emptyText: string; // shown when there are no rows (none yet, or none match the filters)
   onUpdate: (staffId: number, changes: UpdateStaffInput) => Promise<boolean>;
   onDelete: (staffId: number) => void;
 }
@@ -20,7 +21,7 @@ const TEXT_FIELDS: { key: Exclude<keyof Draft, "admin">; label: string }[] = [
 // Displays every staff member as a row. Edit turns the row into the same fields
 // as the Add Staff form, with Save and Cancel (Enter saves, Escape cancels).
 // The student flag isn't editable; students are managed through the student workflow.
-export function StaffList({ staff, onUpdate, onDelete }: StaffListProps) {
+export function StaffList({ staff, emptyText, onUpdate, onDelete }: StaffListProps) {
   // Only one staff member is edited at a time: their id and the draft values.
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draft, setDraft] = useState<Draft>({
@@ -58,7 +59,7 @@ export function StaffList({ staff, onUpdate, onDelete }: StaffListProps) {
   };
 
   if (staff.length === 0) {
-    return <p className="ui-row-empty">No staff yet.</p>;
+    return <p className="ui-row-empty">{emptyText}</p>;
   }
 
   return (
