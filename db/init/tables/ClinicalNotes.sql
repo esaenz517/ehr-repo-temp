@@ -16,6 +16,11 @@ BEGIN
         SensitivityClassification NVARCHAR(40) NOT NULL DEFAULT 'general',
         CurrentVersion INT NOT NULL DEFAULT 1,
         IsArchived BIT NOT NULL DEFAULT 0,
+
+        -- Instructor approval metadata.
+        ApprovedAt DATETIME2 NULL,
+        ApprovedByUserId INT NULL REFERENCES dbo.Users(UserId),
+
         CONSTRAINT CK_ClinicalNotes_Sensitivity
             CHECK (SensitivityClassification IN ('general', 'restricted')),
         CONSTRAINT CK_ClinicalNotes_Version
@@ -27,7 +32,7 @@ BEGIN
 END
 GO
 
--- Preserve instructor approval even if assignment status changes.
+-- Upgrade existing databases without replacing notes or approval history.
 IF COL_LENGTH('dbo.ClinicalNotes', 'ApprovedAt') IS NULL
 BEGIN
     ALTER TABLE dbo.ClinicalNotes
