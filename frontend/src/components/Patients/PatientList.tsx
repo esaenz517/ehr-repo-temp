@@ -8,6 +8,7 @@ import { PatientForm } from "./PatientForm";
 
 interface PatientListProps {
   patients: Patient[];
+  emptyText: string; // shown when there are no rows (none yet, or none match the filters)
   providers: Provider[]; // options for the edit form
   drugs: Drug[];
   onUpdate: (patientId: number, changes: UpdatePatientInput) => Promise<boolean>;
@@ -17,7 +18,7 @@ interface PatientListProps {
 // Toggle buttons are outlined while closed and solid blue while their panel is open
 const toggleClass = (open: boolean) => (open ? "ui-button" : "ui-button ui-button--secondary");
 
-export function PatientList({ patients, providers, drugs, onUpdate, onDelete }: PatientListProps) {
+export function PatientList({ patients, emptyText, providers, drugs, onUpdate, onDelete }: PatientListProps) {
   const [editingPatientId, setEditingPatientId] = useState<number | null>(null);
   const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
 
@@ -28,7 +29,7 @@ export function PatientList({ patients, providers, drugs, onUpdate, onDelete }: 
     useState<number | null>(null);
 
   if (patients.length === 0) {
-    return <p className="ui-row-empty">No patients yet.</p>;
+    return <p className="ui-row-empty">{emptyText}</p>;
   }
 
   return (
