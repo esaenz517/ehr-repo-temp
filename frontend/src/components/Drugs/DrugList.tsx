@@ -4,13 +4,14 @@ import type { Drug } from "../../types";
 
 interface DrugListProps {
   drugs: Drug[];
+  emptyText: string; // shown when there are no rows (none yet, or none match the filters)
   onUpdate: (drugId: number, changes: UpdateDrugInput) => Promise<boolean>;
   onDelete: (drugId: number) => void;
 }
 
 // Displays every drug as a row. Edit turns the row into name/description
 // inputs with Save and Cancel (Enter saves, Escape cancels).
-export function DrugList({ drugs, onUpdate, onDelete }: DrugListProps) {
+export function DrugList({ drugs, emptyText, onUpdate, onDelete }: DrugListProps) {
   // Only one drug is edited at a time: its id and the draft values.
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draftName, setDraftName] = useState("");
@@ -37,7 +38,7 @@ export function DrugList({ drugs, onUpdate, onDelete }: DrugListProps) {
   };
 
   if (drugs.length === 0) {
-    return <p className="ui-row-empty">No drugs yet.</p>;
+    return <p className="ui-row-empty">{emptyText}</p>;
   }
 
   return (
