@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { UpdateDrugInput } from "../../api/drugs";
 import type { Drug } from "../../types";
+import "./drugs.css";
 
 interface DrugListProps {
   drugs: Drug[];
@@ -9,8 +10,8 @@ interface DrugListProps {
   onDelete: (drugId: number) => void;
 }
 
-// Displays every drug as a row. Edit turns the row into name/description
-// inputs with Save and Cancel (Enter saves, Escape cancels).
+// Displays every drug as a table row: name and description. Edit turns the
+// row's cells into inputs with Save and Cancel (Enter saves, Escape cancels).
 export function DrugList({ drugs, emptyText, onUpdate, onDelete }: DrugListProps) {
   // Only one drug is edited at a time: its id and the draft values.
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -42,67 +43,92 @@ export function DrugList({ drugs, emptyText, onUpdate, onDelete }: DrugListProps
   }
 
   return (
-    <ul className="ui-row-list">
-      {drugs.map((drug) => {
-        const editing = editingId === drug.drug_id;
-        return (
-          <li key={drug.drug_id} className="ui-row">
-            {editing ? (
-              <div className="ui-row-main ui-form-row">
-                <input
-                  value={draftName}
-                  onChange={(e) => setDraftName(e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(e, drug.drug_id)}
-                  aria-label={`Name for ${drug.name}`}
-                  placeholder="Name"
-                  maxLength={200}
-                  autoFocus
-                  className="ui-input"
-                />
-                <input
-                  value={draftDescription}
-                  onChange={(e) => setDraftDescription(e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(e, drug.drug_id)}
-                  aria-label={`Description for ${drug.name}`}
-                  placeholder="Description (optional)"
-                  maxLength={1000}
-                  className="ui-input ui-input--wide"
-                />
-              </div>
-            ) : (
-              <div className="ui-row-main">
-                <div className="ui-row-title">{drug.name}</div>
-                {drug.description && <div className="ui-row-subtitle">{drug.description}</div>}
-              </div>
-            )}
-            <div className="ui-row-actions">
-              {editing ? (
-                <>
-                  <button
-                    className="ui-button"
-                    onClick={() => saveEdit(drug.drug_id)}
-                    disabled={!draftName.trim()}
-                  >
-                    Save
-                  </button>
-                  <button className="ui-button ui-button--secondary" onClick={() => setEditingId(null)}>
-                    Cancel
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button className="ui-button ui-button--secondary" onClick={() => startEdit(drug)}>
-                    Edit
-                  </button>
-                  <button className="ui-button ui-button--danger" onClick={() => onDelete(drug.drug_id)}>
-                    Delete
-                  </button>
-                </>
-              )}
-            </div>
-          </li>
-        );
-      })}
-    </ul>
+    <div className="ui-table-card ui-table-wrap">
+      <table className="ui-table drugs-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th><span className="ui-visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {drugs.map((drug) => {
+            const editing = editingId === drug.drug_id;
+            return (
+              <tr key={drug.drug_id}>
+                <td className="drugs-name">
+                  {editing ? (
+                    <input
+                      value={draftName}
+                      onChange={(e) => setDraftName(e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(e, drug.drug_id)}
+                      aria-label={`Name for ${drug.name}`}
+                      placeholder="Name"
+                      maxLength={200}
+                      autoFocus
+                      className="ui-input ui-input--full"
+                    />
+                  ) : (
+                    drug.name
+                  )}
+                </td>
+                <td className="drugs-description">
+                  {editing ? (
+                    <input
+                      value={draftDescription}
+                      onChange={(e) => setDraftDescription(e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(e, drug.drug_id)}
+                      aria-label={`Description for ${drug.name}`}
+                      placeholder="Description (optional)"
+                      maxLength={1000}
+                      className="ui-input ui-input--full"
+                    />
+                  ) : (
+                    drug.description || <span className="ui-muted">—</span>
+                  )}
+                </td>
+                <td className="drugs-actions">
+                  <div className="ui-row-actions">
+                    {editing ? (
+                      <>
+                        <button
+                          className="ui-button ui-button--small"
+                          onClick={() => saveEdit(drug.drug_id)}
+                          disabled={!draftName.trim()}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="ui-button ui-button--secondary ui-button--small"
+                          onClick={() => setEditingId(null)}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          className="ui-button ui-button--secondary ui-button--small"
+                          onClick={() => startEdit(drug)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="ui-button ui-button--danger ui-button--small"
+                          onClick={() => onDelete(drug.drug_id)}
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
