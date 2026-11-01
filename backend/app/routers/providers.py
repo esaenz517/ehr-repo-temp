@@ -1,6 +1,6 @@
 """
 Providers Router
-This file defines API endpoints for managing providers. It includes routes for listing, retrieving, creating, and deleting providers.
+This file defines API endpoints for managing providers. It includes routes for listing, retrieving, creating, updating, and deleting providers.
 """
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.crud import providers as crud
 from app.database import get_db
-from app.schemas.providers import Provider, ProviderCreate
+from app.schemas.providers import Provider, ProviderCreate, ProviderUpdate
 from app.security.authorization import require_permission
 
 router = APIRouter(prefix="/providers", tags=["providers"])
@@ -41,6 +41,20 @@ def create_provider(
     current_user=Depends(require_permission("provider", "create")),
 ):
     return crud.create_provider(db, provider)
+
+
+# Partial update, e.g. {"phone": "555-0199"}.
+@router.patch("/{provider_id}", response_model=Provider)
+def update_provider(
+    provider_id: int,
+    changes: ProviderUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("provider", "update")),
+):
+    provider = crud.update_provider(db, provider_id, changes)
+    if provider is None:
+        raise HTTPException(status_code=404, detail="Provider not found")
+    return provider
 
 
 @router.delete("/{provider_id}", status_code=204)

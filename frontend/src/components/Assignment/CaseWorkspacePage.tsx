@@ -5,36 +5,28 @@ import type { ChartContext } from "../../api/clinicalNotes";
 import type { Assignment, Case } from "../../types";
 import { AssignmentNote } from "./AssignmentNote";
 import { MedicalHistoryPanel } from "../MedicalHistory/MedicalHistoryPanel";
+import { Section } from "../Section";
 
-// One boxed section of the form, with its title in the border.
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Detail({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <fieldset style={{ border: "1px solid #ddd", borderRadius: 4, marginBottom: 16, padding: 16 }}>
-      <legend style={{ fontWeight: 600, padding: "0 4px" }}>{title}</legend>
-      {children}
-    </fieldset>
+    <>
+      <dt>{label}</dt>
+      <dd>{value ?? "—"}</dd>
+    </>
   );
 }
 
-function Detail({ label, value }: { label: string; value: ReactNode }) {
-    return (
-      <div style={{ marginBottom: 4 }}>
-        <strong>{label}:</strong> {value ?? "—"}
-      </div>
-    );
-  }
-  
 // A section that stays closed until the student clicks it open to work on it.
 function WorkSection({ title, children }: { title: string; children: ReactNode }) {
-const [open, setOpen] = useState(false);
-return (
+  const [open, setOpen] = useState(false);
+  return (
     <Section title={title}>
-    <button type="button" onClick={() => setOpen((o) => !o)}>
+      <button type="button" className="ui-button ui-button--secondary" onClick={() => setOpen((o) => !o)}>
         {open ? `Close ${title.toLowerCase()}` : `Open ${title.toLowerCase()}`}
-    </button>
-    {open && <div style={{ marginTop: 12 }}>{children}</div>}
+      </button>
+      {open && <div className="ui-section-body">{children}</div>}
     </Section>
-);
+  );
 }
 
 interface CaseWorkspacePageProps {
@@ -76,28 +68,28 @@ export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignme
     const vitals = chart?.latest_vitals;
   
     return (
-      <div>
-        <button type="button" onClick={onBack} style={{ marginBottom: 16 }}>
+      <div className="ui-page">
+        <button type="button" className="ui-button ui-button--secondary ui-back" onClick={onBack}>
           ← Back to {backLabel}
         </button>
-  
-        <h1>
+
+        <h1 className="ui-page-title">
           Case #{assignment.case_id}
           {assignment.patient_name && ` · ${assignment.patient_name}`}
         </h1>
-        <p style={{ color: "#555", marginTop: 0 }}>
+        <p className="ui-page-intro">
           {assignment.course ?? "No course"}
           {assignment.due_date && ` · Due ${formatUtc(assignment.due_date)}`}
         </p>
-  
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        {loading && <p>Loading...</p>}
-  
+
+        {error && <p className="ui-error">{error}</p>}
+        {loading && <p className="ui-muted">Loading...</p>}
+
         {caseInfo && (
           <>
             <Section title="Patient Demographics">
               {patient ? (
-                <>
+                <dl className="ui-detail-list">
                   <Detail label="Name" value={`${patient.last_name}, ${patient.first_name}`} />
                   <Detail label="Preferred name" value={patient.preferred_name} />
                   <Detail label="Date of birth" value={patient.date_of_birth} />
@@ -105,24 +97,24 @@ export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignme
                   <Detail label="Gender identity" value={patient.gender_identity} />
                   <Detail label="Pronouns" value={patient.pronouns} />
                   <Detail label="MRN" value={patient.mrn} />
-                </>
+                </dl>
               ) : (
-                <p style={{ color: "#888", margin: 0 }}>No patient information.</p>
+                <p className="ui-muted">No patient information.</p>
               )}
             </Section>
-  
+
             <Section title="Case Content">
-              <Detail label="Chief complaint" value={caseInfo.chief_complaint} />
-              <div style={{ whiteSpace: "pre-wrap" }}>
-                <strong>Narrative / HPI:</strong> {caseInfo.narrative ?? "—"}
-              </div>
+              <dl className="ui-detail-list">
+                <Detail label="Chief complaint" value={caseInfo.chief_complaint} />
+                <Detail label="Narrative / HPI" value={<span className="ui-prewrap">{caseInfo.narrative ?? "—"}</span>} />
+              </dl>
             </Section>
-  
+
             {chart && (
               <Section title="Chart Data">
-                <strong>Medications</strong>
+                <h3 className="ui-subheading">Medications</h3>
                 {chart.medications.length === 0 ? (
-                  <p style={{ color: "#888" }}>None recorded.</p>
+                  <p className="ui-muted">None recorded.</p>
                 ) : (
                   <ul>
                     {chart.medications.map((m, i) => (
@@ -133,10 +125,10 @@ export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignme
                     ))}
                   </ul>
                 )}
-  
-                <strong>Allergies</strong>
+
+                <h3 className="ui-subheading">Allergies</h3>
                 {chart.allergies.length === 0 ? (
-                  <p style={{ color: "#888" }}>No known allergies.</p>
+                  <p className="ui-muted">No known allergies.</p>
                 ) : (
                   <ul>
                     {chart.allergies.map((a, i) => (
@@ -147,8 +139,8 @@ export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignme
                     ))}
                   </ul>
                 )}
-  
-                <strong>Latest vitals</strong>
+
+                <h3 className="ui-subheading">Latest vitals</h3>
                 {vitals ? (
                   <p>
                     BP {vitals.blood_pressure ?? "—"} · HR {vitals.heart_rate ?? "—"} · RR{" "}
@@ -156,14 +148,14 @@ export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignme
                     {vitals.oxygen_saturation ?? "—"}%
                   </p>
                 ) : (
-                  <p style={{ color: "#888" }}>None recorded.</p>
+                  <p className="ui-muted">None recorded.</p>
                 )}
-  
-                <strong>Recent labs</strong>
+
+                <h3 className="ui-subheading">Recent labs</h3>
                 {chart.recent_labs.length === 0 ? (
-                  <p style={{ color: "#888" }}>None recorded.</p>
+                  <p className="ui-muted">None recorded.</p>
                 ) : (
-                  <ul>
+                  <ul className="ui-lab-list">
                     {chart.recent_labs.map((l, i) => {
                       const flag = l.flag?.trim() ?? "";
                       const isAbnormal =
@@ -173,37 +165,14 @@ export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignme
                         );
 
                       return (
-                        <li
-                          key={i}
-                          style={{
-                            marginBottom: 8,
-                            padding: 10,
-                            borderRadius: 6,
-                            border: isAbnormal
-                              ? "1px solid #dc2626"
-                              : "1px solid #ddd",
-                            backgroundColor: isAbnormal
-                              ? "#fef2f2"
-                              : "#fff",
-                          }}
-                        >
+                        <li key={i} className={`ui-lab${isAbnormal ? " ui-lab--abnormal" : ""}`}>
                           <strong>{l.test_name}</strong>: {l.result}
                           {l.unit && ` ${l.unit}`}
 
                           {flag && (
                             <span
                               role={isAbnormal ? "alert" : undefined}
-                              style={{
-                                marginLeft: 10,
-                                padding: "3px 8px",
-                                borderRadius: 4,
-                                fontSize: 12,
-                                fontWeight: 600,
-                                color: isAbnormal ? "#991b1b" : "#166534",
-                                backgroundColor: isAbnormal
-                                  ? "#fee2e2"
-                                  : "#dcfce7",
-                              }}
+                              className={`ui-badge ${isAbnormal ? "ui-badge--error" : "ui-badge--success"}`}
                             >
                               {isAbnormal ? "⚠ " : ""}
                               {flag}
@@ -216,11 +185,11 @@ export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignme
                 )}
               </Section>
             )}
-  
+
             <WorkSection title="Medical and Family History">
               <MedicalHistoryPanel patientId={caseInfo.patient_id} />
             </WorkSection>
-  
+
             {chart && (
               <Section title="SOAP Note">
                 <AssignmentNote

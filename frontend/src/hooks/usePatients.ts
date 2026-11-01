@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { CreatePatientInput, patientsApi } from "../api/patients";
+import { CreatePatientInput, patientsApi, UpdatePatientInput } from "../api/patients";
 import type { Patient } from "../types";
 
 export function usePatients() {
@@ -32,6 +32,18 @@ export function usePatients() {
     }
   };
 
+  // Returns true when saved, so the list knows to close the edit form.
+  const update = async (patientId: number, changes: UpdatePatientInput) => {
+    try {
+      await patientsApi.update(patientId, changes);
+      await load();
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update patient");
+      return false;
+    }
+  };
+
   const remove = async (patientId: number) => {
     try {
       await patientsApi.remove(patientId);
@@ -41,5 +53,5 @@ export function usePatients() {
     }
   };
 
-  return { patients, loading, error, create, remove, reload: load, };
+  return { patients, loading, error, create, update, remove, reload: load, };
 }

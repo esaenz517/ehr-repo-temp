@@ -262,10 +262,10 @@
   margin-left: 9px;
   padding: 2px 6px;
 
-  border-radius: 12px;
+  border-radius: var(--radius-pill);
 
-  background-color: #b43d2b;
-  color: #ffffff;
+  background-color: var(--color-error);
+  color: var(--color-on-primary);
 
   font-size: 12px;
   font-weight: 700;

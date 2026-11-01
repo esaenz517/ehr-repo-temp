@@ -1,6 +1,6 @@
 """
 Staff Router
-This file defines API endpoints for managing staff. It includes routes for listing, retrieving, creating, and deleting staff.
+This file defines API endpoints for managing staff. It includes routes for listing, retrieving, creating, updating, and deleting staff.
 """
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.crud import staff as crud
 from app.database import get_db
-from app.schemas.staff import Staff, StaffCreate
+from app.schemas.staff import Staff, StaffCreate, StaffUpdate
 from app.security.authorization import require_permission
 
 router = APIRouter(prefix="/staff", tags=["staff"])
@@ -41,6 +41,20 @@ def create_staff(
     current_user=Depends(require_permission("staff", "create")),
 ):
     return crud.create_staff(db, staff)
+
+
+# Partial update, e.g. {"specialization": "Cardiology"}.
+@router.patch("/{staffid}", response_model=Staff)
+def update_staff(
+    staffid: int,
+    changes: StaffUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("staff", "update")),
+):
+    staff = crud.update_staff(db, staffid, changes)
+    if staff is None:
+        raise HTTPException(status_code=404, detail="Staff member not found")
+    return staff
 
 
 @router.delete("/{staffid}", status_code=204)

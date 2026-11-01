@@ -119,13 +119,12 @@ export function StudentCreateForm({
             className="ui-form-panel"
             aria-label="Create student account"
         >
-            <h2 style={{ margin: 0 }}>
+            <h2 className="ui-form-panel-title">
                 Add Individual Student
             </h2>
 
             <p
-                className="ui-muted"
-                style={{ margin: 0 }}
+                className="ui-muted ui-flush"
             >
                 Create a student account manually.
                 Login credentials and student roles are
@@ -274,8 +273,7 @@ export function StudentCreateForm({
                 </div>
 
                 <div
-                    className="ui-form-row"
-                    style={{ marginTop: 16 }}
+                    className="ui-form-row ui-form-row--actions"
                 >
                     <button
                         type="submit"

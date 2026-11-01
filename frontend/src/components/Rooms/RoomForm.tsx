@@ -39,7 +39,7 @@ export function RoomForm({ onSubmit }: RoomFormProps) {
         aria-label="Unit"
       />
       <div className="rooms-card-actions">
-        <button type="submit" className="rooms-button">Add room</button>
+        <button type="submit" className="ui-button">Add room</button>
       </div>
     </form>
   );

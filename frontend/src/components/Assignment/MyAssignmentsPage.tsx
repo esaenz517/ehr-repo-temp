@@ -22,24 +22,26 @@ export function MyAssignmentsPage({ studentId, onOpen }: MyAssignmentsPageProps)
 
   const actions = (a: Assignment) => {
     if (a.encounter_status === "not_started") {
-      return <button onClick={() => startAndOpen(a)}>Start</button>;
+      return <button className="ui-button" onClick={() => startAndOpen(a)}>Start</button>;
     }
     if (a.encounter_status === "in_progress") {
-      return <button onClick={() => onOpen(a)}>Continue</button>;
+      return <button className="ui-button ui-button--secondary" onClick={() => onOpen(a)}>Continue</button>;
     }
     return null;
   };
 
   return (
-    <div>
-      <h1>My Assignments</h1>
-      <button onClick={reload} style={{ marginBottom: 16 }}>Refresh</button>
+    <div className="ui-page">
+      <h1 className="ui-page-title">My Assignments</h1>
+      <div className="ui-toolbar">
+        <button className="ui-button ui-button--secondary" onClick={reload}>Refresh</button>
+      </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="ui-error">{error}</p>}
       {loading ? (
-        <p>Loading...</p>
+        <p className="ui-muted">Loading...</p>
       ) : assignments.length === 0 ? (
-        <p style={{ color: "#888" }}>No assignments yet.</p>
+        <p className="ui-row-empty">No assignments yet.</p>
       ) : (
         <AssignmentList assignments={assignments} actions={actions} onOpen={onOpen} />
       )}

@@ -1,28 +1,35 @@
 import { FormEvent, useState } from "react";
 import type { CreatePatientInput } from "../../api/patients";
-import type { Drug, Provider } from "../../types";
+import type { Drug, Patient, Provider } from "../../types";
 import { GENDER_IDENTITY_OPTIONS, PRONOUN_OPTIONS, SEX_OPTIONS } from "./PatientDemographics";
 import "./patients.css";
 
 interface PatientFormProps {
   providers: Provider[];
   drugs: Drug[];
-  onSubmit: (input: CreatePatientInput) => void;
+  onSubmit: (input: CreatePatientInput) => void; // edit mode: the parent closes the form once saved
+  patient?: Patient; // when set, the form edits this patient instead of adding a new one
+  onCancel?: () => void; // edit mode: shows a Cancel button
 }
 
-export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
-  const [mrn, setMrn] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [middleName, setMiddleName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [preferredName, setPreferredName] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [genderAtBirth, setGenderAtBirth] = useState("");
-  const [genderIdentity, setGenderIdentity] = useState("");
-  const [pronouns, setPronouns] = useState("");
-  const [status, setStatus] = useState("outpatient");
-  const [providerId, setProviderId] = useState("");
-  const [drugIds, setDrugIds] = useState<number[]>([]);
+// Adds a new patient, or (with `patient`) edits an existing one using the same fields.
+export function PatientForm({ providers, drugs, onSubmit, patient, onCancel }: PatientFormProps) {
+  const editing = patient !== undefined;
+  // Field ids must be unique on the page, and an edit form can be open next to the new-patient form.
+  const idPrefix = editing ? `patient-${patient.patient_id}` : "patient";
+
+  const [mrn, setMrn] = useState(patient?.mrn ?? "");
+  const [firstName, setFirstName] = useState(patient?.first_name ?? "");
+  const [middleName, setMiddleName] = useState(patient?.middle_name ?? "");
+  const [lastName, setLastName] = useState(patient?.last_name ?? "");
+  const [preferredName, setPreferredName] = useState(patient?.preferred_name ?? "");
+  const [dateOfBirth, setDateOfBirth] = useState(patient?.date_of_birth ?? "");
+  const [genderAtBirth, setGenderAtBirth] = useState(patient?.gender_at_birth ?? "");
+  const [genderIdentity, setGenderIdentity] = useState(patient?.gender_identity ?? "");
+  const [pronouns, setPronouns] = useState(patient?.pronouns ?? "");
+  const [status, setStatus] = useState(patient?.status ?? "outpatient");
+  const [providerId, setProviderId] = useState(patient?.provider_id?.toString() ?? "");
+  const [drugIds, setDrugIds] = useState<number[]>(patient?.drugs.map((d) => d.drug_id) ?? []);
 
   // Drugs are picked from a dropdown one at a time and shown as removable chips.
   // The dropdown only lists drugs that haven't been picked yet.
@@ -50,6 +57,7 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
       provider_id: providerId ? Number(providerId) : null,
       drug_ids: drugIds,
     });
+    if (editing) return; // keep the values; the parent closes the form once saved
     setMrn("");
     setFirstName("");
     setMiddleName("");
@@ -65,14 +73,14 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="patients-form">
-      <h2 className="patients-form-title">New patient</h2>
+    <form onSubmit={handleSubmit} className={editing ? "patients-form patients-form--edit" : "patients-form"}>
+      <h2 className="patients-form-title">{editing ? "Edit patient" : "New patient"}</h2>
 
       <div className="patients-form-grid">
         <div className="patients-field">
-          <label htmlFor="patient-mrn" className="patients-label">MRN</label>
+          <label htmlFor={`${idPrefix}-mrn`} className="patients-label">MRN</label>
           <input
-            id="patient-mrn"
+            id={`${idPrefix}-mrn`}
             value={mrn}
             onChange={(e) => setMrn(e.target.value)}
             className="patients-input"
@@ -80,11 +88,11 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
         </div>
 
         <div className="patients-field">
-          <label htmlFor="patient-first-name" className="patients-label">
+          <label htmlFor={`${idPrefix}-first-name`} className="patients-label">
             First name<span className="patients-required" aria-hidden="true">*</span>
           </label>
           <input
-            id="patient-first-name"
+            id={`${idPrefix}-first-name`}
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             required
@@ -93,9 +101,9 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
         </div>
 
         <div className="patients-field">
-          <label htmlFor="patient-middle-name" className="patients-label">Middle name</label>
+          <label htmlFor={`${idPrefix}-middle-name`} className="patients-label">Middle name</label>
           <input
-            id="patient-middle-name"
+            id={`${idPrefix}-middle-name`}
             value={middleName}
             onChange={(e) => setMiddleName(e.target.value)}
             className="patients-input"
@@ -103,11 +111,11 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
         </div>
 
         <div className="patients-field">
-          <label htmlFor="patient-last-name" className="patients-label">
+          <label htmlFor={`${idPrefix}-last-name`} className="patients-label">
             Last name<span className="patients-required" aria-hidden="true">*</span>
           </label>
           <input
-            id="patient-last-name"
+            id={`${idPrefix}-last-name`}
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             required
@@ -116,9 +124,9 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
         </div>
 
         <div className="patients-field">
-          <label htmlFor="patient-preferred-name" className="patients-label">Preferred name</label>
+          <label htmlFor={`${idPrefix}-preferred-name`} className="patients-label">Preferred name</label>
           <input
-            id="patient-preferred-name"
+            id={`${idPrefix}-preferred-name`}
             value={preferredName}
             onChange={(e) => setPreferredName(e.target.value)}
             className="patients-input"
@@ -126,11 +134,11 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
         </div>
 
         <div className="patients-field">
-          <label htmlFor="patient-dob" className="patients-label">
+          <label htmlFor={`${idPrefix}-dob`} className="patients-label">
             Date of birth<span className="patients-required" aria-hidden="true">*</span>
           </label>
           <input
-            id="patient-dob"
+            id={`${idPrefix}-dob`}
             type="date"
             value={dateOfBirth}
             onChange={(e) => setDateOfBirth(e.target.value)}
@@ -140,11 +148,11 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
         </div>
 
         <div className="patients-field">
-          <label htmlFor="patient-sex" className="patients-label">
+          <label htmlFor={`${idPrefix}-sex`} className="patients-label">
             Sex at birth<span className="patients-required" aria-hidden="true">*</span>
           </label>
           <select
-            id="patient-sex"
+            id={`${idPrefix}-sex`}
             value={genderAtBirth}
             onChange={(e) => setGenderAtBirth(e.target.value)}
             required
@@ -156,11 +164,11 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
         </div>
 
         <div className="patients-field">
-          <label htmlFor="patient-gender" className="patients-label">
+          <label htmlFor={`${idPrefix}-gender`} className="patients-label">
             Gender identity<span className="patients-required" aria-hidden="true">*</span>
           </label>
           <select
-            id="patient-gender"
+            id={`${idPrefix}-gender`}
             value={genderIdentity}
             onChange={(e) => setGenderIdentity(e.target.value)}
             required
@@ -172,11 +180,11 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
         </div>
 
         <div className="patients-field">
-          <label htmlFor="patient-pronouns" className="patients-label">
+          <label htmlFor={`${idPrefix}-pronouns`} className="patients-label">
             Pronouns<span className="patients-required" aria-hidden="true">*</span>
           </label>
           <select
-            id="patient-pronouns"
+            id={`${idPrefix}-pronouns`}
             value={pronouns}
             onChange={(e) => setPronouns(e.target.value)}
             required
@@ -188,9 +196,9 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
         </div>
 
         <div className="patients-field">
-          <label htmlFor="patient-status" className="patients-label">Status</label>
+          <label htmlFor={`${idPrefix}-status`} className="patients-label">Status</label>
           <select
-            id="patient-status"
+            id={`${idPrefix}-status`}
             value={status}
             onChange={(e) => setStatus(e.target.value)}
             className="patients-input"
@@ -201,9 +209,9 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
         </div>
 
         <div className="patients-field">
-          <label htmlFor="patient-provider" className="patients-label">Provider</label>
+          <label htmlFor={`${idPrefix}-provider`} className="patients-label">Provider</label>
           <select
-            id="patient-provider"
+            id={`${idPrefix}-provider`}
             value={providerId}
             onChange={(e) => setProviderId(e.target.value)}
             className="patients-input"
@@ -218,11 +226,11 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
         </div>
 
         <div className="patients-field patients-field--full">
-          <label htmlFor="patient-drugs" className="patients-label">Drugs</label>
+          <label htmlFor={`${idPrefix}-drugs`} className="patients-label">Drugs</label>
           <div className="patients-drugs">
             {/* Always shows the placeholder; picking an option adds it as a chip */}
             <select
-              id="patient-drugs"
+              id={`${idPrefix}-drugs`}
               value=""
               onChange={(e) => e.target.value && addDrug(Number(e.target.value))}
               disabled={remainingDrugs.length === 0}
@@ -258,7 +266,12 @@ export function PatientForm({ providers, drugs, onSubmit }: PatientFormProps) {
       </div>
 
       <div className="patients-form-actions">
-        <button type="submit" className="ui-button">Add patient</button>
+        {onCancel && (
+          <button type="button" className="ui-button ui-button--secondary" onClick={onCancel}>
+            Cancel
+          </button>
+        )}
+        <button type="submit" className="ui-button">{editing ? "Save changes" : "Add patient"}</button>
       </div>
     </form>
   );

@@ -16,6 +16,10 @@ export interface CreatePatientInput {
   drug_ids: number[];
 }
 
+// Partial update - only the fields included are changed on the backend.
+// drug_ids, when included, replaces the patient's drug list.
+export type UpdatePatientInput = Partial<CreatePatientInput>;
+
 export interface PatientChartContext {
   medical_history: {
     condition: string;
@@ -77,6 +81,12 @@ export const patientsApi = {
     apiFetch<Patient>("/patients", {
       method: "POST",
       body: JSON.stringify(input),
+    }),
+
+  update: (patientId: number, changes: UpdatePatientInput) =>
+    apiFetch<Patient>(`/patients/${patientId}`, {
+      method: "PATCH",
+      body: JSON.stringify(changes),
     }),
 
   remove: (patientId: number) =>

@@ -26,6 +26,7 @@ USING (
     VALUES
         ('patient.read',   'patient',   'read'),
         ('patient.create', 'patient',   'create'),
+        ('patient.update', 'patient',   'update'),
         ('patient.delete', 'patient',   'delete'),
 
         ('case.read',   'case',   'read'),
@@ -34,14 +35,17 @@ USING (
 
         ('staff.read',     'staff',     'read'),
         ('staff.create',   'staff',     'create'),
+        ('staff.update',   'staff',     'update'),
         ('staff.delete',   'staff',     'delete'),
 
         ('provider.read',   'provider',   'read'),
         ('provider.create', 'provider',   'create'),
+        ('provider.update', 'provider',   'update'),
         ('provider.delete', 'provider',   'delete'),
 
         ('drug.read',   'drug',   'read'),
         ('drug.create', 'drug',   'create'),
+        ('drug.update', 'drug',   'update'),
         ('drug.delete', 'drug',   'delete'),
 
         ('room.read',   'room',   'read'),

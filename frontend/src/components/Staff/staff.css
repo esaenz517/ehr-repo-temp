@@ -1,0 +1,96 @@
+/* Staff Directory table: every class is prefixed with "staff-".
+   Table, badge, input and button looks come from the shared ui- classes. */
+
+.staff-name {
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.staff-specialization {
+  width: 100%; /* specialization takes the spare width; the other columns stay snug */
+}
+
+/* First, middle and last name side by side while editing */
+.staff-name-inputs {
+  display: flex;
+  gap: 8px;
+  min-width: 360px;
+}
+
+.staff-name-inputs > span {
+  flex: 1;
+}
+
+.staff-table td .ui-input {
+  min-width: 110px;
+}
+
+.staff-role-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.staff-actions .ui-row-actions {
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+
+/* Phones: each row becomes a small card (name, then "Label: value" lines, then buttons).
+   The extra selectors outrank the shared .ui-table / .ui-table-card cell rules. */
+@media (max-width: 640px) {
+  .staff-table thead {
+    display: none;
+  }
+
+  .ui-table.staff-table tr {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  .ui-table.staff-table tr:last-child {
+    border-bottom: none;
+  }
+
+  .ui-table-card .ui-table.staff-table tr td {
+    padding: 0;
+    border: none;
+  }
+
+  .staff-specialization {
+    width: auto;
+  }
+
+  .staff-name-inputs {
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .staff-specialization::before,
+  .staff-role::before {
+    content: attr(data-label) ": ";
+    color: var(--color-text-muted);
+    font-weight: 600;
+  }
+
+  /* Keep the "Role:" label on the same line as its tags */
+  .staff-role {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ui-table-card .ui-table.staff-table tr .staff-actions {
+    padding-top: 8px;
+  }
+
+  .staff-actions .ui-row-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}

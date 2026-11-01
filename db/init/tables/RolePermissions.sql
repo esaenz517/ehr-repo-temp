@@ -54,6 +54,7 @@ FROM (
     VALUES
         ('FACULTY_INSTRUCTOR', 'patient.read'),
         ('FACULTY_INSTRUCTOR', 'patient.create'),
+        ('FACULTY_INSTRUCTOR', 'patient.update'),
         ('FACULTY_INSTRUCTOR', 'patient.delete'),
         ('FACULTY_INSTRUCTOR', 'case.read'),
         ('FACULTY_INSTRUCTOR', 'case.create'),
@@ -61,9 +62,11 @@ FROM (
         ('FACULTY_INSTRUCTOR', 'staff.read'),
         ('FACULTY_INSTRUCTOR', 'provider.read'),
         ('FACULTY_INSTRUCTOR', 'provider.create'),
+        ('FACULTY_INSTRUCTOR', 'provider.update'),
         ('FACULTY_INSTRUCTOR', 'provider.delete'),
         ('FACULTY_INSTRUCTOR', 'drug.read'),
         ('FACULTY_INSTRUCTOR', 'drug.create'),
+        ('FACULTY_INSTRUCTOR', 'drug.update'),
         ('FACULTY_INSTRUCTOR', 'drug.delete'),
         ('FACULTY_INSTRUCTOR', 'room.read'),
         ('FACULTY_INSTRUCTOR', 'room.create'),
@@ -75,7 +78,9 @@ FROM (
         ('FACULTY_INSTRUCTOR', 'assignment.read'),
         ('FACULTY_INSTRUCTOR', 'assignment.update'),
         ('FACULTY_INSTRUCTOR', 'assignment.manage'),
-        ('FACULTY_INSTRUCTOR', 'course.read'),       
+        ('FACULTY_INSTRUCTOR', 'course.read'),
+        ('FACULTY_INSTRUCTOR', 'course.create'),
+        ('FACULTY_INSTRUCTOR', 'course.update'),
 
         --Student Permissions
         ('STUDENT', 'history.read'),

@@ -50,7 +50,7 @@
 .history-count {
   min-width: 24px;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-bg);
   color: var(--color-text-muted);
   font-size: 12px;
@@ -120,7 +120,7 @@
   display: inline-block;
   margin-right: 8px;
   padding: 1px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-primary);
   color: var(--color-on-primary);
   font-size: 12px;
@@ -181,7 +181,7 @@
 .history-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(255, 130, 0, 0.35); /* orange focus ring */
+  box-shadow: var(--focus-ring);
 }
 
 .history-form-actions {

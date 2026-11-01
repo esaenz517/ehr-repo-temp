@@ -55,7 +55,7 @@ export function RoomList({ rooms, availablePatients, onDelete, onAssign, onUnass
                     ))}
                   </select>
                   <button
-                    className="rooms-button"
+                    className="ui-button"
                     disabled={!selected[room.room_id]} // can't assign until a patient is picked
                     onClick={() => onAssign(room.room_id, Number(selected[room.room_id]))}
                   >
@@ -65,14 +65,14 @@ export function RoomList({ rooms, availablePatients, onDelete, onAssign, onUnass
               ) : (
                 // Room is occupied - only option is to discharge the current patient
                 <button
-                  className="rooms-button rooms-button--secondary"
+                  className="ui-button ui-button--secondary"
                   onClick={() => onUnassign(room.room_id)}
                 >
                   Unassign
                 </button>
               )}
               <button
-                className="rooms-button rooms-button--danger"
+                className="ui-button ui-button--danger"
                 onClick={() => onDelete(room.room_id)}
               >
                 Delete

@@ -1,12 +1,12 @@
 '''
 Providers CRUD
-DB access functions for providers - list, get, create, delete.
+DB access functions for providers - list, get, create, update, delete.
 '''
 
 from sqlalchemy.orm import Session
 
 from app.models.providers import Provider as ProviderModel
-from app.schemas.providers import ProviderCreate
+from app.schemas.providers import ProviderCreate, ProviderUpdate
 
 
 # Gets all providers from the DB.
@@ -29,6 +29,22 @@ def create_provider(db: Session, provider: ProviderCreate):
         email=provider.email,
     )
     db.add(db_provider)
+    db.commit()
+    db.refresh(db_provider)
+    return db_provider
+
+
+# Changes only the fields that were sent. Returns None if the provider doesn't exist.
+def update_provider(db: Session, provider_id: int, changes: ProviderUpdate):
+    db_provider = get_provider(db, provider_id)
+    if db_provider is None:
+        return None
+
+    for field, value in changes.model_dump(exclude_unset=True).items():
+        if field in ("first_name", "last_name") and value is None:
+            continue  # names can't be empty in the database
+        setattr(db_provider, field, value)
+
     db.commit()
     db.refresh(db_provider)
     return db_provider

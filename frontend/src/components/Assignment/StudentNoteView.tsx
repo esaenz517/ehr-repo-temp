@@ -48,16 +48,16 @@ export function StudentNoteView({ assignment, studentName, actions, review, onRe
   }, [load]);
 
   return (
-    <div>
-      <button type="button" onClick={onBack} style={{ marginBottom: 16 }}>
+    <div className="ui-page">
+      <button type="button" className="ui-button ui-button--secondary ui-back" onClick={onBack}>
         ← Back to Assigned Cases
       </button>
 
-      <h1>
+      <h1 className="ui-page-title">
         {studentName} · Case #{assignment.case_id}
         {assignment.patient_name && ` · ${assignment.patient_name}`}
       </h1>
-      <p className="ui-muted">
+      <p className="ui-page-intro">
         {assignment.chief_complaint ?? "No chief complaint"} · {assignment.course ?? "No course"}
       </p>
 
