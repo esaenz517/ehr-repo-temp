@@ -4,6 +4,7 @@ import type { Provider } from "../../types";
 
 interface ProviderListProps {
   providers: Provider[];
+  emptyText: string; // shown when there are no rows (none yet, or none match the filters)
   onUpdate: (providerId: number, changes: UpdateProviderInput) => Promise<boolean>;
   onDelete: (providerId: number) => void;
 }
@@ -20,7 +21,7 @@ const FIELDS: { key: keyof Draft; label: string; maxLength: number }[] = [
 
 // Displays every provider as a row. Edit turns the row into inputs with
 // Save and Cancel (Enter saves, Escape cancels).
-export function ProviderList({ providers, onUpdate, onDelete }: ProviderListProps) {
+export function ProviderList({ providers, emptyText, onUpdate, onDelete }: ProviderListProps) {
   // Only one provider is edited at a time: its id and the draft values.
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draft, setDraft] = useState<Draft>({ firstName: "", lastName: "", specialty: "", phone: "", email: "" });
@@ -56,7 +57,7 @@ export function ProviderList({ providers, onUpdate, onDelete }: ProviderListProp
   };
 
   if (providers.length === 0) {
-    return <p className="ui-row-empty">No providers yet.</p>;
+    return <p className="ui-row-empty">{emptyText}</p>;
   }
 
   return (
