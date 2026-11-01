@@ -1,4 +1,5 @@
 import type { Staff } from "../../types";
+import { confirmDelete } from "../confirmDelete";
 
 interface StaffListProps {
   staff: Staff[];
@@ -26,7 +27,16 @@ export function StaffList({ staff, onDelete }: StaffListProps) {
             </div>
           </div>
           <div className="ui-row-actions">
-            <button className="ui-button ui-button--danger" onClick={() => onDelete(member.staffid)}>
+            <button className="ui-button ui-button--danger" onClick={() => {
+                if (
+                  confirmDelete(
+                    `staff member ${member.first_name} ${member.last_name}`,
+                    `/staff/${member.staffid}`
+                  )
+                ) {
+                  onDelete(member.staffid);
+                }
+              }}>
               Delete
             </button>
           </div>

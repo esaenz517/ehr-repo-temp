@@ -1,4 +1,5 @@
 import type { Provider } from "../../types";
+import { confirmDelete } from "../confirmDelete";
 
 interface ProviderListProps {
   providers: Provider[];
@@ -27,7 +28,16 @@ export function ProviderList({ providers, onDelete }: ProviderListProps) {
             <div className="ui-row-actions">
               <button
                 className="ui-button ui-button--danger"
-                onClick={() => onDelete(provider.provider_id)}
+                onClick={() => {
+                  if (
+                    confirmDelete(
+                      `provider Dr. ${provider.first_name} ${provider.last_name}`,
+                      `/providers/${provider.provider_id}`
+                    )
+                  ) {
+                    onDelete(provider.provider_id);
+                  }
+                }}
               >
                 Delete
               </button>

@@ -3,6 +3,7 @@ import type { Patient } from "../../types";
 import { MedicalHistoryPanel } from "../MedicalHistory/MedicalHistoryPanel";
 import { AppointmentPanel } from "../Appointments/AppointmentPanel";
 import { BillingChargePanel } from "../Billing/BillingChargePanel";
+import { confirmDelete } from "../confirmDelete";
 
 interface PatientListProps {
   patients: Patient[];
@@ -86,7 +87,16 @@ export function PatientList({ patients, onDelete }: PatientListProps) {
 
               <button
                 className="ui-button ui-button--danger"
-                onClick={() => onDelete(patient.patient_id)}
+                onClick={() => {
+                  if (
+                    confirmDelete(
+                      `patient ${patient.first_name} ${patient.last_name}`,
+                      `/patients/${patient.patient_id}`
+                    )
+                  ) {
+                    onDelete(patient.patient_id);
+                  }
+                }}
               >
                 Delete
               </button>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useBilling } from "../../hooks/useBilling";
 import "./billing.css";
+import { confirmDelete } from "../confirmDelete";
 
 interface BillingChargePanelProps {
   patientId: number;
@@ -77,7 +78,16 @@ export function BillingChargePanel({
                   <button
                     type="button"
                     className="ui-button ui-button--danger billing-delete"
-                    onClick={() => removeCharge(charge.charge_id)}
+                    onClick={() => {
+                      if (
+                        confirmDelete(
+                          `charge "${charge.charge_summary}"`,
+                          `/patients/${patientId}/charges/${charge.charge_id}`
+                        )
+                      ) {
+                        removeCharge(charge.charge_id);
+                      }
+                    }}
                     aria-label={`Delete charge ${charge.charge_summary}`}
                   >
                     Delete

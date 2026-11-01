@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAppointments } from "../../hooks/useAppointments";
 import { useProviders } from "../../hooks/useProviders";
 import "./appointments.css";
+import { confirmDelete } from "../confirmDelete";
 
 interface AppointmentPanelProps {
   patientId: number;
@@ -150,7 +151,16 @@ export function AppointmentPanel({
                   <button
                     type="button"
                     className="ui-button ui-button--danger appointments-delete"
-                    onClick={() => removeAppointment(appointment.appointment_id)}
+                    onClick={() => {
+                      if (
+                        confirmDelete(
+                          `the appointment on ${date.toLocaleString()}`,
+                          `/patients/${patientId}/appointments/${appointment.appointment_id}`
+                        )
+                      ) {
+                        removeAppointment(appointment.appointment_id);
+                      }
+                    }}
                     aria-label={`Delete appointment on ${date.toLocaleString()}`}
                   >
                     Delete

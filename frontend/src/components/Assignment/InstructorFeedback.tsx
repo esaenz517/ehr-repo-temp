@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatUtc } from "../../api/clinicalNotes";
+import { autosaveLabel, useAutosave } from "../../hooks/useAutosave";
+import type { SaveReason } from "../../hooks/useAutosave";
 import type { Assignment, EncounterStatus } from "../../types";
 import "./assignmentNote.css";
 
@@ -22,14 +24,36 @@ export function InstructorFeedback({ assignment, error, signOffBlocked, onSave, 
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  // Start from the saved feedback whenever a different assignment is opened
-  useEffect(() => {
-    setText(assignment.feedback ?? "");
-    setMessage(null);
-  }, [assignment.assignment_id, assignment.feedback]);
-
   const status = assignment.encounter_status;
   const dirty = text.trim() !== (assignment.feedback ?? "");
+  // Feedback can only be written on submitted or signed work
+  const editable = status === "submitted" || status === "signed";
+
+  // Bumped whenever a different assignment opens so a save that finishes late is ignored
+  const assignmentToken = useRef(0);
+
+  // Saves the typed feedback. Autosave skips when nothing changed.
+  const saveFeedback = async (reason: SaveReason): Promise<boolean> => {
+    if (!editable || (reason === "auto" && !dirty)) return true;
+    const token = assignmentToken.current;
+    const ok = await onSave(text);
+    if (ok && reason === "manual" && token === assignmentToken.current) {
+      setMessage("Feedback saved.");
+    }
+    return ok;
+  };
+
+  const autosave = useAutosave(saveFeedback, { enabled: editable });
+
+  // Start from the saved feedback whenever a different assignment is opened. Only on
+  // a new assignment: the saved feedback also changes after each autosave, and
+  // resetting then would wipe out anything typed while the save was running.
+  useEffect(() => {
+    assignmentToken.current += 1;
+    autosave.cancel();
+    setText(assignment.feedback ?? "");
+    setMessage(null);
+  }, [assignment.assignment_id]);
 
   if (status === "not_started") return null;
 
@@ -45,6 +69,8 @@ export function InstructorFeedback({ assignment, error, signOffBlocked, onSave, 
   }
 
   const run = async (action: () => Promise<boolean>, done: string) => {
+    // Sign off / send back save the feedback themselves, so drop any pending autosave
+    autosave.cancel();
     setBusy(true);
     setMessage(null);
     if (await action()) setMessage(done);
@@ -73,8 +99,10 @@ export function InstructorFeedback({ assignment, error, signOffBlocked, onSave, 
         onChange={(e) => {
           setText(e.target.value);
           setMessage(null);
+          autosave.notifyEdit();
         }}
         placeholder="What went well, what to fix, and anything to review before resubmitting…"
+        // Not disabled during autosave, so typing isn't interrupted
         disabled={busy}
       />
 
@@ -83,23 +111,31 @@ export function InstructorFeedback({ assignment, error, signOffBlocked, onSave, 
       {status === "submitted" && signOffBlocked && <p className="ui-muted">{signOffBlocked}</p>}
 
       <div className="assignment-feedback-actions">
+        <span className="ui-muted" aria-live="polite">
+          {autosaveLabel(autosave.status)}
+        </span>
         <button
           type="button"
           className="ui-button ui-button--secondary"
-          disabled={busy || !dirty}
-          onClick={() => run(() => onSave(text), "Feedback saved.")}
+          disabled={busy || !dirty || autosave.status === "saving"}
+          onClick={autosave.saveNow}
         >
           Save feedback
         </button>
         {status === "submitted" && (
           <>
-            <button type="button" className="ui-button ui-button--secondary" disabled={busy} onClick={sendBack}>
+            <button
+              type="button"
+              className="ui-button ui-button--secondary"
+              disabled={busy || autosave.status === "saving"}
+              onClick={sendBack}
+            >
               Send back
             </button>
             <button
               type="button"
               className="ui-button"
-              disabled={busy}
+              disabled={busy || autosave.status === "saving"}
               onClick={() => run(() => onDecision("signed", text), "Signed off.")}
             >
               Sign off

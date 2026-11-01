@@ -76,6 +76,7 @@ GO
 :r /init/tables/NoteAuditEvents.sql
 :r /init/tables/BillingCharges.sql
 :r /init/tables/Courses.sql
+:r /init/tables/DeletionAuditLog.sql
 
 -- DEMO DATA: needs every table above and the logins from seed/users.sql
 :r /init/seed/chart.sql

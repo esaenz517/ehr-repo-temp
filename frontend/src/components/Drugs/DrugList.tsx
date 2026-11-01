@@ -1,4 +1,5 @@
 import type { Drug } from "../../types";
+import { confirmDelete } from "../confirmDelete";
 
 interface DrugListProps {
   drugs: Drug[];
@@ -19,7 +20,11 @@ export function DrugList({ drugs, onDelete }: DrugListProps) {
             {drug.description && <div className="ui-row-subtitle">{drug.description}</div>}
           </div>
           <div className="ui-row-actions">
-            <button className="ui-button ui-button--danger" onClick={() => onDelete(drug.drug_id)}>
+            <button className="ui-button ui-button--danger" onClick={() => {
+                if (confirmDelete(`drug ${drug.name}`, `/drugs/${drug.drug_id}`)) {
+                  onDelete(drug.drug_id);
+                }
+              }}>
               Delete
             </button>
           </div>
