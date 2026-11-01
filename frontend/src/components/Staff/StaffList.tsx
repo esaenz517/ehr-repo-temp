@@ -1,6 +1,7 @@
 import { KeyboardEvent, useState } from "react";
 import type { UpdateStaffInput } from "../../api/staff";
 import type { Staff } from "../../types";
+import "./staff.css";
 
 interface StaffListProps {
   staff: Staff[];
@@ -9,17 +10,20 @@ interface StaffListProps {
   onDelete: (staffId: number) => void;
 }
 
-// The editable text fields, in the order the inputs are shown.
+// The editable text fields. The Name column holds the three name inputs.
 type Draft = { firstName: string; middleName: string; lastName: string; specialization: string; admin: boolean };
-const TEXT_FIELDS: { key: Exclude<keyof Draft, "admin">; label: string }[] = [
-  { key: "firstName", label: "First Name" },
-  { key: "middleName", label: "Middle Name" },
-  { key: "lastName", label: "Last Name" },
-  { key: "specialization", label: "Specialization" },
-];
+type TextField = Exclude<keyof Draft, "admin">;
+const FIELD_LABELS: Record<TextField, string> = {
+  firstName: "First Name",
+  middleName: "Middle Name",
+  lastName: "Last Name",
+  specialization: "Specialization",
+};
+const NAME_FIELDS: TextField[] = ["firstName", "middleName", "lastName"];
 
-// Displays every staff member as a row. Edit turns the row into the same fields
-// as the Add Staff form, with Save and Cancel (Enter saves, Escape cancels).
+// Displays every staff member as a table row: name, specialization, role. Edit
+// turns the row's cells into the same fields as the Add Staff form, with Save
+// and Cancel (Enter saves, Escape cancels).
 // The student flag isn't editable; students are managed through the student workflow.
 export function StaffList({ staff, emptyText, onUpdate, onDelete }: StaffListProps) {
   // Only one staff member is edited at a time: their id and the draft values.
@@ -62,75 +66,112 @@ export function StaffList({ staff, emptyText, onUpdate, onDelete }: StaffListPro
     return <p className="ui-row-empty">{emptyText}</p>;
   }
 
+  // One draft input; the label names the person so screen readers know which row it's in.
+  const input = (key: TextField, member: Staff, autoFocus = false) => (
+    <input
+      value={draft[key]}
+      onChange={(e) => setDraft((prev) => ({ ...prev, [key]: e.target.value }))}
+      onKeyDown={(e) => handleKeyDown(e, member.staffid)}
+      aria-label={`${FIELD_LABELS[key]} for ${member.first_name} ${member.last_name}`}
+      placeholder={FIELD_LABELS[key]}
+      maxLength={100}
+      autoFocus={autoFocus}
+      className="ui-input ui-input--full"
+    />
+  );
+
   return (
-    <ul className="ui-row-list">
-      {staff.map((member) => {
-        const editing = editingId === member.staffid;
-        return (
-          <li key={member.staffid} className="ui-row">
-            {editing ? (
-              <div className="ui-row-main ui-form-row">
-                {TEXT_FIELDS.map((field, i) => (
-                  <input
-                    key={field.key}
-                    value={draft[field.key]}
-                    onChange={(e) => setDraft((prev) => ({ ...prev, [field.key]: e.target.value }))}
-                    onKeyDown={(e) => handleKeyDown(e, member.staffid)}
-                    aria-label={field.label}
-                    placeholder={field.label}
-                    maxLength={100}
-                    autoFocus={i === 0}
-                    className="ui-input"
-                  />
-                ))}
-                <select
-                  value={draft.admin ? "yes" : "no"}
-                  onChange={(e) => setDraft((prev) => ({ ...prev, admin: e.target.value === "yes" }))}
-                  onKeyDown={(e) => e.key === "Escape" && setEditingId(null)}
-                  aria-label="Admin"
-                  className="ui-input"
-                >
-                  <option value="no">Admin: No</option>
-                  <option value="yes">Admin: Yes</option>
-                </select>
-              </div>
-            ) : (
-              <div className="ui-row-main">
-                <div className="ui-row-title">
-                  {member.first_name} {member.middle_name ? `${member.middle_name} ` : ""}
-                  {member.last_name}
-                </div>
-                <div className="ui-row-subtitle">
-                  {member.specialization}
-                  {member.student && <> · Student</>}
-                  {member.admin && <> · Admin</>}
-                </div>
-              </div>
-            )}
-            <div className="ui-row-actions">
-              {editing ? (
-                <>
-                  <button className="ui-button" onClick={() => saveEdit(member.staffid)} disabled={!canSave}>
-                    Save
-                  </button>
-                  <button className="ui-button ui-button--secondary" onClick={() => setEditingId(null)}>
-                    Cancel
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button className="ui-button ui-button--secondary" onClick={() => startEdit(member)}>
-                    Edit
-                  </button>
-                  <button className="ui-button ui-button--danger" onClick={() => onDelete(member.staffid)}>
-                    Delete
-                  </button>
-                </>
-              )}
-            </div>
-          </li>
-        );
-      })}
-    </ul>
+    <div className="ui-table-card ui-table-wrap">
+      <table className="ui-table staff-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Specialization</th>
+            <th>Role</th>
+            <th><span className="ui-visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {staff.map((member) => {
+            const editing = editingId === member.staffid;
+            return (
+              <tr key={member.staffid}>
+                <td className="staff-name">
+                  {editing ? (
+                    <div className="staff-name-inputs">
+                      {NAME_FIELDS.map((key, i) => <span key={key}>{input(key, member, i === 0)}</span>)}
+                    </div>
+                  ) : (
+                    [member.first_name, member.middle_name, member.last_name].filter(Boolean).join(" ")
+                  )}
+                </td>
+                <td className="staff-specialization" data-label="Specialization">
+                  {editing ? input("specialization", member) : member.specialization}
+                </td>
+                <td className="staff-role" data-label="Role">
+                  <div className="staff-role-tags">
+                    {/* The student flag isn't editable here, so it shows as a tag either way */}
+                    {member.student && <span className="ui-badge ui-badge--muted">Student</span>}
+                    {editing ? (
+                      <select
+                        value={draft.admin ? "yes" : "no"}
+                        onChange={(e) => setDraft((prev) => ({ ...prev, admin: e.target.value === "yes" }))}
+                        onKeyDown={(e) => e.key === "Escape" && setEditingId(null)}
+                        aria-label={`Admin for ${member.first_name} ${member.last_name}`}
+                        className="ui-input"
+                      >
+                        <option value="no">Admin: No</option>
+                        <option value="yes">Admin: Yes</option>
+                      </select>
+                    ) : (
+                      <>
+                        {member.admin && <span className="ui-badge">Admin</span>}
+                        {!member.admin && !member.student && <span className="ui-muted">Staff</span>}
+                      </>
+                    )}
+                  </div>
+                </td>
+                <td className="staff-actions">
+                  <div className="ui-row-actions">
+                    {editing ? (
+                      <>
+                        <button
+                          className="ui-button ui-button--small"
+                          onClick={() => saveEdit(member.staffid)}
+                          disabled={!canSave}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="ui-button ui-button--secondary ui-button--small"
+                          onClick={() => setEditingId(null)}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          className="ui-button ui-button--secondary ui-button--small"
+                          onClick={() => startEdit(member)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="ui-button ui-button--danger ui-button--small"
+                          onClick={() => onDelete(member.staffid)}
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
