@@ -11,7 +11,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from app.security.authorization import require_permission
-
 from app.crud import assignment as crud
 from app.crud import rubric as rubric_crud
 from app.crud.clinical_notes import note_data
@@ -76,7 +75,7 @@ def create_assignment(
     except IntegrityError:
         raise HTTPException(
             status_code=400,
-            detail=("A case or staff ID in your request " "does not exist"),
+            detail="A case or staff ID in your request does not exist",
         )
 
 
@@ -158,7 +157,8 @@ def start_assignment(
     return student_view(crud.start_assignment(db, row))
 
 
-# Student or instructor: the SOAP note written for this assignment (null until the first save)
+# Student or instructor: the SOAP note written for this assignment
+# Returns null until the first save.
 @router.get("/{assignment_id}/note", response_model=NoteOut | None)
 def get_note(
     assignment_id: int,
@@ -166,7 +166,14 @@ def get_note(
     current_user=Depends(require_permission("assignment", "read")),
     login: Login = Depends(get_current_login),
 ):
-    row = assignment_for(db, assignment_id, login, student=True, instructor=True)
+    row = assignment_for(
+        db,
+        assignment_id,
+        login,
+        student=True,
+        instructor=True,
+    )
+
     note = crud.get_note(db, row)
     return note_data(note) if note else None
 
@@ -182,11 +189,13 @@ def submit_assignment(
     row = assignment_for(db, assignment_id, login, student=True)
     if row.encounter_status != "in_progress":
         raise HTTPException(
-            status_code=409, detail="Only an in-progress assignment can be submitted"
+            status_code=409,
+            detail="Only an in-progress assignment can be submitted",
         )
     if crud.get_note(db, row) is None:
         raise HTTPException(
-            status_code=409, detail="Save a SOAP note before submitting"
+            status_code=409,
+            detail="Save a SOAP note before submitting",
         )
     return student_view(crud.update_status(db, assignment_id, "submitted"))
 
@@ -203,13 +212,15 @@ def save_feedback(
     row = assignment_for(db, assignment_id, login, instructor=True)
     if row.encounter_status not in ("submitted", "signed"):
         raise HTTPException(
-            status_code=409, detail="Feedback can only be written on submitted work"
+            status_code=409,
+            detail="Feedback can only be written on submitted work",
         )
     return crud.save_feedback(db, row, body.feedback)
 
 
-# Instructor: sign off on submitted work, or send it back ("in_progress") for re-work, including feedback
-# Students also hold assignment.update, so the instructor check is what stops self sign-off.
+# Instructor: sign off on submitted work or send it back for rework.
+# Approval records the instructor and timestamp with the status change.
+# Students also hold assignment.update, so the instructor check prevents self sign-off.
 @router.patch(
     "/{assignment_id}/status",
     response_model=Assignment,
@@ -234,104 +245,83 @@ def update_status(
             detail="Instructor must sign off or send back the assignment",
         )
 
-    if row.encounter_status != "submitted":
-        raise HTTPException(
-            status_code=409,
-            detail="Only submitted work can be reviewed",
-        )
-
-    updated = crud.update_status(
-        db,
-        assignment_id,
-        body.encounter_status,
-        body.feedback,
-    )
-
-    if body.encounter_status == "in_progress":
-        grade = grades_crud.get_grade(
-            db,
-            assignment_id,
-        )
-
-        if grade is not None and grade.published_at is not None:
-            grade.published_at = None
-            db.commit()
-
-    return updated
-# Instructor: sign off on submitted work, or send it back ("in_progress") for re-work, including feedback.
-# Signing off requires every rubric item scored.
-# Students also hold assignment.update, so the instructor check is what stops self sign-off.
-@router.patch("/{assignment_id}/status", response_model = Assignment)
-def update_status(assignment_id: int, body: AssignmentStatus, db: Session = Depends(get_db), current_user=Depends(require_permission("assignment", "update")), login: Login = Depends(get_current_login)):
-    row = assignment_for(db, assignment_id, login, instructor=True)
-
-    if body.encounter_status == "signed" and not rubric_crud.fully_scored(db, row):
-        raise HTTPException(
-            status_code=409,
-            detail="Score every rubric item before signing off",
-        )
     if row.encounter_status == "signed":
         raise HTTPException(
             status_code=409,
             detail="Approved assignments cannot be reopened or modified",
         )
 
-    if body.encounter_status == "signed" and row.encounter_status != "submitted":
+    if row.encounter_status != "submitted":
         raise HTTPException(
             status_code=409,
-            detail="Only a submitted assignment can be approved",
+            detail="Only submitted work can be reviewed",
         )
 
-    if body.encounter_status == "signed":
-        note = crud.get_note(db, row)
-
-        if note is None:
-            raise HTTPException(
-                status_code=409,
-                detail="Cannot approve an assignment without a clinical note",
-            )
-
-        if note.approved_at is not None:
-            raise HTTPException(
-                status_code=409,
-                detail="This clinical note has already been approved",
-            )
-
-        note.approved_at = datetime.now(timezone.utc).replace(tzinfo=None)
-        note.approved_by_user_id = current_user.user_id
-
-        audit_event = NoteAuditEvent(
-            note_id=note.note_id,
-            actor_user_id=current_user.user_id,
-            action="note_approved",
-            details="Instructor approved the clinical note",
-            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+    # Require rubric completion before instructor approval.
+    if body.encounter_status == "signed" and not rubric_crud.fully_scored(db, row):
+        raise HTTPException(
+            status_code=409,
+            detail="Score every rubric item before signing off",
         )
 
-        db.add(audit_event)
+    try:
+        if body.encounter_status == "signed":
+            note = crud.get_note(db, row)
 
-    if body.encounter_status == "signed":
-        try:
-            updated_assignment = crud.update_status(
-                db,
-                assignment_id,
-                body.encounter_status,
-                feedback=body.feedback,
-                commit=False,
+            if note is None:
+                raise HTTPException(
+                    status_code=409,
+                    detail="Cannot approve an assignment without a clinical note",
+                )
+
+            if note.approved_at is not None:
+                raise HTTPException(
+                    status_code=409,
+                    detail="This clinical note has already been approved",
+                )
+
+            # Store approval metadata on the clinical note.
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
+
+            note.approved_at = now
+            note.approved_by_user_id = current_user.user_id
+
+            # Record the instructor approval in the audit log.
+            db.add(
+                NoteAuditEvent(
+                    note_id=note.note_id,
+                    actor_user_id=current_user.user_id,
+                    action="note_approved",
+                    details="Instructor approved the clinical note",
+                    created_at=now,
+                )
             )
-            db.commit()
-            db.refresh(updated_assignment)
-            return updated_assignment
-        except Exception:
-            db.rollback()
-            raise
 
-    return crud.update_status(
-    db,
-    assignment_id,
-    body.encounter_status,
-    feedback=body.feedback,
-)
+        else:
+            # Returning work for rework also unpublishes its grade.
+            grade = grades_crud.get_grade(db, assignment_id)
+
+            if grade is not None and grade.published_at is not None:
+                grade.published_at = None
+
+        # Commit the status change and associated updates together.
+        updated = crud.update_status(
+            db,
+            assignment_id,
+            body.encounter_status,
+            feedback=body.feedback,
+            commit=False,
+        )
+
+        db.commit()
+        db.refresh(updated)
+
+        return updated
+
+    except Exception:
+        db.rollback()
+        raise
+
 
 @router.delete("/{assignment_id}", status_code=204)
 def delete_assignment(
@@ -340,4 +330,7 @@ def delete_assignment(
     current_user=Depends(require_permission("assignment", "manage")),
 ):
     if not crud.delete_assignment(db, assignment_id):
-        raise HTTPException(status_code=404, detail="Assignment not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
