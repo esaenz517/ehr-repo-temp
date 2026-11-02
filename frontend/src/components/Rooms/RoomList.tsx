@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { CreateRoomInput } from "../../api/rooms";
 import type { Patient, Room } from "../../types";
 import { RoomForm } from "./RoomForm";
+import { confirmDelete } from "../confirmDelete";
 
 interface RoomListProps {
   rooms: Room[];
@@ -73,7 +74,11 @@ export function RoomList({ rooms, availablePatients, onDelete, onAssign, onUnass
               )}
               <button
                 className="ui-button ui-button--danger"
-                onClick={() => onDelete(room.room_id)}
+                onClick={() => {
+                  if (confirmDelete(`room ${room.room_number}`, `/rooms/${room.room_id}`)) {
+                    onDelete(room.room_id);
+                  }
+                }}
               >
                 Delete
               </button>

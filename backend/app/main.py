@@ -23,8 +23,10 @@ from app.routers import (
     courses,
     batch_students,
     grades_progress,
-    rubric
+    rubric,
+    deletion_audit,
 )
+from app.security.deletion_audit_middleware import deletion_audit_middleware
 
 app = FastAPI(title="EHR API")
 
@@ -36,6 +38,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Log every delete request and its outcome to dbo.DeletionAuditLog
+app.middleware("http")(deletion_audit_middleware)
 
 app.include_router(patients.router)
 app.include_router(providers.router)
@@ -58,6 +63,7 @@ app.include_router(assignment.router)
 app.include_router(rubric.router)
 
 app.include_router(clinical_notes.router)
+app.include_router(deletion_audit.router)
 
 
 @app.get("/health")

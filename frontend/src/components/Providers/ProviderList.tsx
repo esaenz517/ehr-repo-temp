@@ -1,6 +1,7 @@
 import { KeyboardEvent, useState } from "react";
 import type { UpdateProviderInput } from "../../api/providers";
 import type { Provider } from "../../types";
+import { confirmDelete } from "../confirmDelete";
 import "./providers.css";
 
 interface ProviderListProps {
@@ -141,7 +142,16 @@ export function ProviderList({ providers, emptyText, onUpdate, onDelete }: Provi
                         </button>
                         <button
                           className="ui-button ui-button--danger ui-button--small"
-                          onClick={() => onDelete(provider.provider_id)}
+                          onClick={() => {
+                            if (
+                              confirmDelete(
+                                `provider Dr. ${provider.first_name} ${provider.last_name}`,
+                                `/providers/${provider.provider_id}`
+                              )
+                            ) {
+                              onDelete(provider.provider_id);
+                            }
+                          }}
                         >
                           Delete
                         </button>

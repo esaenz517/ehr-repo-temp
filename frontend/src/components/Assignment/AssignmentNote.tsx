@@ -3,6 +3,7 @@ import { clinicalNotesApi, formatUtc } from "../../api/clinicalNotes";
 import type { NoteAddendum } from "../../api/clinicalNotes";
 import type { ChartContext } from "../../api/clinicalNotes";
 import { useAssignmentNote } from "../../hooks/useAssignmentNote";
+import { autosaveLabel } from "../../hooks/useAutosave";
 import type { Assignment } from "../../types";
 import { SoapEditor } from "../ClinicalNotes/SoapEditor";
 import { GradeBreakdown } from "./GradeBreakdown";
@@ -131,7 +132,7 @@ export function AssignmentNote({ assignment, patientId, chiefComplaint, chart }:
       {n.message && <p className="assignment-note-message">{n.message}</p>}
 
       <div className="clinical-notes">
-        <SoapEditor content={n.content} context={chart} disabled={n.locked || n.saving} onChange={n.edit} />
+      <SoapEditor content={n.content} context={chart} disabled={n.locked} onChange={n.edit} />
       </div>
 
       {n.assignment.encounter_status === "signed" && n.note && (
@@ -184,8 +185,10 @@ export function AssignmentNote({ assignment, patientId, chiefComplaint, chart }:
 
       {!n.locked && (
         <div className="assignment-note-actions">
-          <span className="ui-muted">
-            {n.dirty
+          <span className="ui-muted" aria-live="polite">
+            {n.autosaveStatus === "saving" || n.autosaveStatus === "error"
+              ? autosaveLabel(n.autosaveStatus)
+              : n.dirty
               ? "Unsaved changes"
               : n.note
                 ? `Last saved ${formatUtc(n.note.last_modified_at)}`

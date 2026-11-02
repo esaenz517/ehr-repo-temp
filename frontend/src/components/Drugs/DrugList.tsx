@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { UpdateDrugInput } from "../../api/drugs";
 import type { Drug } from "../../types";
+import { confirmDelete } from "../confirmDelete";
 import "./drugs.css";
 
 interface DrugListProps {
@@ -116,7 +117,11 @@ export function DrugList({ drugs, emptyText, onUpdate, onDelete }: DrugListProps
                         </button>
                         <button
                           className="ui-button ui-button--danger ui-button--small"
-                          onClick={() => onDelete(drug.drug_id)}
+                          onClick={() => {
+                            if (confirmDelete(`drug ${drug.name}`, `/drugs/${drug.drug_id}`)) {
+                              onDelete(drug.drug_id);
+                            }
+                          }}
                         >
                           Delete
                         </button>

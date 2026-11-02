@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { useMedicalHistory } from "../../hooks/useMedicalHistory";
 import "./history.css";
+import { confirmDelete } from "../confirmDelete";
 
 interface MedicalHistoryPanelProps {
   patientId: number;
@@ -105,7 +106,16 @@ export function MedicalHistoryPanel({
                   <button
                     type="button"
                     className="ui-button ui-button--danger history-delete"
-                    onClick={() => removeMedical(history.medical_history_id)}
+                    onClick={() => {
+                      if (
+                        confirmDelete(
+                          `medical history "${history.condition}"`,
+                          `/patients/${patientId}/medical-history/${history.medical_history_id}`
+                        )
+                      ) {
+                        removeMedical(history.medical_history_id);
+                      }
+                    }}
                     aria-label={`Delete ${history.condition}`}
                   >
                     Delete
@@ -206,7 +216,16 @@ export function MedicalHistoryPanel({
                   <button
                     type="button"
                     className="ui-button ui-button--danger history-delete"
-                    onClick={() => removeFamily(history.family_history_id)}
+                    onClick={() => {
+                      if (
+                        confirmDelete(
+                          `family history "${history.relationship}: ${history.condition}"`,
+                          `/patients/${patientId}/family-history/${history.family_history_id}`
+                        )
+                      ) {
+                        removeFamily(history.family_history_id);
+                      }
+                    }}
                     aria-label={`Delete ${history.relationship}: ${history.condition}`}
                   >
                     Delete

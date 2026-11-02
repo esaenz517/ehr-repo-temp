@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { rubricApi } from "../../api/rubric";
+import { autosaveLabel, useAutosave } from "../../hooks/useAutosave";
+import type { SaveReason } from "../../hooks/useAutosave";
 import type { Assignment, AssignmentGrade } from "../../types";
 import { RUBRIC_CATEGORY_LABELS } from "../Cases/RubricEditor";
 import "./rubric.css";
@@ -49,13 +51,22 @@ export function RubricScoring({ assignment, onSignOffBlocked }: RubricScoringPro
   const status = assignment.encounter_status;
   const editable = status === "submitted" || status === "signed";
 
+  // Bumped on every edit so a save only resets the inputs if nothing was typed while it ran
+  const editRevision = useRef(0);
+  // Bumped whenever a different assignment loads so a save that finishes late is ignored
+  const assignmentToken = useRef(0);
+
   const load = useCallback(async () => {
+    assignmentToken.current += 1;
+    const token = assignmentToken.current;
     try {
       const g = await rubricApi.grade(assignment.assignment_id);
+      if (token !== assignmentToken.current) return;
       setGrade(g);
       setDrafts(draftsFrom(g));
       setError(null);
     } catch (err) {
+      if (token !== assignmentToken.current) return;
       setError(err instanceof Error ? err.message : "Failed to load rubric");
     }
   }, [assignment.assignment_id]);
@@ -77,6 +88,49 @@ export function RubricScoring({ assignment, onSignOffBlocked }: RubricScoringPro
   const invalid = items.find((item) => readPoints(drafts[item.rubric_item_id]?.points ?? "", item.points) === "invalid");
   const unscored = items.filter((item) => item.points_awarded === null).length;
 
+  // Saves every item that has points typed in. Autosave skips while nothing changed or
+  // a points box holds an invalid number (the instructor is probably still typing).
+  const save = async (reason: SaveReason = "manual"): Promise<boolean> => {
+    if (!editable || !grade || invalid || (reason === "auto" && !dirty)) return true;
+
+    // Only items with points typed in are sent; blank ones stay unscored
+    const scores = items.flatMap((item) => {
+      const d = drafts[item.rubric_item_id];
+      const p = readPoints(d.points, item.points);
+      return typeof p === "number"
+        ? [{ rubric_item_id: item.rubric_item_id, points_awarded: p, comment: d.comment.trim() || null }]
+        : [];
+    });
+    const token = assignmentToken.current;
+    const revision = editRevision.current;
+    setSaving(true);
+    if (reason === "manual") setMessage(null);
+    try {
+      const g = await rubricApi.saveScores(assignment.assignment_id, scores);
+      if (token !== assignmentToken.current) return true;
+      setGrade(g);
+      // Keep anything typed while the save was running; it's saved on the next pause
+      if (editRevision.current === revision) setDrafts(draftsFrom(g));
+      setError(null);
+      if (reason === "manual") setMessage("Rubric scores saved.");
+      return true;
+    } catch (err) {
+      if (token === assignmentToken.current) {
+        setError(err instanceof Error ? err.message : "Failed to save scores");
+      }
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const autosave = useAutosave(save, { enabled: editable });
+
+  // Drop a pending autosave when a different assignment opens
+  useEffect(() => {
+    autosave.cancel();
+  }, [assignment.assignment_id]);
+
   // Tell the parent whether Sign off can go ahead
   useEffect(() => {
     if (!grade) onSignOffBlocked("Loading rubric…");
@@ -92,6 +146,8 @@ export function RubricScoring({ assignment, onSignOffBlocked }: RubricScoringPro
   const setDraft = (id: number, field: keyof Draft, value: string) => {
     setDrafts((prev) => ({ ...prev, [id]: { ...prev[id], [field]: value } }));
     setMessage(null);
+    editRevision.current += 1;
+    autosave.notifyEdit();
   };
 
   // Running total uses what's typed, so the instructor sees the grade as they go
@@ -100,30 +156,6 @@ export function RubricScoring({ assignment, onSignOffBlocked }: RubricScoringPro
     return sum + (typeof p === "number" ? p : 0);
   }, 0);
   const totalPoints = grade.total_points ?? 0;
-
-  const save = async () => {
-    // Only items with points typed in are sent; blank ones stay unscored
-    const scores = items.flatMap((item) => {
-      const d = drafts[item.rubric_item_id];
-      const p = readPoints(d.points, item.points);
-      return typeof p === "number"
-        ? [{ rubric_item_id: item.rubric_item_id, points_awarded: p, comment: d.comment.trim() || null }]
-        : [];
-    });
-    setSaving(true);
-    setMessage(null);
-    try {
-      const g = await rubricApi.saveScores(assignment.assignment_id, scores);
-      setGrade(g);
-      setDrafts(draftsFrom(g));
-      setError(null);
-      setMessage("Rubric scores saved.");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save scores");
-    } finally {
-      setSaving(false);
-    }
-  };
 
   return (
     <section className="rubric">
@@ -159,18 +191,18 @@ export function RubricScoring({ assignment, onSignOffBlocked }: RubricScoringPro
                     aria-label={`Points for ${item.label}`}
                     className={`ui-input${bad ? " rubric-input--bad" : ""}`}
                     value={d.points}
-                    disabled={!editable || saving}
+                    disabled={!editable}
                     onChange={(e) => setDraft(item.rubric_item_id, "points", e.target.value)}
                   />
                   <span>/ {item.points}</span>
                 </label>
                 {editable && (
                   <>
-                    <button type="button" className="ui-button ui-button--secondary" disabled={saving}
+                    <button type="button" className="ui-button ui-button--secondary"
                       onClick={() => setDraft(item.rubric_item_id, "points", String(item.points))}>
                       Full
                     </button>
-                    <button type="button" className="ui-button ui-button--secondary" disabled={saving}
+                    <button type="button" className="ui-button ui-button--secondary"
                       onClick={() => setDraft(item.rubric_item_id, "points", "0")}>
                       None
                     </button>
@@ -182,7 +214,7 @@ export function RubricScoring({ assignment, onSignOffBlocked }: RubricScoringPro
                   aria-label={`Comment for ${item.label}`}
                   maxLength={1000}
                   value={d.comment}
-                  disabled={!editable || saving}
+                  disabled={!editable}
                   onChange={(e) => setDraft(item.rubric_item_id, "comment", e.target.value)}
                 />
               </div>
@@ -200,7 +232,10 @@ export function RubricScoring({ assignment, onSignOffBlocked }: RubricScoringPro
           <span className="ui-muted rubric-status">
             {unscored > 0 ? `${unscored} of ${items.length} items not scored yet` : "All items scored"}
           </span>
-          <button type="button" className="ui-button" disabled={saving || !dirty || !!invalid} onClick={save}>
+          <span className="ui-muted" aria-live="polite">
+            {invalid ? "Fix the highlighted score to save" : autosaveLabel(autosave.status)}
+          </span>
+          <button type="button" className="ui-button" disabled={saving || !dirty || !!invalid} onClick={autosave.saveNow}>
             {saving ? "Saving…" : "Save scores"}
           </button>
         </div>

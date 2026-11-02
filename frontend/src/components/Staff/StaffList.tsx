@@ -1,6 +1,7 @@
 import { KeyboardEvent, useState } from "react";
 import type { UpdateStaffInput } from "../../api/staff";
 import type { Staff } from "../../types";
+import { confirmDelete } from "../confirmDelete";
 import "./staff.css";
 
 interface StaffListProps {
@@ -159,7 +160,16 @@ export function StaffList({ staff, emptyText, onUpdate, onDelete }: StaffListPro
                         </button>
                         <button
                           className="ui-button ui-button--danger ui-button--small"
-                          onClick={() => onDelete(member.staffid)}
+                          onClick={() => {
+                            if (
+                              confirmDelete(
+                                `staff member ${member.first_name} ${member.last_name}`,
+                                `/staff/${member.staffid}`
+                              )
+                            ) {
+                              onDelete(member.staffid);
+                            }
+                          }}
                         >
                           Delete
                         </button>
