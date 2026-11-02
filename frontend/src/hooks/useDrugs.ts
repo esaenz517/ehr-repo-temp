@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { CreateDrugInput, drugsApi } from "../api/drugs";
+import { CreateDrugInput, drugsApi, UpdateDrugInput } from "../api/drugs";
 import type { Drug } from "../types";
 
 export function useDrugs() {
@@ -32,6 +32,18 @@ export function useDrugs() {
     }
   };
 
+  // Returns true when saved, so the list knows to close the edit row.
+  const update = async (drugId: number, changes: UpdateDrugInput) => {
+    try {
+      await drugsApi.update(drugId, changes);
+      await load();
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update drug");
+      return false;
+    }
+  };
+
   const remove = async (drugId: number) => {
     try {
       await drugsApi.remove(drugId);
@@ -41,5 +53,5 @@ export function useDrugs() {
     }
   };
 
-  return { drugs, loading, error, create, remove };
+  return { drugs, loading, error, create, update, remove };
 }

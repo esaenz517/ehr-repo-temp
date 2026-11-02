@@ -1,0 +1,66 @@
+/* Drugs table: every class is prefixed with "drugs-".
+   Table, input and button looks come from the shared ui- classes. */
+
+.drugs-name {
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.drugs-name .ui-input {
+  min-width: 160px;
+}
+
+.drugs-description {
+  width: 100%; /* description takes the spare width; the other columns stay snug */
+  min-width: 200px;
+}
+
+.drugs-actions .ui-row-actions {
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+
+/* Phones: each row becomes a small card (name, description, buttons).
+   The extra selectors outrank the shared .ui-table / .ui-table-card cell rules. */
+@media (max-width: 640px) {
+  .drugs-table thead {
+    display: none;
+  }
+
+  .ui-table.drugs-table tr {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  .ui-table.drugs-table tr:last-child {
+    border-bottom: none;
+  }
+
+  .ui-table-card .ui-table.drugs-table tr td {
+    padding: 0;
+    border: none;
+  }
+
+  .drugs-name {
+    white-space: normal;
+  }
+
+  .drugs-description {
+    width: auto;
+    min-width: 0;
+    color: var(--color-text-muted);
+  }
+
+  .ui-table-card .ui-table.drugs-table tr .drugs-actions {
+    padding-top: 8px;
+  }
+
+  .drugs-actions .ui-row-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}

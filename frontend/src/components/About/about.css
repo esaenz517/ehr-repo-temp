@@ -1,0 +1,177 @@
+/* About Us page: every class is prefixed with "about-". */
+
+.about-hero {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-bottom: 32px;
+  padding: 28px 32px;
+  border-radius: var(--radius-lg);
+  border-bottom: 4px solid var(--color-accent);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow);
+}
+
+.about-logo {
+  width: 96px;
+  height: auto;
+  flex-shrink: 0;
+  padding: 10px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.about-eyebrow {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.about-title {
+  margin: 0 0 8px;
+  font-size: 28px;
+  line-height: 1.2;
+  color: inherit;
+}
+
+.about-lead {
+  margin: 0;
+  max-width: 60ch;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-on-primary-muted);
+}
+
+.about-section {
+  margin-bottom: 32px;
+}
+
+.about-section-title {
+  margin: 0 0 14px;
+  font-size: 20px;
+}
+
+/* Numbered workflow: one card per step */
+.about-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-step {
+  position: relative;
+  padding: 20px 16px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-top: 4px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.about-step-number {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: 700;
+}
+
+.about-step-title,
+.about-feature-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.about-step p,
+.about-feature p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.about-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-feature {
+  padding: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius);
+}
+
+.about-team {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-member {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+}
+
+.about-avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: var(--color-on-primary);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.about-member-name {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.about-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 760px) {
+  .about-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 22px 20px;
+  }
+
+  .about-steps,
+  .about-team {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

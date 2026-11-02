@@ -17,7 +17,8 @@ export type View =
   | "assignedCases"
   | "clinicalNotes"
   | "grades"
-  | "progress";
+  | "progress"
+  | "about";
 
 interface SidebarProps {
   active: View;
@@ -31,11 +32,12 @@ interface SidebarProps {
 }
 
 // Students can access their dashboard, assignments,
-// and published grades.
+// published grades, and the About Us page.
 export const STUDENT_VIEWS: View[] = [
   "home",
   "assignments",
   "grades",
+  "about",
 ];
 
 const COLLAPSED_KEY = "sidebar-collapsed";
@@ -75,6 +77,7 @@ const NAV_ITEMS: { view: View; label: string }[] = [
   // Student grading and instructor progress features.
   { view: "grades", label: "My Grades" },
   { view: "progress", label: "Student Progress" },
+  { view: "about", label: "About Us" },
 ];
 
 export function Sidebar({

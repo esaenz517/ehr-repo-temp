@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
-import type { Assignment, EncounterStatus } from "../../types";
+import type { Assignment } from "../../types";
+import { StatusBadge } from "../StatusBadge";
 
-//AI was used to assist in building this section as dev assigned to it is 
-// unfamiliar with how this works. 
+//AI was used to assist in building this section as dev assigned to it is
+// unfamiliar with how this works.
 
 interface AssignmentListProps {
   assignments: Assignment[];
@@ -11,21 +12,6 @@ interface AssignmentListProps {
   onOpen?: (assignment: Assignment) => void; // when set, clicking a case opens it
 }
 
-const STATUS_LABELS: Record<EncounterStatus, string> = {
-  not_started: "Not started",
-  in_progress: "In progress",
-  submitted: "Submitted",
-  signed: "Signed",
-};
-
-// Color the status text for ease of viewing
-const STATUS_COLORS: Record<EncounterStatus, { background: string; color: string }> = {
-  not_started: { background: "#c62828", color: "#fff" }, // red
-  in_progress: { background: "#f9a825", color: "#222" }, // gold (dark text for readability)
-  submitted:   { background: "#1565c0", color: "#fff" }, // blue
-  signed:      { background: "#2e7d32", color: "#fff" }, // green
-};
-
 // Due dates are stored in UTC without a time zone marker, so add "Z" before converting to local time.
 function formatDueDate(dueDate: string | null) {
   return dueDate ? new Date(dueDate + "Z").toLocaleString() : "(No due date)";
@@ -33,48 +19,28 @@ function formatDueDate(dueDate: string | null) {
 
 export function AssignmentList({ assignments, studentName, actions, onOpen }: AssignmentListProps) {
   return (
-    <ul style={{ listStyle: "none", padding: 0 }}>
+    <ul className="ui-row-list">
       {assignments.map((a) => (
-        <li
-          key={a.assignment_id}
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "8px 0",
-            borderBottom: "1px solid #eee",
-          }}
-        >
+        <li key={a.assignment_id} className="ui-row">
           <div
+            className={`ui-row-main${onOpen ? " ui-row-main--link" : ""}`}
             onClick={onOpen ? () => onOpen(a) : undefined}
             onKeyDown={onOpen ? (e) => e.key === "Enter" && onOpen(a) : undefined}
             role={onOpen ? "button" : undefined}
             tabIndex={onOpen ? 0 : undefined}
-            style={onOpen ? { cursor: "pointer" } : undefined}
           >
-            <strong>Case #{a.case_id}</strong>
-            {studentName && <> · {studentName(a.assigned_to)}</>}
-            {a.patient_name && <span> · {a.patient_name}</span>}
-            {a.chief_complaint && (
-              <div style={{ fontSize: 14 }}>{a.chief_complaint}</div>
-            )}
-            <div style={{ fontSize: 14, color: "#555" }}>
+            <div className="ui-row-title">
+              Case #{a.case_id}
+              {studentName && <> · {studentName(a.assigned_to)}</>}
+              {a.patient_name && <> · {a.patient_name}</>}
+            </div>
+            {a.chief_complaint && <div className="ui-row-subtitle">{a.chief_complaint}</div>}
+            <div className="ui-row-subtitle">
               {a.course ?? "No course"} · Due {formatDueDate(a.due_date)}
             </div>
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <span
-              style={{
-                ...STATUS_COLORS[a.encounter_status],
-                padding: "2px 10px",
-                borderRadius: 12,
-                fontSize: 13,
-                fontWeight: 600,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {STATUS_LABELS[a.encounter_status]}
-            </span>
+          <div className="ui-row-actions">
+            <StatusBadge status={a.encounter_status} />
             {actions?.(a)}
           </div>
         </li>
@@ -82,4 +48,3 @@ export function AssignmentList({ assignments, studentName, actions, onOpen }: As
     </ul>
   );
 }
-

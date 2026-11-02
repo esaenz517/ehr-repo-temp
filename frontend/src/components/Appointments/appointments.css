@@ -25,7 +25,7 @@
 
 .appointments-count-badge {
   padding: 4px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-primary);
   color: var(--color-on-primary);
   font-size: 13px;
@@ -144,7 +144,7 @@
   height: 30px;
   padding: 2px 10px;
   border: 1px solid;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -229,7 +229,7 @@
 .appointments-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(255, 130, 0, 0.35); /* orange focus ring */
+  box-shadow: var(--focus-ring);
 }
 
 .appointments-submit {

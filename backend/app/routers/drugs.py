@@ -1,6 +1,6 @@
 """
 Drugs Router
-This file defines API endpoints for managing drugs. It includes routes for listing, retrieving, creating, and deleting drugs.
+This file defines API endpoints for managing drugs. It includes routes for listing, retrieving, creating, updating, and deleting drugs.
 """
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.crud import drugs as crud
 from app.database import get_db
-from app.schemas.drugs import Drug, DrugCreate
+from app.schemas.drugs import Drug, DrugCreate, DrugUpdate
 from app.security.authorization import require_permission
 
 router = APIRouter(prefix="/drugs", tags=["drugs"])
@@ -41,6 +41,20 @@ def create_drug(
     current_user=Depends(require_permission("drug", "create")),
 ):
     return crud.create_drug(db, drug)
+
+
+# Partial update, e.g. {"name": "Metformin ER"}.
+@router.patch("/{drug_id}", response_model=Drug)
+def update_drug(
+    drug_id: int,
+    changes: DrugUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("drug", "update")),
+):
+    drug = crud.update_drug(db, drug_id, changes)
+    if drug is None:
+        raise HTTPException(status_code=404, detail="Drug not found")
+    return drug
 
 
 @router.delete("/{drug_id}", status_code=204)

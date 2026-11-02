@@ -18,6 +18,7 @@ import { CaseWorkspacePage } from "./components/Assignment/CaseWorkspacePage";
 import { StudentGradesPage } from "./components/Grades/StudentGradesPage";
 import { InstructorProgressPage } from "./components/Progress/InstructorProgressPage";
 import { gradesApi } from "./api/grades";
+import { AboutPage } from "./components/About/AboutPage";
 
 function App() {
   const [view, setView] = useState<View>("home");
@@ -168,6 +169,7 @@ function App() {
           canView("progress") && (
             <InstructorProgressPage />
           )}
+        {view === "about" && <AboutPage />}
       </main>
     </div>
   );

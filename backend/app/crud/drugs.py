@@ -1,12 +1,12 @@
 '''
 Drugs CRUD
-DB access functions for drugs - list, get, create, delete.
+DB access functions for drugs - list, get, create, update, delete.
 '''
 
 from sqlalchemy.orm import Session
 
 from app.models.drugs import Drug as DrugModel
-from app.schemas.drugs import DrugCreate
+from app.schemas.drugs import DrugCreate, DrugUpdate
 
 
 # Gets all drugs from the DB.
@@ -23,6 +23,22 @@ def get_drug(db: Session, drug_id: int):
 def create_drug(db: Session, drug: DrugCreate):
     db_drug = DrugModel(name=drug.name, description=drug.description)
     db.add(db_drug)
+    db.commit()
+    db.refresh(db_drug)
+    return db_drug
+
+
+# Changes only the fields that were sent. Returns None if the drug doesn't exist.
+def update_drug(db: Session, drug_id: int, changes: DrugUpdate):
+    db_drug = get_drug(db, drug_id)
+    if db_drug is None:
+        return None
+
+    for field, value in changes.model_dump(exclude_unset=True).items():
+        if field == "name" and value is None:
+            continue  # name can't be empty in the database
+        setattr(db_drug, field, value)
+
     db.commit()
     db.refresh(db_drug)
     return db_drug

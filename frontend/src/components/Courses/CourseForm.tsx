@@ -6,7 +6,11 @@ interface CourseFormProps {
   onSubmit: (input: CreateCourseInput) => Promise<boolean>;
 }
 
-const TERMS: CourseTerm[] = ["Fall", "Spring", "Summer"];
+export const TERMS: CourseTerm[] = ["Fall", "Spring", "Summer"];
+
+// Years offered in the dropdowns: five back and five ahead of the current year
+const CURRENT_YEAR = new Date().getFullYear();
+export const YEARS = Array.from({ length: 11 }, (_, i) => CURRENT_YEAR - 5 + i);
 
 // Form for creating a new course. Collects input and hands it up to onSubmit
 // (CoursesPage wires this to useCourses().create). Only clears on success so
@@ -16,7 +20,7 @@ export function CourseForm({ onSubmit }: CourseFormProps) {
   const [courseNumber, setCourseNumber] = useState("");
   const [title, setTitle] = useState("");
   const [term, setTerm] = useState<CourseTerm>("Fall");
-  const [termYear, setTermYear] = useState(String(new Date().getFullYear()));
+  const [termYear, setTermYear] = useState(CURRENT_YEAR);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -27,7 +31,7 @@ export function CourseForm({ onSubmit }: CourseFormProps) {
       course_number: courseNumber.trim(),
       title: title.trim(),
       term,
-      term_year: Number(termYear),
+      term_year: termYear,
     });
     if (saved) {
       setSubjectCode("");
@@ -72,15 +76,16 @@ export function CourseForm({ onSubmit }: CourseFormProps) {
           <option key={t} value={t}>{t}</option>
         ))}
       </select>
-      <input
+      <select
         value={termYear}
-        onChange={(e) => setTermYear(e.target.value)}
-        type="number"
-        min={2000}
-        max={2100}
+        onChange={(e) => setTermYear(Number(e.target.value))}
         aria-label="Term year"
         className="ui-input ui-input--narrow"
-      />
+      >
+        {YEARS.map((y) => (
+          <option key={y} value={y}>{y}</option>
+        ))}
+      </select>
       <button type="submit" className="ui-button">Add course</button>
     </form>
   );

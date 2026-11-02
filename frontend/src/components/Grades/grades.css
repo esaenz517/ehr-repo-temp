@@ -1,59 +1,56 @@
-.grades-page {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 16px 24px;
-}
+/* Grades and Student Progress pages. Classes are prefixed "grades-" / "progress-".
+   Tables, cards and stat tiles come from the shared ui- classes. */
 
+/* Big overall score beside its explanation (My Grades) */
 .grades-summary {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 16px;
-    padding: 16px 20px;
-    margin: 20px 0;
-    background: var(--surface, #f5f6f8);
-    border-radius: 10px;
+    gap: 20px;
 }
 
-.grades-summary strong {
+.grades-summary-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 240px;
+}
+
+.grades-summary-text strong {
     font-size: 26px;
+    color: var(--color-primary);
 }
 
+/* Collapsible per-case panel and the grade editor panel */
 .grades-panel {
-    margin: 18px 0;
+    margin: 0 0 16px;
     padding: 16px;
-    border: 1px solid #cfd5db;
-    border-radius: 8px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
 }
 
 .grades-panel summary {
     cursor: pointer;
 }
 
-.grades-table-wrap {
-    max-width: 100%;
-    overflow-x: auto;
+.grades-panel summary:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.grades-panel h2 {
+    margin-top: 0;
 }
 
 .grades-table {
-    width: 100%;
-    border-collapse: collapse;
     margin: 14px 0;
-    font-size: 14px;
-}
-
-.grades-table th,
-.grades-table td {
-    text-align: left;
-    padding: 9px;
-    border-bottom: 1px solid #dce1e6;
-    vertical-align: middle;
 }
 
 .grades-table input {
     width: 100%;
     min-width: 65px;
-    box-sizing: border-box;
     padding: 7px;
 }
 
@@ -73,6 +70,9 @@
     flex-direction: column;
     gap: 4px;
     min-width: 150px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-muted);
 }
 
 .grades-adjust label:last-child {
@@ -91,31 +91,16 @@
     margin: 14px 0;
 }
 
-.progress-stats {
-    display: grid;
-    grid-template-columns:
-        repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin: 20px 0;
-}
-
-.progress-stats>div {
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
-    border: 1px solid #dce1e6;
-    border-radius: 8px;
-}
-
-.progress-stats strong {
-    font-size: 24px;
-}
-
-.progress-stats span {
-    font-size: 13px;
-}
-
 .progress-alert {
     font-weight: 700;
-    color: #a13b18;
+    color: var(--color-error);
+}
+
+/* Banner above the table when alerts exist */
+.progress-alert-banner {
+    margin: 0 0 16px;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    border-left: 3px solid var(--color-error);
+    background: var(--color-error-bg);
 }

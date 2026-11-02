@@ -1,0 +1,177 @@
+/* Shared charts. Classes are prefixed "chart-". Colors come from theme.css. */
+
+/* Status fills (same tokens as the Instructor Dashboard bar) */
+.chart-fill--not_started { background: var(--status-not-started-fill); }
+.chart-fill--in_progress { background: var(--status-in-progress-fill); }
+.chart-fill--submitted   { background: var(--status-submitted-fill); }
+.chart-fill--signed      { background: var(--status-signed-fill); }
+
+/* ---------- Status breakdown: one stacked bar + legend ---------- */
+
+.chart-stack {
+  display: flex;
+  gap: 2px; /* surface-colored gap between touching segments */
+  height: 18px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--color-surface);
+}
+
+.chart-stack-part {
+  min-width: 4px;
+  transition: opacity 0.15s ease;
+}
+
+/* Hovering one segment fades the others so it stands out */
+.chart-stack:hover .chart-stack-part {
+  opacity: 0.45;
+}
+
+.chart-stack .chart-stack-part:hover {
+  opacity: 1;
+}
+
+.chart-stack-empty {
+  flex: 1;
+  background: var(--color-bg-strong);
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+}
+
+.chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chart-legend-value {
+  color: var(--color-primary);
+}
+
+.chart-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* ---------- Score bars: label | track | value ---------- */
+
+.chart-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.chart-bar-row {
+  display: grid;
+  grid-template-columns: minmax(80px, 180px) minmax(0, 1fr) 56px;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.chart-bar-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chart-bar-track {
+  height: 14px;
+  background: var(--color-bg);
+  border-radius: 0 4px 4px 0;
+}
+
+.chart-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 0 4px 4px 0; /* rounded data end, square at the baseline */
+  transition: background 0.15s ease;
+}
+
+.chart-bar-row:hover .chart-bar-fill {
+  background: var(--color-primary-light);
+}
+
+.chart-bar-value {
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Score ring ---------- */
+
+.chart-ring {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  margin: 0;
+  width: 128px;
+  height: 128px;
+}
+
+.chart-ring svg {
+  transform: rotate(-90deg); /* start the arc at 12 o'clock */
+}
+
+.chart-ring-track,
+.chart-ring-value {
+  fill: none;
+  stroke-width: 12;
+}
+
+.chart-ring-track {
+  stroke: var(--color-bg-strong);
+}
+
+.chart-ring-value {
+  stroke: var(--color-primary);
+  stroke-linecap: round;
+}
+
+.chart-ring-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.chart-ring-text strong {
+  font-size: 22px;
+  color: var(--color-primary);
+}
+
+.chart-ring-text span {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 640px) {
+  .chart-bar-row {
+    grid-template-columns: minmax(0, 1fr) 56px;
+  }
+
+  .chart-bar-label {
+    grid-column: 1 / -1;
+  }
+}

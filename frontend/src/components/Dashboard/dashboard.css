@@ -16,8 +16,8 @@
   justify-content: space-between;
   gap: 24px;
   padding: 28px 32px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--color-primary) 0%, #0b3a7a 60%, #1a5aa8 100%);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
   color: var(--color-on-primary);
   box-shadow: 0 10px 30px rgba(4, 30, 66, 0.25);
   animation: dash-rise 0.5s ease both;
@@ -66,6 +66,7 @@
 
 .dash-hero-title {
   margin: 0 0 8px;
+  color: inherit; /* white on the blue hero, not the global heading blue */
   font-size: 30px;
   line-height: 1.2;
 }
@@ -83,7 +84,7 @@
 .dash-hero-cta {
   padding: 10px 18px;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-accent);
   color: var(--color-primary);
   font-weight: 700;
@@ -159,12 +160,12 @@
 
 .dash-stat {
   --tone: var(--color-primary);
-  --tone-bg: #e6ecf5;
+  --tone-bg: var(--color-primary-tint);
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border-top: 4px solid var(--tone);
   background: var(--color-surface);
   box-shadow: var(--shadow);
@@ -178,13 +179,13 @@
 
 .dash-stat:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 24px rgba(4, 30, 66, 0.14);
+  box-shadow: var(--shadow-hover);
 }
 
-.dash-stat--todo     { --tone: #c62828; --tone-bg: #fdecea; }
-.dash-stat--progress { --tone: #e08a00; --tone-bg: #fff4e0; }
+.dash-stat--todo     { --tone: var(--status-not-started-fill); --tone-bg: var(--status-not-started-bg); }
+.dash-stat--progress { --tone: var(--status-in-progress-fill); --tone-bg: var(--status-in-progress-bg); }
 .dash-stat--done     { --tone: var(--color-success); --tone-bg: var(--color-success-bg); }
-.dash-stat--week     { --tone: #1565c0; --tone-bg: #e3eefb; }
+.dash-stat--week     { --tone: var(--color-info); --tone-bg: var(--color-info-bg); }
 .dash-stat--late     { --tone: var(--color-error); --tone-bg: var(--color-error-bg); }
 
 .dash-stat-icon {
@@ -193,7 +194,7 @@
   width: 44px;
   height: 44px;
   flex-shrink: 0;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: var(--tone-bg);
   color: var(--tone);
 }
@@ -215,7 +216,7 @@
 
 .dash-panel {
   padding: 20px 22px;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: var(--shadow);
   animation: dash-rise 0.5s ease 0.2s both;
@@ -261,9 +262,9 @@
   align-items: center;
   gap: 14px;
   padding: 12px 14px;
-  border: 1px solid #e5e8ee;
+  border: 1px solid var(--color-border-light);
   border-left: 4px solid var(--edge);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   background: var(--color-surface);
   animation: dash-rise 0.4s ease both;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -276,7 +277,7 @@
 
 .dash-item--late  { --edge: var(--color-error); }
 .dash-item--soon  { --edge: var(--color-accent); }
-.dash-item--later { --edge: #1565c0; }
+.dash-item--later { --edge: var(--color-info); }
 
 .dash-item-avatar {
   display: grid;
@@ -285,7 +286,7 @@
   height: 40px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), #1a5aa8);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
   color: var(--color-on-primary);
   font-weight: 700;
 }
@@ -320,7 +321,7 @@
 
 .dash-chip {
   padding: 2px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-bg);
   color: var(--color-text-muted);
   font-size: 12px;
@@ -329,17 +330,17 @@
 }
 
 .dash-chip--late  { background: var(--color-error-bg); color: var(--color-error); }
-.dash-chip--soon  { background: #fff1e0; color: #a35400; }
-.dash-chip--later { background: #e3eefb; color: #0d4a8f; }
+.dash-chip--soon  { background: var(--color-warning-bg); color: var(--color-warning); }
+.dash-chip--later { background: var(--color-info-bg); color: var(--color-info); }
 
-.dash-chip--status-not_started { background: #fdecea; color: #a11d1d; }
-.dash-chip--status-in_progress { background: #fff4e0; color: #8a5a00; }
+.dash-chip--status-not_started { background: var(--status-not-started-bg); color: var(--status-not-started-text); }
+.dash-chip--status-in_progress { background: var(--status-in-progress-bg); color: var(--status-in-progress-text); }
 
 .dash-item-action {
   flex-shrink: 0;
   padding: 8px 18px;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-primary);
   color: var(--color-on-primary);
   font-weight: 700;
@@ -357,14 +358,14 @@
 }
 
 .dash-item-action--continue:hover {
-  background: #e67300;
+  background: var(--color-accent-dark);
 }
 
 /* Loading placeholder rows */
 .dash-skeleton {
   height: 72px;
-  border-left-color: #e5e8ee;
-  background: linear-gradient(90deg, #f1f3f7 25%, #e6e9ef 50%, #f1f3f7 75%);
+  border-left-color: var(--color-border-light);
+  background: linear-gradient(90deg, var(--color-bg) 25%, var(--color-bg-strong) 50%, var(--color-bg) 75%);
   background-size: 200% 100%;
   animation: dash-shimmer 1.2s linear infinite;
 }
@@ -381,7 +382,7 @@
   height: 64px;
   margin-bottom: 10px;
   border-radius: 50%;
-  background: #fff1e0;
+  background: var(--color-accent-tint);
   color: var(--color-accent);
   animation: dash-pop 0.6s ease both;
 }

@@ -259,8 +259,8 @@ export function GradeEditor({
                 </p>
             ) : (
                 <>
-                    <div className="grades-table-wrap">
-                        <table className="grades-table">
+                    <div className="ui-table-wrap">
+                        <table className="ui-table grades-table">
                             <thead>
                                 <tr>
                                     <th>Criterion</th>
@@ -333,6 +333,7 @@ export function GradeEditor({
                                         <td>
                                             <button
                                                 type="button"
+                                                className="ui-button ui-button--danger ui-button--small"
                                                 onClick={() => {
                                                     setItems((previous) =>
                                                         previous.filter(
@@ -354,6 +355,7 @@ export function GradeEditor({
 
                     <button
                         type="button"
+                        className="ui-button ui-button--secondary"
                         onClick={addItem}
                     >
                         Add criterion
@@ -428,6 +430,7 @@ export function GradeEditor({
                     <div className="grades-actions">
                         <button
                             type="button"
+                            className="ui-button ui-button--secondary"
                             disabled={
                                 busy ||
                                 (!!grade && !dirty)
@@ -439,6 +442,7 @@ export function GradeEditor({
 
                         <button
                             type="button"
+                            className="ui-button"
                             disabled={
                                 busy ||
                                 !grade ||

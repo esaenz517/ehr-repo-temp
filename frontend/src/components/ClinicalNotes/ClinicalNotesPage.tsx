@@ -396,10 +396,10 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
     );
 
     return (
-        <div className="clinical-notes">
-            <h1>Clinical Notes</h1>
+        <div className="ui-page clinical-notes">
+            <h1 className="ui-page-title">Clinical Notes</h1>
 
-            <p className="note-muted">
+            <p className="ui-page-intro">
                 Write a SOAP draft for an
                 encounter. Patient chart
                 information is shown alongside
@@ -500,6 +500,7 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
 
                         <button
                             type="button"
+                            className="ui-button"
                             onClick={startEncounter}
                         >
                             Start encounter
@@ -779,6 +780,7 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
 
                                     <button
                                         type="button"
+                                        className="ui-button"
                                         disabled={
                                             saving ||
                                             encounterId ===
@@ -798,6 +800,7 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
                                     {note && (
                                         <button
                                             type="button"
+                                            className="ui-button ui-button--danger"
                                             onClick={archive}
                                         >
                                             Archive note

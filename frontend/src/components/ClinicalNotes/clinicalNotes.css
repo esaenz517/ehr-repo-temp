@@ -1,9 +1,9 @@
 .clinical-notes {
-    color: #20303a;
+    color: var(--color-text);
 }
 
 .clinical-notes .note-muted {
-    color: #596871;
+    color: var(--color-text-muted);
     font-size: .9rem;
 }
 
@@ -26,18 +26,20 @@
     font-weight: 600;
 }
 
-.clinical-notes button {
-    border: 1px solid #adc4cd;
-    border-radius: 6px;
-    background: white;
-    color: #164e63;
+/* Plain buttons in a note look like .ui-button--secondary; ui-buttons keep their own look */
+.clinical-notes button:not(.ui-button) {
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    color: var(--color-primary);
+    font-weight: 600;
 }
 
-.clinical-notes button:hover:not(:disabled) {
-    background: #e8f4f6;
+.clinical-notes button:not(.ui-button):hover:not(:disabled) {
+    background: var(--color-bg);
 }
 
-.clinical-notes button:disabled {
+.clinical-notes button:not(.ui-button):disabled {
     opacity: .55;
     cursor: default;
 }
@@ -45,8 +47,8 @@
 .clinical-notes select,
 .clinical-notes input,
 .clinical-notes textarea {
-    border: 1px solid #afbdc4;
-    border-radius: 5px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
     max-width: 100%;
 }
 
@@ -59,9 +61,9 @@
 
 .note-list {
     padding: .8rem;
-    border: 1px solid #d6e0e3;
-    border-radius: 8px;
-    background: #f5f8f9;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg);
 }
 
 .note-list h2 {
@@ -83,14 +85,14 @@
     text-align: left;
 }
 
-.note-list li button.selected {
-    background: #d7edf0;
-    border-color: #398093;
+.note-list li button.selected:not(.ui-button) {
+    background: var(--color-primary-tint);
+    border-color: var(--color-primary);
 }
 
 .note-list small {
     display: block;
-    color: #53646b;
+    color: var(--color-text-muted);
     margin-top: .3rem;
 }
 
@@ -109,12 +111,13 @@
 .soap-section {
     margin: 0 0 1rem;
     padding: 1rem;
-    border: 1px solid #d6e0e3;
-    border-radius: 8px;
-    background: white;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
 }
 
 .soap-section h2 {
+    color: var(--color-primary);
     display: flex;
     gap: .65rem;
     align-items: center;
@@ -128,9 +131,9 @@
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    border-radius: 5px;
-    color: white;
-    background: #276b7d;
+    border-radius: var(--radius);
+    color: var(--color-on-primary);
+    background: var(--color-primary);
 }
 
 .soap-section h3 {
@@ -139,7 +142,7 @@
 }
 
 .soap-section h3 small {
-    color: #596871;
+    color: var(--color-text-muted);
     font-weight: normal;
 }
 
@@ -186,30 +189,32 @@
 }
 
 .note-empty {
-    background: #f5f8f9;
+    background: var(--color-bg);
     padding: .65rem;
-    border-radius: 5px;
-    color: #596871;
+    border-radius: var(--radius);
+    color: var(--color-text-muted);
 }
 
 .note-chart-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: .6rem;
-    background: #f5f8f9;
+    background: var(--color-bg);
+    border-radius: var(--radius);
     padding: .8rem;
 }
 
 .note-error {
-    color: #a22828;
+    color: var(--color-error);
 }
 
 .note-success {
-    color: #13623f;
+    color: var(--color-success);
 }
 
 .note-review {
-    background: #e7f3f5;
+    background: var(--color-primary-tint);
+    border-radius: var(--radius);
     padding: .8rem;
     display: flex;
     gap: 1rem;
@@ -217,7 +222,7 @@
 }
 
 .note-history {
-    border-top: 1px solid #d6e0e3;
+    border-top: 1px solid var(--color-border-light);
     margin-top: 1.5rem;
 }
 
@@ -228,4 +233,8 @@
     .note-chart-grid {
         grid-template-columns: minmax(0, 1fr);
     }
+}
+/* Lab list inside a SOAP section keeps the shared ui-lab-list spacing */
+.soap-section .ui-lab-list {
+    padding: 0;
 }
