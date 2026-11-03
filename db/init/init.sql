@@ -75,6 +75,7 @@ GO
 :r /init/tables/NoteAddenda.sql
 :r /init/tables/NoteAuditEvents.sql
 :r /init/tables/BillingCharges.sql
+:r /init/tables/PatientInsurance.sql
 :r /init/tables/Courses.sql
 :r /init/tables/DeletionAuditLog.sql
 

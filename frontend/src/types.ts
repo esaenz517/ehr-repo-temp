@@ -115,6 +115,28 @@ export interface BillingCharge {
   charge_amount: string;
 }
 
+export type InsurancePriority = "primary" | "secondary";
+
+export type InsuranceVerificationStatus =
+  | "unverified"
+  | "verified_active"
+  | "verified_inactive"
+  | "unable_to_verify";
+
+export interface PatientInsurance {
+  insurance_id: number;
+  patient_id: number;
+  insurance_company: string;
+  member_id: string;
+  group_number: string | null;
+  policyholder_name: string;
+  policyholder_date_of_birth: string | null;
+  insurance_priority: InsurancePriority;
+  coverage_start_date: string | null;
+  coverage_end_date: string | null;
+  verification_status: InsuranceVerificationStatus;
+}
+
 export type EncounterStatus = "not_started" | "in_progress" | "submitted" | "signed";  //for use with Assignment interface
 
 export interface Assignment {

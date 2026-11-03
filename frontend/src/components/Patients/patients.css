@@ -249,3 +249,53 @@
     grid-template-columns: max-content minmax(0, 1fr);
   }
 }
+
+/* Patient insurance registration form */
+.insurance-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 24px;
+  margin-top: 20px;
+  padding: 24px;
+  border: 1px solid #d9e1eb;
+  border-radius: 10px;
+  background-color: #f8fafc;
+}
+
+.insurance-form h4,
+.insurance-form p,
+.insurance-form button {
+  grid-column: 1 / -1;
+}
+
+.insurance-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 600;
+  color: #24344d;
+  min-width: 0;
+}
+
+.insurance-form input,
+.insurance-form select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #b8c5d6;
+  border-radius: 6px;
+  font: inherit;
+  background-color: white;
+}
+
+.insurance-form button {
+  justify-self: start;
+}
+
+@media (max-width: 700px) {
+  .insurance-form {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+}

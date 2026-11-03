@@ -18,6 +18,7 @@ from app.routers import (
     medical_history,
     assignment,
     billing,
+    insurance,
     clinical_notes,
     cases,
     courses,
@@ -53,6 +54,7 @@ app.include_router(medical_history.router)
 app.include_router(rooms.router)
 app.include_router(appointments.router)
 app.include_router(billing.router)
+app.include_router(insurance.router)
 app.include_router(cases.router)
 app.include_router(courses.router)
 

@@ -15,6 +15,7 @@ MERGE dbo.Roles AS target
 USING (
     VALUES
         ('ADMIN',              'Admin',                NULL),
+        ('BILLING_STAFF',      'Billing Staff',        NULL),
         ('FACULTY_INSTRUCTOR', 'Faculty / Instructor', NULL),
         ('PHYSICIAN',          'Physician',            NULL),
         ('NURSE',              'Nurse',                'Nursing'),
