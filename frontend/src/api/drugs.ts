@@ -14,6 +14,8 @@ export interface UpdateDrugInput {
 
 export const drugsApi = {
   list: () => apiFetch<Drug[]>("/drugs"),
+  // Medication autocomplete: best-matching names for any medication, e.g. "metf" -> ["Metformin", ...]
+  suggest: (query: string) => apiFetch<string[]>(`/drugs/suggest?q=${encodeURIComponent(query)}`),
   create: (input: CreateDrugInput) =>
     apiFetch<Drug>("/drugs", { method: "POST", body: JSON.stringify(input) }),
   update: (drugId: number, changes: UpdateDrugInput) =>

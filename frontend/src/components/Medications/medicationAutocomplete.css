@@ -1,0 +1,99 @@
+/* Medication autocomplete (MedicationAutocomplete.tsx) */
+
+.med-ac {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.med-ac-field {
+  position: relative;
+}
+
+.med-ac-input {
+  position: relative; /* sits above the grey autofill text */
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  background: transparent !important; /* let the autofill text show through */
+}
+
+/* Grey autofill text drawn behind the input, lined up with the typed text
+   (1px border + 10px padding, same as the input). */
+.med-ac-ghost {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 11px;
+  font-family: inherit;
+  font-size: 14px;
+  white-space: pre;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.med-ac-ghost-typed {
+  visibility: hidden;
+}
+
+.med-ac-ghost-rest {
+  color: var(--color-text-muted);
+  opacity: 0.8;
+}
+
+.med-ac-spinner {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border: 2px solid var(--color-border-light);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: med-ac-spin 0.7s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes med-ac-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.med-ac-list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  min-width: 220px;
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 18px rgba(4, 30, 66, 0.14);
+}
+
+.med-ac-option {
+  padding: 7px 10px;
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 14px;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.med-ac-option strong {
+  color: var(--color-primary);
+}
+
+.med-ac-option--active {
+  background: var(--color-primary-tint);
+}

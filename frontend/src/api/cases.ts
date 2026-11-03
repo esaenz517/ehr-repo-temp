@@ -1,9 +1,10 @@
 import type { Case, RubricCategory } from "../types";
 import { apiFetch } from "./client";
 
-// One medication saved to the case's patient.
+// One medication saved to the case's patient. drug_name is whatever the instructor
+// typed; the backend matches it to an existing drug or adds it as a new one.
 export interface MedicationInput {
-  drug_id: number;
+  drug_name: string;
   dose: string | null;
   route: string | null;
   frequency: string | null;

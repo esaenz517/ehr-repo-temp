@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 #from app.schemas.drugs import Drug
 #from app.schemas.providers import Provider
@@ -21,11 +21,20 @@ class LabResultCreate(BaseModel):
     collected_at: datetime
     
 #Creating a Medication
+# The instructor types the medication name (drug_name); it's matched to an existing
+# drug or added as a new one. drug_id still works for picking a known drug.
 class MedicationCreate(BaseModel):
-    drug_id: int
+    drug_id: int | None = None
+    drug_name: str | None = None
     dose: str | None = None
     route: str | None = None
     frequency: str | None = None
+
+    @model_validator(mode="after")
+    def needs_drug(self):
+        if self.drug_id is None and not (self.drug_name or "").strip():
+            raise ValueError("Each medication needs a drug_name or drug_id")
+        return self
 
 class CaseBase(BaseModel):
     patient_id: int
@@ -45,4 +54,4 @@ class Case(CaseBase):
     patient: Patient | None = None
 
     class Config:
-        from_attributes = True
+        from_attributes = True

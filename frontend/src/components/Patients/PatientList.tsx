@@ -1,6 +1,6 @@
 import { Fragment, useState } from "react";
 import type { UpdatePatientInput } from "../../api/patients";
-import type { Drug, Patient, Provider } from "../../types";
+import type { Patient, Provider } from "../../types";
 import { MedicalHistoryPanel } from "../MedicalHistory/MedicalHistoryPanel";
 import { AppointmentPanel } from "../Appointments/AppointmentPanel";
 import { BillingChargePanel } from "../Billing/BillingChargePanel";
@@ -12,7 +12,6 @@ interface PatientListProps {
   patients: Patient[];
   emptyText: string; // shown when there are no rows (none yet, or none match the filters)
   providers: Provider[]; // options for the edit form
-  drugs: Drug[];
   onUpdate: (patientId: number, changes: UpdatePatientInput) => Promise<boolean>;
   onDelete: (patientId: number) => void;
 }
@@ -27,7 +26,7 @@ const COLUMN_COUNT = 6; // Patient, MRN, DOB, Status, Provider, actions; the det
 // date of birth, status, and provider. Details opens a panel under the row with
 // the rest (identity, drugs) and the History / Appointments / Charges panels;
 // Edit opens the full patient form there instead.
-export function PatientList({ patients, emptyText, providers, drugs, onUpdate, onDelete }: PatientListProps) {
+export function PatientList({ patients, emptyText, providers, onUpdate, onDelete }: PatientListProps) {
   const [editingPatientId, setEditingPatientId] = useState<number | null>(null);
   const [detailsPatientId, setDetailsPatientId] = useState<number | null>(null);
   const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
@@ -137,7 +136,6 @@ export function PatientList({ patients, emptyText, providers, drugs, onUpdate, o
                         <PatientForm
                           patient={patient}
                           providers={providers}
-                          drugs={drugs}
                           onSubmit={async (input) => {
                             if (await onUpdate(patient.patient_id, input)) setEditingPatientId(null);
                           }}

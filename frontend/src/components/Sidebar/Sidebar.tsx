@@ -9,7 +9,6 @@ export type View =
   | "patients"
   | "staff"
   | "providers"
-  | "drugs"
   | "rooms"
   | "courses"
   | "createCase"
@@ -66,7 +65,6 @@ const NAV_ITEMS: { view: View; label: string }[] = [
   { view: "patients", label: "Patients" },
   { view: "staff", label: "Staff" },
   { view: "providers", label: "Providers" },
-  { view: "drugs", label: "Drugs" },
   { view: "rooms", label: "Rooms" },
   { view: "courses", label: "Courses" },
   { view: "createCase", label: "Create Case" },
