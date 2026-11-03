@@ -3,10 +3,11 @@ Drugs Router
 This file defines API endpoints for managing drugs. It includes routes for listing, retrieving, creating, updating, and deleting drugs.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.crud import drugs as crud
+from app.crud.drug_suggestions import suggest_drugs
 from app.database import get_db
 from app.schemas.drugs import Drug, DrugCreate, DrugUpdate
 from app.security.authorization import require_permission
@@ -20,6 +21,19 @@ def list_drugs(
     current_user=Depends(require_permission("drug", "read")),
 ):
     return crud.list_drugs(db)
+
+
+# Medication autocomplete: GET /drugs/suggest?q=metf -> ["Metformin", ...]
+# Suggests any medication (not only ones saved in the Drugs table), best match first.
+# Must be declared before /{drug_id} so "suggest" isn't read as a drug id.
+@router.get("/suggest", response_model=list[str])
+def suggest(
+    q: str = Query(default="", max_length=100),
+    limit: int = Query(default=10, ge=1, le=25),
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("drug", "read")),
+):
+    return suggest_drugs(db, q, limit)
 
 
 @router.get("/{drug_id}", response_model=Drug)

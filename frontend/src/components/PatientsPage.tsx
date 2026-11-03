@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { PatientForm } from "./Patients/PatientForm";
 import { PatientList } from "./Patients/PatientList";
-import { useDrugs } from "../hooks/useDrugs";
 import { usePatients } from "../hooks/usePatients";
 import { useProviders } from "../hooks/useProviders";
 
@@ -15,7 +14,6 @@ const STATUS_FILTERS = [
 export function PatientsPage() {
   const { patients, loading, error, create, update, remove } = usePatients();
   const { providers } = useProviders();
-  const { drugs } = useDrugs();
   const [search, setSearch] = useState(""); // matches the name, preferred name, or MRN
   const [dob, setDob] = useState(""); // "" or a "YYYY-MM-DD" date of birth
   const [status, setStatus] = useState("all"); // "all", "outpatient", or "inpatient"
@@ -45,7 +43,7 @@ export function PatientsPage() {
     <div className="ui-page">
       <h1 className="ui-page-title">Patients</h1>
 
-      <PatientForm providers={providers} drugs={drugs} onSubmit={create} />
+      <PatientForm providers={providers} onSubmit={create} />
 
       <div className="ui-filter-bar" role="search" aria-label="Filter patients">
         <label className={`ui-filter-field${query ? " ui-filter-field--active" : ""}`}>
@@ -107,7 +105,6 @@ export function PatientsPage() {
           patients={shown}
           emptyText={patients.length > 0 ? "No patients match these filters." : "No patients yet."}
           providers={providers}
-          drugs={drugs}
           onUpdate={update}
           onDelete={remove}
         />

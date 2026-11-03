@@ -29,12 +29,14 @@ class PatientBase(BaseModel):
 
 
 # Shape of the data a client (frontend) sends to create a new patient.
+# drug_names are typed medication names; new ones are added to the Drugs table.
 class PatientCreate(PatientBase):
     drug_ids: list[int] = []
+    drug_names: list[str] = []
 
 
 # Partial update - only the fields the client sends are changed.
-# drug_ids, when sent, replaces the patient's drug list.
+# drug_ids / drug_names, when sent, replace the patient's drug list.
 class PatientUpdate(BaseModel):
     mrn: str | None = Field(default=None, max_length=20)
     first_name: str | None = Field(default=None, min_length=1, max_length=100)
@@ -48,6 +50,7 @@ class PatientUpdate(BaseModel):
     status: Literal["outpatient", "inpatient"] | None = None
     provider_id: int | None = None
     drug_ids: list[int] | None = None
+    drug_names: list[str] | None = None
 
 
 # Shape of the data the API returns (adds fields the DB fills in).

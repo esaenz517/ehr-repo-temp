@@ -86,7 +86,7 @@ export function useCreateCase() {
 
       setChartData({
         medications: context.medications.map((medication) => ({
-          drugId: String(medication.drug_id),
+          drugName: medication.name,
           dose: medication.dosage || "",
           route: medication.route || "",
           frequency: medication.frequency || "",
@@ -171,11 +171,11 @@ export function useCreateCase() {
       if (!demographics.pronouns) errors.pronouns = "Select pronouns.";
 
       // Each medication needs a drug, and a drug can only be listed once per patient.
-      const drugIds = chartData.medications.map((m) => m.drugId);
+      const drugNames = chartData.medications.map((m) => m.drugName.trim().toLowerCase());
 
-      if (drugIds.some((id) => !id)) {
+      if (drugNames.some((name) => !name)) {
         errors.medications = "Every medication needs a drug.";
-      } else if (new Set(drugIds).size !== drugIds.length) {
+      } else if (new Set(drugNames).size !== drugNames.length) {
         errors.medications = "Each drug can only be listed once.";
       }
 
@@ -298,7 +298,7 @@ export function useCreateCase() {
         medications:
           patientMode === "new"
             ? chartData.medications.map((m) => ({
-              drug_id: Number(m.drugId),
+              drug_name: m.drugName.trim(),
               dose: m.dose.trim() || null,
               route: m.route || null,
               frequency: m.frequency || null,

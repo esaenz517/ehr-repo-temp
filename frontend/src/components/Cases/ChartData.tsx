@@ -1,4 +1,4 @@
-import type { Drug } from "../../types";
+import { MedicationAutocomplete } from "../Medications/MedicationAutocomplete";
 import { Cell, RemoveButton, RowGroup } from "./RowGroup";
 
 // Dropdown options, same as the EMR mockup.
@@ -8,7 +8,7 @@ const FLAGS = ["Normal", "High", "Low"];
 
 // One medication row in the form.
 export interface MedicationRow {
-  drugId: string; // the <select> value; converted to a number when saving
+  drugName: string; // typed by the instructor, with autocomplete suggestions
   dose: string;
   route: string;
   frequency: string;
@@ -40,20 +40,19 @@ export interface ChartDataValues {
 export const EMPTY_CHART_DATA: ChartDataValues = { medications: [], allergies: [], labs: [] };
 
 // Blank rows added by the "Add" buttons.
-const EMPTY_MEDICATION: MedicationRow = { drugId: "", dose: "", route: "", frequency: "" };
+const EMPTY_MEDICATION: MedicationRow = { drugName: "", dose: "", route: "", frequency: "" };
 const EMPTY_ALLERGY: AllergyRow = { substance: "", reaction: "" };
 const EMPTY_LAB: LabRow = { testName: "", result: "", unit: "", flag: "", collectedAt: "" };
 
 interface ChartDataProps {
   values: ChartDataValues;
-  drugs: Drug[]; // every drug the instructor can pick from
   onChange: (values: ChartDataValues) => void; // sends the whole updated section back up
   errors: Partial<Record<keyof ChartDataValues, string>>;
   readOnly?: boolean;
 }
 
 // Chart Data section of the Create Case page: medications, allergies, and labs.
-export function ChartData({ values, drugs, onChange, errors, readOnly = false, }: ChartDataProps) {
+export function ChartData({ values, onChange, errors, readOnly = false, }: ChartDataProps) {
   // Change one field in one medication row.
   const updateMedication = (index: number, field: keyof MedicationRow, value: string) =>
     onChange({
@@ -87,19 +86,17 @@ export function ChartData({ values, drugs, onChange, errors, readOnly = false, }
   const removeLab = (index: number) =>
     onChange({ ...values, labs: values.labs.filter((_, i) => i !== index) });
 
-  const drugName = (drugId: string) => drugs.find((d) => String(d.drug_id) === drugId)?.name ?? "";
-
   // Existing patients show their chart as text; new patients get editable rows.
   // Remove buttons are type="button" (inside RemoveButton) so they don't submit the whole form.
   return (
     <div className="form-stack">
-      {/* Medications: one row per drug, picked from the drugs already in the system */}
+      {/* Medications: one row per drug. Type any medication; the most likely match autofills. */}
       <RowGroup
         title="Medications"
         count={values.medications.length}
         columns={["Drug *", "Dose", "Route", "Frequency"]}
         layout="meds"
-        emptyText={readOnly ? "No medications on file." : drugs.length === 0 ? "No drugs yet. Add them on the Drugs page." : "No medications added."}
+        emptyText={readOnly ? "No medications on file." : "No medications added."}
         addLabel="Add medication"
         onAdd={addMedication}
         readOnly={readOnly}
@@ -108,24 +105,20 @@ export function ChartData({ values, drugs, onChange, errors, readOnly = false, }
         {values.medications.map((row, i) =>
           readOnly ? (
             <div key={i} className="case-grid-row case-grid-row--readonly">
-              <Cell label="Drug"><strong>{drugName(row.drugId)}</strong></Cell>
+              <Cell label="Drug"><strong>{row.drugName}</strong></Cell>
               <Cell label="Dose">{row.dose}</Cell>
               <Cell label="Route">{row.route}</Cell>
               <Cell label="Frequency">{row.frequency}</Cell>
             </div>
           ) : (
             <div key={i} className="case-grid-row">
-              <select
+              <MedicationAutocomplete
                 className="ui-input"
-                aria-label="Drug"
-                value={row.drugId}
-                onChange={(e) => updateMedication(i, "drugId", e.target.value)}
-              >
-                <option value="">Select drug</option>
-                {drugs.map((drug) => (
-                  <option key={drug.drug_id} value={drug.drug_id}>{drug.name}</option>
-                ))}
-              </select>
+                ariaLabel="Drug"
+                placeholder="Type a medication…"
+                value={row.drugName}
+                onChange={(name) => updateMedication(i, "drugName", name)}
+              />
               <input
                 className="ui-input"
                 aria-label="Dose"

@@ -1,6 +1,5 @@
 import { FormEvent, useEffect, useRef } from "react";
 import { useCreateCase } from "../hooks/useCreateCase";
-import { useDrugs } from "../hooks/useDrugs";
 import { CaseContent } from "./Cases/CaseContent";
 import { ChartData } from "./Cases/ChartData";
 import { PatientDemographics } from "./Patients/PatientDemographics";
@@ -19,7 +18,6 @@ interface CreateCasePageProps {
 // state to hooks/useCreateCase.ts, then add a CaseStep below.
 export function CreateCasePage({ staffId }: CreateCasePageProps) {
   const createCase = useCreateCase();
-  const { drugs } = useDrugs(); // drug list for the Medications dropdowns
   const bannerRef = useRef<HTMLDivElement>(null);
   const existing = createCase.patientMode === "existing";
 
@@ -88,7 +86,6 @@ export function CreateCasePage({ staffId }: CreateCasePageProps) {
         <CaseStep number={4} title="Chart data">
           <ChartData
             values={createCase.chartData}
-            drugs={drugs}
             onChange={createCase.setChartData}
             errors={createCase.fieldErrors}
             readOnly={existing}

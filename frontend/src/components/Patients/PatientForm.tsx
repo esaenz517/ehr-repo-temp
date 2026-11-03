@@ -1,19 +1,19 @@
 import { FormEvent, useState } from "react";
 import type { CreatePatientInput } from "../../api/patients";
-import type { Drug, Patient, Provider } from "../../types";
+import type { Patient, Provider } from "../../types";
+import { MedicationAutocomplete } from "../Medications/MedicationAutocomplete";
 import { GENDER_IDENTITY_OPTIONS, PRONOUN_OPTIONS, SEX_OPTIONS } from "./PatientDemographics";
 import "./patients.css";
 
 interface PatientFormProps {
   providers: Provider[];
-  drugs: Drug[];
   onSubmit: (input: CreatePatientInput) => void; // edit mode: the parent closes the form once saved
   patient?: Patient; // when set, the form edits this patient instead of adding a new one
   onCancel?: () => void; // edit mode: shows a Cancel button
 }
 
 // Adds a new patient, or (with `patient`) edits an existing one using the same fields.
-export function PatientForm({ providers, drugs, onSubmit, patient, onCancel }: PatientFormProps) {
+export function PatientForm({ providers, onSubmit, patient, onCancel }: PatientFormProps) {
   const editing = patient !== undefined;
   // Field ids must be unique on the page, and an edit form can be open next to the new-patient form.
   const idPrefix = editing ? `patient-${patient.patient_id}` : "patient";
@@ -29,15 +29,17 @@ export function PatientForm({ providers, drugs, onSubmit, patient, onCancel }: P
   const [pronouns, setPronouns] = useState(patient?.pronouns ?? "");
   const [status, setStatus] = useState(patient?.status ?? "outpatient");
   const [providerId, setProviderId] = useState(patient?.provider_id?.toString() ?? "");
-  const [drugIds, setDrugIds] = useState<number[]>(patient?.drugs.map((d) => d.drug_id) ?? []);
+  const [drugNames, setDrugNames] = useState<string[]>(patient?.drugs.map((d) => d.name) ?? []);
+  const [drugQuery, setDrugQuery] = useState(""); // what's typed in the medication box
 
-  // Drugs are picked from a dropdown one at a time and shown as removable chips.
-  // The dropdown only lists drugs that haven't been picked yet.
-  const selectedDrugs = drugs.filter((d) => drugIds.includes(d.drug_id));
-  const remainingDrugs = drugs.filter((d) => !drugIds.includes(d.drug_id));
-
-  const addDrug = (drugId: number) => setDrugIds((prev) => [...prev, drugId]);
-  const removeDrug = (drugId: number) => setDrugIds((prev) => prev.filter((id) => id !== drugId));
+  // Type any medication; picking a suggestion (or pressing Enter) adds it as a removable chip.
+  const addDrug = (name: string) => {
+    const clean = name.trim();
+    setDrugQuery("");
+    if (!clean) return;
+    setDrugNames((prev) => (prev.some((n) => n.toLowerCase() === clean.toLowerCase()) ? prev : [...prev, clean]));
+  };
+  const removeDrug = (name: string) => setDrugNames((prev) => prev.filter((n) => n !== name));
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -55,7 +57,8 @@ export function PatientForm({ providers, drugs, onSubmit, patient, onCancel }: P
       pronouns,
       status,
       provider_id: providerId ? Number(providerId) : null,
-      drug_ids: drugIds,
+      drug_ids: [],
+      drug_names: drugNames,
     });
     if (editing) return; // keep the values; the parent closes the form once saved
     setMrn("");
@@ -69,7 +72,8 @@ export function PatientForm({ providers, drugs, onSubmit, patient, onCancel }: P
     setPronouns("");
     setStatus("outpatient");
     setProviderId("");
-    setDrugIds([]);
+    setDrugNames([]);
+    setDrugQuery("");
   };
 
   return (
@@ -228,34 +232,25 @@ export function PatientForm({ providers, drugs, onSubmit, patient, onCancel }: P
         <div className="patients-field patients-field--full">
           <label htmlFor={`${idPrefix}-drugs`} className="patients-label">Drugs</label>
           <div className="patients-drugs">
-            {/* Always shows the placeholder; picking an option adds it as a chip */}
-            <select
+            {/* Type any medication; the most likely match autofills. Enter or a click adds it as a chip. */}
+            <MedicationAutocomplete
               id={`${idPrefix}-drugs`}
-              value=""
-              onChange={(e) => e.target.value && addDrug(Number(e.target.value))}
-              disabled={remainingDrugs.length === 0}
               className="patients-input"
-            >
-              <option value="">
-                {drugs.length === 0
-                  ? "No drugs available"
-                  : remainingDrugs.length === 0
-                    ? "All drugs added"
-                    : "Add a drug…"}
-              </option>
-              {remainingDrugs.map((drug) => (
-                <option key={drug.drug_id} value={drug.drug_id}>{drug.name}</option>
-              ))}
-            </select>
+              placeholder="Add a drug…"
+              value={drugQuery}
+              onChange={setDrugQuery}
+              onSelect={addDrug}
+              onEnterTyped={addDrug}
+            />
 
-            {selectedDrugs.map((drug) => (
-              <span key={drug.drug_id} className="patients-drug-chip">
-                {drug.name}
+            {drugNames.map((name) => (
+              <span key={name} className="patients-drug-chip">
+                {name}
                 <button
                   type="button"
                   className="patients-drug-chip-remove"
-                  onClick={() => removeDrug(drug.drug_id)}
-                  aria-label={`Remove ${drug.name}`}
+                  onClick={() => removeDrug(name)}
+                  aria-label={`Remove ${name}`}
                 >
                   ×
                 </button>

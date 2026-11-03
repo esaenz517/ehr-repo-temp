@@ -9,6 +9,7 @@ from app.models.cases import Case as CaseModel
 from app.models.clinical_notes import PatientAllergy, PatientLabResult
 from app.models.patients import PatientDrug
 from app.crud import rubric as rubric_crud
+from app.crud.drugs import get_or_create_drug_by_name
 
 from app.schemas.cases import CaseCreate
 
@@ -52,14 +53,22 @@ def create_case(db: Session, case: CaseCreate):
                                 flag=lab.flag,
                                 collected_at=lab.collected_at
                                 ))
-    #Save each drug for patient
+    # Save each drug for patient. Typed names are matched to an existing drug
+    # (or added as a new one); a drug listed twice is only saved once.
+    saved_drug_ids = set()
     for drug in case.medications:
+        drug_id = drug.drug_id
+        if drug_id is None:
+            drug_id = get_or_create_drug_by_name(db, drug.drug_name).drug_id
+        if drug_id in saved_drug_ids:
+            continue
+        saved_drug_ids.add(drug_id)
         db.add(PatientDrug(patient_id=case.patient_id,
-                           drug_id = drug.drug_id,
-                           dosage = drug.dose,
+                           drug_id=drug_id,
+                           dosage=drug.dose,
                            route=drug.route,
-                           frequency=drug.frequency))    
-    
+                           frequency=drug.frequency))
+
     db.commit()
     db.refresh(db_case)
     return db_case  

@@ -72,7 +72,7 @@
   color: var(--color-text-muted);
 }
 
-/* Drugs: dropdown on the left, chosen drugs as chips beside/below it */
+/* Drugs: medication autocomplete on the left, chosen drugs as chips beside/below it */
 .patients-drugs {
   display: flex;
   flex-wrap: wrap;
@@ -80,7 +80,7 @@
   gap: 8px;
 }
 
-.patients-drugs .patients-input {
+.patients-drugs .med-ac {
   width: auto;
   flex: 0 1 260px;
 }

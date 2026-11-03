@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { CreateCasePage } from "./components/CreateCasePage";
-import { DrugsPage } from "./components/DrugsPage";
 import { Home } from "./components/Home";
 import { PatientsPage } from "./components/PatientsPage";
 import { StaffPage } from "./components/StaffPage";
@@ -134,7 +133,6 @@ function App() {
         {view === "staff" && canView("staff") && (
           <StaffPage canBatchImport={user.admin} />
         )}        {view === "providers" && canView("providers") && <ProvidersPage />}
-        {view === "drugs" && canView("drugs") && <DrugsPage />}
         {view === "rooms" && canView("rooms") && <RoomsPage />}
         {view === "courses" && canView("courses") && <CoursesPage />}
         {view === "createCase" && canView("createCase") && <CreateCasePage staffId={user.staffid} />}

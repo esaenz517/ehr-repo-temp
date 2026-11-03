@@ -3,6 +3,7 @@ Drugs CRUD
 DB access functions for drugs - list, get, create, update, delete.
 '''
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.drugs import Drug as DrugModel
@@ -17,6 +18,19 @@ def list_drugs(db: Session):
 # Gets one drug by id, or None if it doesn't exist.
 def get_drug(db: Session, drug_id: int):
     return db.query(DrugModel).filter(DrugModel.drug_id == drug_id).first()
+
+
+# Finds a drug by name (ignoring case/extra spaces), creating it if it's new.
+# Used when an instructor types a medication instead of picking one from a list.
+# Doesn't commit - the caller saves it together with the rest of its changes.
+def get_or_create_drug_by_name(db: Session, name: str):
+    clean = " ".join(name.split())[:200]
+    db_drug = db.query(DrugModel).filter(func.lower(DrugModel.name) == clean.lower()).first()
+    if db_drug is None:
+        db_drug = DrugModel(name=clean)
+        db.add(db_drug)
+        db.flush()  # gives the new drug its id
+    return db_drug
 
 
 # Inserts a new drug and returns it (with its new id).

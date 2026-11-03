@@ -14,10 +14,11 @@ export interface CreatePatientInput {
   status: string;
   provider_id: number | null;
   drug_ids: number[];
+  drug_names?: string[]; // typed medication names; new ones are added automatically
 }
 
 // Partial update - only the fields included are changed on the backend.
-// drug_ids, when included, replaces the patient's drug list.
+// drug_ids / drug_names, when included, replace the patient's drug list.
 export type UpdatePatientInput = Partial<CreatePatientInput>;
 
 export interface PatientChartContext {
