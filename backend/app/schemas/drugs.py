@@ -24,6 +24,12 @@ class DrugUpdate(BaseModel):
     description: str | None = Field(default=None, max_length=1000)
 
 
+# One strength a drug comes in (dose suggestions), e.g. {"strength": "500 mg Tab", "route": "PO"}.
+class DrugStrength(BaseModel):
+    strength: str
+    route: str | None = None
+
+
 # Shape of the data the API returns (adds fields the DB fills in).
 class Drug(DrugBase):
     drug_id: int

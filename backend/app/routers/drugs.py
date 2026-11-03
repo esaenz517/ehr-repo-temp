@@ -7,9 +7,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.crud import drugs as crud
+from app.crud.drug_strengths import drug_strengths
 from app.crud.drug_suggestions import suggest_drugs
 from app.database import get_db
-from app.schemas.drugs import Drug, DrugCreate, DrugUpdate
+from app.schemas.drugs import Drug, DrugCreate, DrugStrength, DrugUpdate
 from app.security.authorization import require_permission
 
 router = APIRouter(prefix="/drugs", tags=["drugs"])
@@ -34,6 +35,15 @@ def suggest(
     current_user=Depends(require_permission("drug", "read")),
 ):
     return suggest_drugs(db, q, limit)
+
+
+# Dose suggestions: GET /drugs/strengths?name=Metformin -> [{"strength": "500 mg Tab", "route": "PO"}, ...]
+@router.get("/strengths", response_model=list[DrugStrength])
+def strengths(
+    name: str = Query(default="", max_length=200),
+    current_user=Depends(require_permission("drug", "read")),
+):
+    return drug_strengths(name)
 
 
 @router.get("/{drug_id}", response_model=Drug)

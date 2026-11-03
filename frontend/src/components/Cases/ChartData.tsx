@@ -1,3 +1,4 @@
+import { DoseAutocomplete } from "../Medications/DoseAutocomplete";
 import { MedicationAutocomplete } from "../Medications/MedicationAutocomplete";
 import { Cell, RemoveButton, RowGroup } from "./RowGroup";
 
@@ -60,6 +61,15 @@ export function ChartData({ values, onChange, errors, readOnly = false, }: Chart
       medications: values.medications.map((row, i) => (i === index ? { ...row, [field]: value } : row)),
     });
 
+  // A suggested strength was picked: set the dose, and the route too if it's still empty.
+  const pickDose = (index: number, dose: string, route: string | null) =>
+    onChange({
+      ...values,
+      medications: values.medications.map((row, i) =>
+        i === index ? { ...row, dose, route: row.route || (route && ROUTES.includes(route) ? route : "") } : row
+      ),
+    });
+
   // Change one field in one allergy row.
   const updateAllergy = (index: number, field: keyof AllergyRow, value: string) =>
     onChange({
@@ -119,12 +129,12 @@ export function ChartData({ values, onChange, errors, readOnly = false, }: Chart
                 value={row.drugName}
                 onChange={(name) => updateMedication(i, "drugName", name)}
               />
-              <input
+              <DoseAutocomplete
                 className="ui-input"
-                aria-label="Dose"
-                placeholder="e.g. 500 mg"
+                drugName={row.drugName}
                 value={row.dose}
-                onChange={(e) => updateMedication(i, "dose", e.target.value)}
+                onChange={(dose) => updateMedication(i, "dose", dose)}
+                onPick={(dose, route) => pickDose(i, dose, route)}
               />
               <select
                 className="ui-input"
