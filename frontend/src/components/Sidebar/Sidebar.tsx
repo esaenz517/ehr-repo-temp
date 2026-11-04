@@ -31,12 +31,11 @@ interface SidebarProps {
 }
 
 // Students can access their dashboard, assignments,
-// published grades, and the About Us page.
+// and published grades.
 export const STUDENT_VIEWS: View[] = [
   "home",
   "assignments",
   "grades",
-  "about",
 ];
 
 const COLLAPSED_KEY = "sidebar-collapsed";
@@ -75,7 +74,6 @@ const NAV_ITEMS: { view: View; label: string }[] = [
   // Student grading and instructor progress features.
   { view: "grades", label: "My Grades" },
   { view: "progress", label: "Student Progress" },
-  { view: "about", label: "About Us" },
 ];
 
 export function Sidebar({
