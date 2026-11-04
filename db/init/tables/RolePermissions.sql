@@ -39,6 +39,29 @@ WHERE
     );
 GO
 
+
+-- BILLING STAFF PERMISSIONS
+INSERT INTO dbo.RolePermissions (RoleId, PermissionId)
+SELECT r.RoleId, p.PermissionId
+FROM dbo.Roles r
+CROSS JOIN dbo.Permissions p
+WHERE r.RoleName = 'BILLING_STAFF'
+  AND p.PermissionCode IN (
+      'billing.read',
+      'billing.create',
+      'billing.update',
+      'billing.delete',
+      'patient.read'
+  )
+  AND NOT EXISTS (
+      SELECT 1
+      FROM dbo.RolePermissions rp
+      WHERE rp.RoleId = r.RoleId
+        AND rp.PermissionId = p.PermissionId
+  );
+GO
+
+
 -- INSTRUCTOR AND STUDENT PERMISSIONS
 -- Instructors build cases and manage the clinical catalog; staff.read lets
 -- Create Case list students. Students only read what they need for their
@@ -72,9 +95,11 @@ FROM (
         ('FACULTY_INSTRUCTOR', 'room.create'),
         ('FACULTY_INSTRUCTOR', 'room.update'),
         ('FACULTY_INSTRUCTOR', 'room.delete'),
-        ('FACULTY_INSTRUCTOR', 'appointment.read'),  
-        ('FACULTY_INSTRUCTOR', 'billing.read'),      
-        ('FACULTY_INSTRUCTOR', 'history.read'),       
+        ('FACULTY_INSTRUCTOR', 'appointment.read'),
+        ('FACULTY_INSTRUCTOR', 'billing.read'),
+        ('FACULTY_INSTRUCTOR', 'billing.create'),
+        ('FACULTY_INSTRUCTOR', 'billing.update'),
+        ('FACULTY_INSTRUCTOR', 'history.read'),
         ('FACULTY_INSTRUCTOR', 'assignment.read'),
         ('FACULTY_INSTRUCTOR', 'assignment.update'),
         ('FACULTY_INSTRUCTOR', 'assignment.manage'),

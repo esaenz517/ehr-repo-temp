@@ -4,6 +4,7 @@ import type { Patient, Provider } from "../../types";
 import { MedicalHistoryPanel } from "../MedicalHistory/MedicalHistoryPanel";
 import { AppointmentPanel } from "../Appointments/AppointmentPanel";
 import { BillingChargePanel } from "../Billing/BillingChargePanel";
+import { InsurancePanel } from "../Insurance/InsurancePanel";
 import { confirmDelete } from "../confirmDelete";
 import { PatientForm } from "./PatientForm";
 import "./patients.css";
@@ -37,6 +38,9 @@ export function PatientList({ patients, emptyText, providers, onUpdate, onDelete
   const [billingPatientId, setBillingPatientId] =
     useState<number | null>(null);
 
+  const [insurancePatientId, setInsurancePatientId] =
+    useState<number | null>(null);
+
   if (patients.length === 0) {
     return <p className="ui-row-empty">{emptyText}</p>;
   }
@@ -61,6 +65,7 @@ export function PatientList({ patients, emptyText, providers, onUpdate, onDelete
             const historyOpen = selectedPatientId === patient.patient_id;
             const appointmentsOpen = appointmentPatientId === patient.patient_id;
             const chargesOpen = billingPatientId === patient.patient_id;
+            const insuranceOpen = insurancePatientId === patient.patient_id;
             const detailId = `patient-detail-${patient.patient_id}`;
 
             return (
@@ -173,6 +178,14 @@ export function PatientList({ patients, emptyText, providers, onUpdate, onDelete
                             >
                               {chargesOpen ? "Hide Charges" : "View Charges"}
                             </button>
+                            <button
+                              className={toggleClass(insuranceOpen)}
+                              onClick={() =>
+                                setInsurancePatientId(insuranceOpen ? null : patient.patient_id)
+                              }
+                            >
+                              {insuranceOpen ? "Hide Insurance" : "View Insurance"}
+                            </button>
                           </div>
 
                           {historyOpen && (
@@ -190,6 +203,13 @@ export function PatientList({ patients, emptyText, providers, onUpdate, onDelete
                               <BillingChargePanel patientId={patient.patient_id} />
                             </div>
                           )}
+
+                          {insuranceOpen && (
+                            <div className="ui-row-detail">
+                              <InsurancePanel patientId={patient.patient_id} />
+                            </div>
+                          )}
+
                         </>
                       )}
                     </td>
