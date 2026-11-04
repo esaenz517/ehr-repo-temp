@@ -1,6 +1,7 @@
 # Render Blueprint: deploys the backend and frontend from this repo on every push
-# to main. The database is Azure SQL (ehrserver.database.windows.net), not a
-# container. Local development still uses docker-compose.yml and is unaffected.
+# to main. The database is Azure SQL (utepehrserver.database.windows.net, database
+# UTEP-EHR-DB, Canada Central), not a container. Local development still uses
+# docker-compose.yml and is unaffected.
 #
 # Values marked "sync: false" are secrets or depend on the deployed URLs. Render
 # asks for them when the Blueprint is first created and never stores them in git.
@@ -16,11 +17,11 @@ services:
     healthCheckPath: /health
     envVars:
       - key: DB_SERVER
-        value: ehrserver.database.windows.net
+        value: utepehrserver.database.windows.net
       - key: DB_PORT
         value: "1433"
       - key: DB_NAME
-        value: AppDb
+        value: UTEP-EHR-DB
       - key: DB_USER
         sync: false
       - key: DB_PASSWORD

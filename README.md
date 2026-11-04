@@ -83,12 +83,21 @@ Open SQL Server Management Studio and connect to:
 You'll see the `AppDb` database and its tables once `db-init` has finished.
 
 ## Connecting to Azure Server
-- **Server name:** `ehrserver.database.windows.net`
-- **Location:** `(Asia Pacific)`
+- **Server name:** `utepehrserver.database.windows.net`
+- **Location:** Canada Central (resource group `UTEP-EHR-Resource`)
 - **Authentication:** SQL Authentication
-- **Database Name:** `AppDb`
-- **Login:** `dev`
-- **Password:** `UTEP123#` 
+- **Database Name:** `UTEP-EHR-DB`
+- **Login / Password:** the server admin login — ask a team member; it is not stored in this repo.
+
+Your IP (or the UTEP VPN range) must be allowed in the server's firewall (Azure Portal → utepehrserver → Networking).
+
+To load the schema and seed data into a fresh Azure database, run `db/init/init-azure.sql` from the repo root:
+
+```bash
+docker run --rm -v "$PWD/db/init:/init" --entrypoint /opt/mssql-tools18/bin/sqlcmd \
+  mcr.microsoft.com/mssql/server:2022-latest \
+  -S utepehrserver.database.windows.net -d UTEP-EHR-DB -U <admin> -P '<password>' -b -i /init/init-azure.sql
+```
 
 ## Connecting with CloudBeaver
 
