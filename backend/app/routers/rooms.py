@@ -5,6 +5,7 @@ Use this router as a template to implement feature and objects
 """
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.crud import rooms as rooms_crud
@@ -68,7 +69,15 @@ def delete_room(
     db: Session = Depends(get_db),
     current_user=Depends(require_permission("room", "delete")),
 ):
-    deleted = rooms_crud.delete_room(db, room_id)
+    try:
+        deleted = rooms_crud.delete_room(db, room_id)
+    except IntegrityError:
+        # Room assignments (even discharged ones) keep the room's history
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="This room has patient assignment history and can't be deleted",
+        )
 
     if not deleted:
         raise HTTPException(

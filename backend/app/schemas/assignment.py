@@ -15,11 +15,11 @@ AssingmentType = Literal["graded", "practice"] # Assignment types
 # What front end sends to assign cases.
 class AssignmentRequest(BaseModel):
     case_id: int
-    course: str | None = None
+    course_id: int | None = None  # the course offering; its students must be enrolled
     due_date: datetime | None = None
     assignment_type: AssingmentType = "graded"
     assigned_to: list[int]
-    assigned_by: int # WILL NEED REFACTORING to draw from active session rather than manual input (not sure how to do this yet)
+    assigned_by: int | None = None  # ignored: the signed-in instructor is used
 
 # What is sent to change Assignment Status 
 class AssignmentStatus(BaseModel): 
@@ -35,7 +35,8 @@ class Assignment(BaseModel):
     assignment_id: int
     case_id: int
     encounter_status: EncounterStatus
-    course: str | None
+    course_id: int | None = None
+    course: str | None = None  # label, e.g. "NURS 3310"
     due_date: datetime | None
     assignment_type: AssingmentType
     assigned_to: int

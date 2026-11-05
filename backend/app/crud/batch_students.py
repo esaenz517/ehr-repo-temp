@@ -1,6 +1,13 @@
 """
 Batch Students CRUD
 CSV validation and account creation for student batches.
+
+Each student gets an account (dbo.Users), a person row (dbo.Staff) with the
+STUDENT role, their discipline and department, and a login (dbo.T_Login).
+The Discipline column takes a code or name ("NURSE" or "Nursing"); the old
+Specialization column name is still accepted. Department is optional (code or
+name): without it the discipline's department is used, else Interprofessional
+Health Sciences (IHS).
 """
 
 import csv
@@ -18,10 +25,11 @@ from fastapi import HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.models.departments import Department
+from app.models.disciplines import Discipline
 from app.models.login import Login
 from app.models.roles import Role
-from app.models.staff import Staff
-from app.models.user_roles import UserRole
+from app.models.staff import STUDENT, Staff
 from app.models.users import User
 
 from app.schemas.batch_students import (
@@ -34,14 +42,8 @@ logger = logging.getLogger(__name__)
 MAX_CSV_BYTES = 256 * 1024
 MAX_STUDENTS = 500
 
-# Student roles are assigned by the backend, never by the CSV.
-DISCIPLINE_ROLES = {
-    "nursing": "NURSE",
-    "physician": "PHYSICIAN",
-    "psychiatry": "PSYCHIATRY",
-    "physical therapy": "PHYSICAL_THERAPY",
-    "allied health": "ALLIED_HEALTH",
-}
+# Department used when neither the CSV nor the discipline names one.
+DEFAULT_DEPARTMENT_CODE = "IHS"
 
 EMAIL_PATTERN = re.compile(r"^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$")
 
@@ -54,7 +56,8 @@ class StudentData:
     first_name: str
     middle_name: str | None
     last_name: str
-    specialization: str
+    discipline: str
+    department: str | None
     email: str
     username: str
     result: StudentBatchRow
@@ -83,8 +86,12 @@ def parse_csv(csv_text: str) -> list[StudentData]:
             detail="CSV is empty or missing a header",
         )
 
-    # Allow different capitalization in CSV column names.
-    reader.fieldnames = [name.strip().casefold() for name in reader.fieldnames]
+    # Allow different capitalization in CSV column names. "Specialization" is
+    # the old name of the Discipline column.
+    reader.fieldnames = [
+        "discipline" if name.strip().casefold() == "specialization" else name.strip().casefold()
+        for name in reader.fieldnames
+    ]
 
     headers = set(reader.fieldnames)
 
@@ -97,7 +104,7 @@ def parse_csv(csv_text: str) -> list[StudentData]:
     required = {
         "firstname",
         "lastname",
-        "specialization",
+        "discipline",
     }
 
     if not required <= headers or not (
@@ -107,7 +114,7 @@ def parse_csv(csv_text: str) -> list[StudentData]:
             status_code=400,
             detail=(
                 "CSV requires FirstName, LastName, "
-                "Specialization, and Email "
+                "Discipline, and Email "
                 "(or UserPrincipalName) columns"
             ),
         )
@@ -156,7 +163,8 @@ def parse_csv(csv_text: str) -> list[StudentData]:
             first = cell("firstname")
             middle = cell("middlename") or None
             last = cell("lastname")
-            specialization = cell("specialization")
+            discipline = cell("discipline")
+            department = cell("department") or None
 
             email_a = cell("email").lower()
             email_b = cell("userprincipalname").lower()
@@ -172,7 +180,7 @@ def parse_csv(csv_text: str) -> list[StudentData]:
             fields = (
                 ("FirstName", first, 100),
                 ("LastName", last, 100),
-                ("Specialization", specialization, 100),
+                ("Discipline", discipline, 150),
                 ("Email", email, 320),
                 ("Username", username, 254),
             )
@@ -183,13 +191,11 @@ def parse_csv(csv_text: str) -> list[StudentData]:
                 elif len(value) > max_length:
                     errors.append(f"{label} exceeds " f"{max_length} characters")
 
+            if department and len(department) > 150:
+                errors.append("Department exceeds 150 characters")
+
             if middle and len(middle) > 100:
                 errors.append("MiddleName exceeds 100 characters")
-
-            full_name = " ".join(part for part in (first, middle, last) if part)
-
-            if len(full_name) > 200:
-                errors.append("Full name exceeds 200 characters")
 
             if email and not EMAIL_PATTERN.fullmatch(email):
                 errors.append("Email is not valid")
@@ -221,7 +227,8 @@ def parse_csv(csv_text: str) -> list[StudentData]:
                     first_name=first,
                     middle_name=middle,
                     last_name=last,
-                    specialization=specialization,
+                    discipline=discipline,
+                    department=department,
                     email=email,
                     username=username,
                     result=result,
@@ -257,28 +264,41 @@ def run_batch(
 
     parsed = parse_csv(csv_text)
 
-    # Resolve the existing role records.
-    role_names = {"STUDENT"} | set(DISCIPLINE_ROLES.values())
+    student_role = (
+        db.query(Role)
+        .filter(Role.role_name == STUDENT, Role.is_active == True)
+        .first()
+    )
 
-    roles = {
-        role.role_name: role
-        for role in (
-            db.query(Role)
-            .filter(
-                Role.role_name.in_(role_names),
-                Role.is_active == True,
-            )
-            .all()
-        )
-    }
-
-    if "STUDENT" not in roles:
+    if student_role is None:
         raise HTTPException(
             status_code=409,
             detail="Active STUDENT role is not configured",
         )
 
-    # Check duplicates and required discipline roles.
+    disciplines = db.query(Discipline).filter(Discipline.is_active == True).all()
+    departments = db.query(Department).filter(Department.is_active == True).all()
+
+    def find_discipline(text: str) -> Discipline | None:
+        key = text.casefold()
+        return next(
+            (d for d in disciplines if key in (d.code.casefold(), d.name.casefold())),
+            None,
+        )
+
+    def find_department(text: str) -> Department | None:
+        key = text.casefold()
+        return next(
+            (d for d in departments if key in (d.code.casefold(), d.name.casefold())),
+            None,
+        )
+
+    default_department = find_department(DEFAULT_DEPARTMENT_CODE)
+
+    # Discipline and department ids for each ready row, by CSV line
+    resolved: dict[int, tuple[int, int | None]] = {}
+
+    # Check duplicates, disciplines, and departments.
     for student in parsed:
 
         if student.result.status != "ready":
@@ -303,11 +323,28 @@ def run_batch(
             )
             continue
 
-        required_role = DISCIPLINE_ROLES.get(student.specialization.casefold())
+        discipline = find_discipline(student.discipline)
 
-        if required_role and required_role not in roles:
+        if discipline is None:
             student.result.status = "invalid"
-            student.result.message = f"Active role {required_role} " "is not configured"
+            student.result.message = f"Unknown discipline: {student.discipline}"
+            continue
+
+        if student.department:
+            department = find_department(student.department)
+
+            if department is None:
+                student.result.status = "invalid"
+                student.result.message = f"Unknown department: {student.department}"
+                continue
+
+            department_id = department.department_id
+        elif discipline.department_id is not None:
+            department_id = discipline.department_id
+        else:
+            department_id = default_department.department_id if default_department else None
+
+        resolved[student.row_number] = (discipline.discipline_id, department_id)
 
     # Invalid input blocks all database modifications.
     blocked = any(student.result.status == "invalid" for student in parsed)
@@ -328,62 +365,37 @@ def run_batch(
                     bcrypt.gensalt(),
                 ).decode("utf-8")
 
-                full_name = " ".join(
-                    part
-                    for part in (
-                        student.first_name,
-                        student.middle_name,
-                        student.last_name,
-                    )
-                    if part
-                )
+                discipline_id, department_id = resolved[student.row_number]
 
-                # Create application user.
+                # Create the account.
                 user = User(
-                    name=full_name,
                     email=student.email,
                     password_hash=None,
                     account_status="active",
-                    discipline=student.specialization,
                     created_at=(datetime.now(timezone.utc).replace(tzinfo=None)),
                 )
 
-                # Create matching staff/student record.
+                db.add(user)
+                db.flush()
+
+                # Create the person: a student in a discipline and department.
                 staff = Staff(
+                    user_id=user.user_id,
                     first_name=student.first_name,
                     middle_name=student.middle_name,
                     last_name=student.last_name,
-                    specialization=student.specialization,
-                    student=True,
-                    admin=False,
+                    role_id=student_role.role_id,
+                    discipline_id=discipline_id,
+                    department_id=department_id,
                 )
 
-                db.add_all([user, staff])
+                db.add(staff)
                 db.flush()
 
-                # Assign the STUDENT role.
-                chosen_roles = [roles["STUDENT"]]
-
-                additional_role = DISCIPLINE_ROLES.get(
-                    student.specialization.casefold()
-                )
-
-                if additional_role:
-                    chosen_roles.append(roles[additional_role])
-
-                for role in chosen_roles:
-                    db.add(
-                        UserRole(
-                            user_id=user.user_id,
-                            role_id=role.role_id,
-                        )
-                    )
-
-                # Link login to both Staff and Users.
+                # The login signs in to the account.
                 login = Login(
                     username=student.username,
                     password_hash=password_hash,
-                    staffid=staff.staffid,
                     userid=user.user_id,
                 )
 

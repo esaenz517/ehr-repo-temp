@@ -44,6 +44,18 @@ export function useStaff() {
     }
   };
 
+  // Gives a person a new role. Returns true when saved.
+  const setRole = async (staffId: number, roleId: number) => {
+    try {
+      await staffApi.setRole(staffId, roleId);
+      await load();
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to change role");
+      return false;
+    }
+  };
+
   const remove = async (staffId: number) => {
     try {
       await staffApi.remove(staffId);
@@ -53,5 +65,5 @@ export function useStaff() {
     }
   };
 
-  return { staff, loading, error, create, update, remove, reload: load };
+  return { staff, loading, error, create, update, setRole, remove, reload: load };
 }

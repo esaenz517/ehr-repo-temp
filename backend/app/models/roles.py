@@ -1,6 +1,7 @@
 """
 Roles Model
 SQLAlchemy ORM class mapped to the dbo.Roles table.
+Three active roles: ADMIN, FACULTY_INSTRUCTOR, STUDENT. Each person (dbo.Staff) has one.
 """
 
 from sqlalchemy import Boolean, Column, Integer, String
@@ -17,7 +18,5 @@ class Role(Base):
     role_name = Column("RoleName", String(100), unique=True, nullable=False)
 
     display_name = Column("DisplayName", String(150), nullable=False)
-
-    discipline = Column("Discipline", String(100), nullable=True)
 
     is_active = Column("IsActive", Boolean, nullable=False, default=True)

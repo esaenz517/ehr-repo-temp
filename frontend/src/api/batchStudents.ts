@@ -33,7 +33,8 @@ export interface CreateStudentInput {
     first_name: string;
     middle_name: string | null;
     last_name: string;
-    specialization: string;
+    discipline: string; // code or name, e.g. "NURSE"
+    department: string | null; // code; null uses the discipline's department
     email: string;
     username: string | null;
 }

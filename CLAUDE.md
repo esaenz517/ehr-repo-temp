@@ -27,7 +27,12 @@ pip install -r requirements.txt
 # also requires the msodbcsql18 ODBC driver installed locally — see backend/Dockerfile for the install steps
 uvicorn app.main:app --reload
 ```
-No test suite or linter is configured for the backend.
+Backend tests (pytest + FastAPI TestClient against a throwaway database rebuilt from the init scripts and demo seed on every run — `backend/tests/build_test_db.py` refuses database names without "test"):
+```bash
+docker compose --profile test run --rm backend-tests      # SQL Server, database AppDbTest
+docker compose --profile test run --rm backend-tests-pg   # Postgres, temporary postgres:16 container
+```
+Signed-in clients per role (`admin`, `instructor`, `pharmacy`, `student`, `ana`) are fixtures in `backend/tests/conftest.py`. No linter is configured.
 
 **Frontend, without Docker:**
 ```bash
@@ -36,8 +41,13 @@ npm install
 npm run dev     # Vite dev server
 npm run build   # tsc -b && vite build
 npm run preview
+npm test        # vitest unit tests (src/access.test.ts: which pages each role sees)
 ```
-No test suite or linter is configured for the frontend beyond the TypeScript compiler run as part of `build`.
+No linter is configured beyond the TypeScript compiler run as part of `build`.
+
+**Access model:** `Users` is the account (email, password, `AccountStatus`); `Staff` is the person (name, `RoleId`, `DisciplineId`, `DepartmentId`, `UserId` → account, NULL for people without a login); `T_Login` is a username for an account (`userid`). Each person has exactly one role — `ADMIN`, `FACULTY_INSTRUCTOR`, or `STUDENT` — and RBAC (`crud/rbac.py`) joins `Staff.RoleId` → `RolePermissions`. `login.staffid` / `login.staff` (models/login.py) give the signed-in person. `CourseEnrollments` links people to course offerings; assignments with a `CourseId` only accept enrolled students. Frontend page visibility comes from the role's permission codes in `/auth/me` (`frontend/src/access.ts`).
+
+**Schema changes:** there are no migration scripts. The table scripts create what's missing but don't reshape existing tables, so after a schema change rebuild the database from scratch (locally: `docker compose down -v` then `docker compose up --build`; Supabase: reset the database, then run `db/postgres/init.sql`).
 
 **Database:** `db-init` waits for SQL Server's healthcheck then runs `db/init/init.sql`, which creates the `AppDb` database, the `dev` login/user (used by the backend and CloudBeaver instead of `sa`), then includes each table script in `db/init/tables/` and the demo data in `db/init/seed/` via sqlcmd `:r`. Connect via SSMS or CloudBeaver at `localhost,1433` (or host `db` from inside the compose network), user `dev`, password `dev123`.
 

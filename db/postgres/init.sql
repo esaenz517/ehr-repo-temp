@@ -21,18 +21,19 @@ CREATE SCHEMA IF NOT EXISTS dbo;
 -- Each dbo table lives in tables/<Table>.sql with its CREATE TABLE and seed data.
 -- Order matters: a table comes after the tables it references, and seed data
 -- after the rows it depends on.
+\ir tables/Departments.sql
+\ir tables/Disciplines.sql
 \ir tables/Users.sql
 \ir tables/Providers.sql
 \ir tables/Roles.sql
 \ir tables/Drugs.sql
 \ir tables/Permissions.sql
-\ir tables/UserRoles.sql
 \ir tables/RolePermissions.sql
 \ir tables/Patients.sql
 \ir tables/Staff.sql
 \ir tables/T_Login.sql
 
--- PEOPLE: Team users, roles, and logins
+-- PEOPLE: accounts, people (role, discipline, department), and logins
 \ir seed/users.sql
 
 \ir tables/Sessions.sql
@@ -41,6 +42,8 @@ CREATE SCHEMA IF NOT EXISTS dbo;
 \ir tables/Rooms.sql
 \ir tables/FamilyHistory.sql
 \ir tables/RoomAssignments.sql
+\ir tables/Courses.sql
+\ir tables/CourseEnrollments.sql
 \ir tables/Cases.sql
 \ir tables/Encounters.sql
 \ir tables/Assignment.sql
@@ -60,9 +63,9 @@ CREATE SCHEMA IF NOT EXISTS dbo;
 \ir tables/NoteAuditEvents.sql
 \ir tables/BillingCharges.sql
 \ir tables/PatientInsurance.sql
-\ir tables/Courses.sql
 \ir tables/DeletionAuditLog.sql
 
 -- DEMO DATA: needs every table above and the logins from seed/users.sql
 \ir seed/chart.sql
 \ir seed/cases.sql
+\ir seed/demo.sql

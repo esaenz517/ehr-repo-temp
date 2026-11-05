@@ -119,6 +119,70 @@ services:
     networks:
       - app-net
 
+  # --- TESTS (profile "test": only started by the commands below) ---
+  # Backend API tests against a throwaway database built from the init scripts.
+  #   SQL Server: docker compose --profile test run --rm backend-tests
+  #   Postgres:   docker compose --profile test run --rm backend-tests-pg
+  # Extra pytest arguments go at the end, e.g. ... backend-tests -k assignments
+  backend-tests:
+    profiles: ["test"]
+    build:
+      context: ./backend
+    environment:
+      DB_DIALECT: "mssql"
+      DB_SERVER: "db"
+      DB_PORT: "1433"
+      DB_NAME: "AppDbTest"   # dropped and rebuilt on every run; never AppDb
+      DB_USER: "sa"          # needs to create and drop the test database
+      DB_PASSWORD: "YourStrong!Passw0rd"
+      DB_SCRIPTS_DIR: "/db"
+    volumes:
+      - ./backend:/app
+      - ./db:/db:ro
+    entrypoint: ["sh", "-c", "pip install -q --root-user-action=ignore -r requirements-dev.txt && pytest \"$$@\"", "--"]
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-net
+
+  # Postgres for the Postgres test run (same major version family as Supabase).
+  test-postgres:
+    profiles: ["test"]
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: "test"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    networks:
+      - app-net
+
+  backend-tests-pg:
+    profiles: ["test"]
+    build:
+      context: ./backend
+    environment:
+      DB_DIALECT: "postgres"
+      DB_SERVER: "test-postgres"
+      DB_PORT: "5432"
+      DB_NAME: "ehr_test"
+      DB_USER: "postgres"
+      DB_PASSWORD: "test"
+      DB_SSLMODE: "disable"
+      DB_SCRIPTS_DIR: "/db"
+    volumes:
+      - ./backend:/app
+      - ./db:/db:ro
+    entrypoint: ["sh", "-c", "pip install -q --root-user-action=ignore -r requirements-dev.txt && pytest \"$$@\"", "--"]
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+    networks:
+      - app-net
+
 networks:
   app-net:
     driver: bridge

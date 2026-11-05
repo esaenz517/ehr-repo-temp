@@ -9,6 +9,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.assignment import Assignment as AssignmentModel
+from app.models.course_enrollments import CourseEnrollment
+from app.models.courses import Course
+from app.models.staff import Staff
 from app.models.clinical_notes import ClinicalNote, Encounter
 from app.models.rubric import AssignmentRubricScore
 from app.schemas.assignment import AssignmentRequest, EncounterStatus
@@ -17,13 +20,43 @@ from app.schemas.assignment import AssignmentRequest, EncounterStatus
 def get_assignment(db: Session, assignment_id: int):
     return db.query(AssignmentModel).filter(AssignmentModel.assignment_id == assignment_id).first()
 
+# Returns a reason the request can't be assigned, or None when it is fine:
+# every assignee must be a student, and with a course they must be enrolled in it.
+def check_assignees(db: Session, request: AssignmentRequest) -> str | None:
+    student_ids = set(request.assigned_to)
+    if not student_ids:
+        return "Choose at least one student"
+
+    people = db.query(Staff).filter(Staff.staffid.in_(student_ids)).all()
+    if len(people) != len(student_ids):
+        return "A student in your request does not exist"
+    if any(not person.is_student for person in people):
+        return "Cases can only be assigned to students"
+
+    if request.course_id is not None:
+        course = db.get(Course, request.course_id)
+        if course is None or not course.is_active:
+            return "Course not found or not active"
+
+        enrolled = {
+            staff_id
+            for (staff_id,) in db.query(CourseEnrollment.staff_id).filter(
+                CourseEnrollment.course_id == request.course_id,
+                CourseEnrollment.staff_id.in_(student_ids),
+            )
+        }
+        if enrolled != student_ids:
+            return "Every student must be enrolled in the chosen course"
+
+    return None
+
 # Assigns one row per student (still able to batch assign)
 def create_assignment(db: Session, request: AssignmentRequest, assigned_by: int):
     student_ids = list(dict.fromkeys(request.assigned_to))
     rows = [
         AssignmentModel(
             case_id = request.case_id,
-            course = request.course,
+            course_id = request.course_id,
             due_date = request.due_date,
             assignment_type = request.assignment_type,
             assigned_to = student_id,

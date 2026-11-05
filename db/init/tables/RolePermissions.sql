@@ -18,7 +18,7 @@ BEGIN
 END
 GO
 
--- DEVELOPMENT ADMIN RECEIVES ALL CURRENT PERMISSIONS
+-- ADMIN RECEIVES ALL CURRENT PERMISSIONS
 INSERT INTO dbo.RolePermissions (
     RoleId,
     PermissionId
@@ -40,32 +40,11 @@ WHERE
 GO
 
 
--- BILLING STAFF PERMISSIONS
-INSERT INTO dbo.RolePermissions (RoleId, PermissionId)
-SELECT r.RoleId, p.PermissionId
-FROM dbo.Roles r
-CROSS JOIN dbo.Permissions p
-WHERE r.RoleName = 'BILLING_STAFF'
-  AND p.PermissionCode IN (
-      'billing.read',
-      'billing.create',
-      'billing.update',
-      'billing.delete',
-      'patient.read'
-  )
-  AND NOT EXISTS (
-      SELECT 1
-      FROM dbo.RolePermissions rp
-      WHERE rp.RoleId = r.RoleId
-        AND rp.PermissionId = p.PermissionId
-  );
-GO
-
-
 -- INSTRUCTOR AND STUDENT PERMISSIONS
 -- Instructors build cases and manage the clinical catalog; staff.read lets
 -- Create Case list students. Students only read what they need for their
 -- assignments. Note permissions are granted with the note permissions below.
+-- Every person has exactly one of these three roles (dbo.Staff.RoleId).
 INSERT INTO dbo.RolePermissions (
     RoleId,
     PermissionId
@@ -148,16 +127,6 @@ WHERE
             r.RoleName = 'STUDENT'
             AND p.SensitivityLevel = 'general'
             AND p.Action IN ('read', 'create', 'update')
-        )
-        OR (
-            r.RoleName IN (
-                'PHYSICIAN',
-                'NURSE',
-                'PSYCHIATRY',
-                'PHYSICAL_THERAPY',
-                'ALLIED_HEALTH'
-            )
-            AND p.SensitivityLevel = 'general'
         )
     )
     AND NOT EXISTS (

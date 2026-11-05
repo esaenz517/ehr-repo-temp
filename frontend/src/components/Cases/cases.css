@@ -357,6 +357,13 @@
   border-color: var(--color-primary);
 }
 
+/* The student's department, after their name */
+.case-student-meta {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
 .case-student--selected {
   border-color: var(--color-primary);
   background: var(--color-primary-tint);

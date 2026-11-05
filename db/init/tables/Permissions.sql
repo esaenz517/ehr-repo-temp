@@ -82,7 +82,10 @@ USING (
         ('role.read',               'role', 'read'),
         ('role.manage_permissions', 'role', 'manage_permissions'),
 
-        ('permission.read', 'permission', 'read')
+        ('permission.read', 'permission', 'read'),
+
+        ('department.manage', 'department', 'manage'),
+        ('discipline.manage', 'discipline', 'manage')
 ) AS source (
     PermissionCode,
     ResourceType,

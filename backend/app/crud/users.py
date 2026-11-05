@@ -1,15 +1,14 @@
 """
 Users CRUD
-DB access functions for users - list, get, create, and role assignment.
+DB access functions for accounts - list, get, create, and change status.
 """
 
 from datetime import datetime, timezone
 
 import bcrypt
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.models.roles import Role as RoleModel
-from app.models.user_roles import UserRole as UserRoleModel
 from app.models.users import User as UserModel
 from app.schemas.users import UserCreate
 
@@ -24,7 +23,16 @@ def get_user(db: Session, user_id: int):
     return db.query(UserModel).filter(UserModel.user_id == user_id).first()
 
 
-# Inserts a new user and returns it.
+# Gets one user by email (any letter case), or None.
+def get_user_by_email(db: Session, email: str):
+    return (
+        db.query(UserModel)
+        .filter(func.lower(UserModel.email) == email.strip().lower())
+        .first()
+    )
+
+
+# Inserts a new account and returns it.
 def create_user(db: Session, user: UserCreate):
     password_hash = bcrypt.hashpw(
         user.password.encode("utf-8"),
@@ -32,11 +40,9 @@ def create_user(db: Session, user: UserCreate):
     ).decode("utf-8")
 
     db_user = UserModel(
-        name=user.name,
-        email=user.email,
+        email=user.email.strip().lower(),
         password_hash=password_hash,
         account_status="active",
-        discipline=user.discipline,
         created_at=datetime.now(timezone.utc).replace(tzinfo=None),
     )
 
@@ -47,64 +53,13 @@ def create_user(db: Session, user: UserCreate):
     return db_user
 
 
-# Gets all roles assigned to a user.
-def get_user_roles(db: Session, user_id: int):
-    return (
-        db.query(RoleModel)
-        .join(
-            UserRoleModel,
-            UserRoleModel.role_id == RoleModel.role_id,
-        )
-        .filter(UserRoleModel.user_id == user_id)
-        .order_by(RoleModel.role_id)
-        .all()
-    )
+# Sets active / disabled / locked. Returns None if the user doesn't exist.
+def set_status(db: Session, user_id: int, account_status: str):
+    db_user = get_user(db, user_id)
+    if db_user is None:
+        return None
 
-
-# Assigns a role to a user.
-def assign_role(db: Session, user_id: int, role_id: int) -> bool:
-    user = get_user(db, user_id)
-    role = db.query(RoleModel).filter(RoleModel.role_id == role_id).first()
-
-    if user is None or role is None:
-        return False
-
-    existing = (
-        db.query(UserRoleModel)
-        .filter(
-            UserRoleModel.user_id == user_id,
-            UserRoleModel.role_id == role_id,
-        )
-        .first()
-    )
-
-    if existing is None:
-        db.add(
-            UserRoleModel(
-                user_id=user_id,
-                role_id=role_id,
-            )
-        )
-        db.commit()
-
-    return True
-
-
-# Removes a role from a user.
-def remove_role(db: Session, user_id: int, role_id: int) -> bool:
-    user_role = (
-        db.query(UserRoleModel)
-        .filter(
-            UserRoleModel.user_id == user_id,
-            UserRoleModel.role_id == role_id,
-        )
-        .first()
-    )
-
-    if user_role is None:
-        return False
-
-    db.delete(user_role)
+    db_user.account_status = account_status
     db.commit()
-
-    return True
+    db.refresh(db_user)
+    return db_user

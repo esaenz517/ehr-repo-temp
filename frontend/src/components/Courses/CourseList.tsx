@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import type { Course, CourseTerm } from "../../types";
+import { CourseRoster } from "./CourseRoster";
 import "./courses.css";
 
 interface CourseListProps {
   courses: Course[];
+  canEnroll: boolean; // may add and remove people (course.update)
   onRename: (courseId: number, title: string) => Promise<boolean>;
   onSetActive: (courseId: number, isActive: boolean) => void;
 }
@@ -18,11 +20,13 @@ const byNewestSemester = (a: Course, b: Course) =>
   a.subject_code.localeCompare(b.subject_code) ||
   a.course_number.localeCompare(b.course_number, undefined, { numeric: true });
 
-// Displays every course as a table row: course, title, year, semester, status. Each row
-// can rename the course title inline and deactivate/reactivate it (courses are never deleted).
-export function CourseList({ courses, onRename, onSetActive }: CourseListProps) {
+// Displays every course as a table row: course, title, department, year, semester, status.
+// Each row can rename the course title inline, deactivate/reactivate it (courses are
+// never deleted), and open its roster of enrolled students and instructors.
+export function CourseList({ courses, canEnroll, onRename, onSetActive }: CourseListProps) {
   // Only one course is edited at a time: its id and the draft title.
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [rosterId, setRosterId] = useState<number | null>(null); // the course whose roster is open
   const [draftTitle, setDraftTitle] = useState("");
 
   const startEdit = (course: Course) => {
@@ -46,6 +50,7 @@ export function CourseList({ courses, onRename, onSetActive }: CourseListProps) 
           <tr>
             <th>Course</th>
             <th>Title</th>
+            <th>Department</th>
             <th>Year</th>
             <th>Semester</th>
             <th>Status</th>
@@ -55,11 +60,10 @@ export function CourseList({ courses, onRename, onSetActive }: CourseListProps) 
         <tbody>
           {[...courses].sort(byNewestSemester).map((course) => {
             const editing = editingId === course.course_id;
+            const rosterOpen = rosterId === course.course_id;
             return (
-              <tr
-                key={course.course_id}
-                className={course.is_active ? "courses-row" : "courses-row courses-row--inactive"}
-              >
+              <Fragment key={course.course_id}>
+              <tr className={course.is_active ? "courses-row" : "courses-row courses-row--inactive"}>
                 <td className="courses-code">{course.short_label}</td>
                 <td className="courses-title">
                   {editing ? (
@@ -79,6 +83,7 @@ export function CourseList({ courses, onRename, onSetActive }: CourseListProps) 
                     course.title
                   )}
                 </td>
+                <td className="courses-department">{course.department_name ?? "—"}</td>
                 <td className="courses-year">{course.term_year}</td>
                 <td className="courses-semester">{course.term}</td>
                 <td className="courses-status">
@@ -109,6 +114,13 @@ export function CourseList({ courses, onRename, onSetActive }: CourseListProps) 
                       </button>
                     )}
                     <button
+                      className="ui-button ui-button--secondary ui-button--small"
+                      aria-expanded={rosterOpen}
+                      onClick={() => setRosterId(rosterOpen ? null : course.course_id)}
+                    >
+                      {rosterOpen ? "Hide roster" : "Roster"}
+                    </button>
+                    <button
                       className={`ui-button ui-button--small${course.is_active ? " ui-button--danger" : ""}`}
                       onClick={() => onSetActive(course.course_id, !course.is_active)}
                     >
@@ -117,6 +129,14 @@ export function CourseList({ courses, onRename, onSetActive }: CourseListProps) 
                   </div>
                 </td>
               </tr>
+              {rosterOpen && (
+                <tr className="courses-roster-row">
+                  <td colSpan={7}>
+                    <CourseRoster course={course} canEnroll={canEnroll} />
+                  </td>
+                </tr>
+              )}
+              </Fragment>
             );
           })}
         </tbody>

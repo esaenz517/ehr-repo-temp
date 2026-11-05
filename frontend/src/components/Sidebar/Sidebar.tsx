@@ -3,41 +3,24 @@ import { useEffect, useRef, useState } from "react";
 import logo from "../../images/UTEP-Logo.png";
 import "./sidebar.css";
 
-// All available pages in the application.
-export type View =
-  | "home"
-  | "patients"
-  | "staff"
-  | "providers"
-  | "rooms"
-  | "courses"
-  | "createCase"
-  | "assignments"
-  | "assignedCases"
-  | "clinicalNotes"
-  | "grades"
-  | "progress"
-  | "about";
+import type { View } from "../../access";
+
+// View and STUDENT_VIEWS live in access.ts (with the rest of the access rules);
+// re-exported here for existing imports.
+export type { View } from "../../access";
+export { STUDENT_VIEWS } from "../../access";
 
 interface SidebarProps {
   active: View;
   onNavigate: (view: View) => void;
   username: string;
-  role?: string; // shown under the username (Student, Instructor, Administrator)
+  role?: string; // shown under the username, e.g. "Student · Nursing"
   onLogout: () => void;
   allowedViews?: View[];
 
   // Number of inactive or overdue assignments.
   progressAlertCount?: number;
 }
-
-// Students can access their dashboard, assignments,
-// and published grades.
-export const STUDENT_VIEWS: View[] = [
-  "home",
-  "assignments",
-  "grades",
-];
 
 const COLLAPSED_KEY = "sidebar-collapsed";
 

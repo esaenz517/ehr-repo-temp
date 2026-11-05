@@ -1,14 +1,29 @@
 from sqlalchemy.orm import Session
 
+from app.models.course_enrollments import CourseEnrollment
 from app.models.courses import Course as CourseModel
+from app.models.departments import Department
+from app.models.staff import Staff
 from app.schemas.courses import CourseCreate, CourseUpdate
 
 # Gets courses from the DB. is_active=None returns all courses;
-# True/False returns only active/deactivated ones.
-def list_courses(db: Session, is_active: bool | None = None):
+# True/False returns only active/deactivated ones. department_id and staffid
+# narrow the list to one department or to the courses a person is enrolled in.
+def list_courses(
+    db: Session,
+    is_active: bool | None = None,
+    department_id: int | None = None,
+    staffid: int | None = None,
+):
     query = db.query(CourseModel)
     if is_active is not None:
         query = query.filter(CourseModel.is_active == is_active)
+    if department_id is not None:
+        query = query.filter(CourseModel.department_id == department_id)
+    if staffid is not None:
+        query = query.join(
+            CourseEnrollment, CourseEnrollment.course_id == CourseModel.course_id
+        ).filter(CourseEnrollment.staff_id == staffid)
     return query.order_by(
         CourseModel.term_year.desc(),
         CourseModel.subject_code,
@@ -39,8 +54,64 @@ def update_course(db: Session, course_id: int, changes: CourseUpdate):
         return None
 
     for field, value in changes.model_dump(exclude_unset=True).items():
+        if value is None:
+            continue  # every editable column is NOT NULL
         setattr(db_course, field, value)
 
     db.commit()
     db.refresh(db_course)
     return db_course
+
+
+
+# True if the department exists; courses must belong to one.
+def department_exists(db: Session, department_id: int) -> bool:
+    return db.get(Department, department_id) is not None
+
+
+# People enrolled in a course (students and the instructors who teach it).
+def list_enrollments(db: Session, course_id: int):
+    return (
+        db.query(Staff)
+        .join(CourseEnrollment, CourseEnrollment.staff_id == Staff.staffid)
+        .filter(CourseEnrollment.course_id == course_id)
+        .order_by(Staff.last_name, Staff.first_name)
+        .all()
+    )
+
+
+# True if the person is enrolled in (or teaches) the course.
+def is_enrolled(db: Session, course_id: int, staffid: int) -> bool:
+    return (
+        db.query(CourseEnrollment)
+        .filter(
+            CourseEnrollment.course_id == course_id,
+            CourseEnrollment.staff_id == staffid,
+        )
+        .first()
+        is not None
+    )
+
+
+# Adds a person to a course. Already enrolled is fine.
+def enroll(db: Session, course_id: int, staffid: int) -> None:
+    if not is_enrolled(db, course_id, staffid):
+        db.add(CourseEnrollment(course_id=course_id, staff_id=staffid))
+        db.commit()
+
+
+# Removes a person from a course. Returns False if they were not enrolled.
+def unenroll(db: Session, course_id: int, staffid: int) -> bool:
+    enrollment = (
+        db.query(CourseEnrollment)
+        .filter(
+            CourseEnrollment.course_id == course_id,
+            CourseEnrollment.staff_id == staffid,
+        )
+        .first()
+    )
+    if enrollment is None:
+        return False
+    db.delete(enrollment)
+    db.commit()
+    return True

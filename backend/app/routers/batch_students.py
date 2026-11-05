@@ -71,7 +71,8 @@ def create_single_student(
             "FirstName",
             "MiddleName",
             "LastName",
-            "Specialization",
+            "Discipline",
+            "Department",
             "Email",
             "Username",
         ]
@@ -82,7 +83,8 @@ def create_single_student(
             student.first_name,
             student.middle_name or "",
             student.last_name,
-            student.specialization,
+            student.discipline,
+            student.department or "",
             student.email,
             student.username or "",
         ]

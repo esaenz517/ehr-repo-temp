@@ -65,6 +65,13 @@ def create_assignment(
     current_user=Depends(require_permission("assignment", "manage")),
     login: Login = Depends(get_current_login),
 ):
+    if login.staffid is None:
+        raise HTTPException(status_code=403, detail="Your account is not linked to a person")
+
+    problem = crud.check_assignees(db, request)
+    if problem:
+        raise HTTPException(status_code=400, detail=problem)
+
     try:
         return crud.create_assignment(
             db,

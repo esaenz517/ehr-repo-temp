@@ -1,4 +1,4 @@
-import type { Course, CourseTerm } from "../types";
+import type { Course, CourseTerm, Staff } from "../types";
 import { apiFetch } from "./client";
 
 // Shape of the data sent to the backend when creating a course.
@@ -8,12 +8,14 @@ export interface CreateCourseInput {
   title: string;
   term: CourseTerm;
   term_year: number;
+  department_id: number;
   is_active?: boolean;
 }
 
 // Partial update - only the fields included are changed on the backend.
 export interface UpdateCourseInput {
   title?: string;
+  department_id?: number;
   is_active?: boolean;
 }
 
@@ -27,4 +29,14 @@ export const coursesApi = {
     apiFetch<Course>("/courses", { method: "POST", body: JSON.stringify(input) }),
   update: (courseId: number, changes: UpdateCourseInput) =>
     apiFetch<Course>(`/courses/${courseId}`, { method: "PATCH", body: JSON.stringify(changes) }),
+
+  // Courses the signed-in person teaches or is enrolled in (works for students too)
+  mine: () => apiFetch<Course[]>("/courses/mine"),
+
+  // Who is in a course: its students and the instructors who teach it
+  enrollments: (courseId: number) => apiFetch<Staff[]>(`/courses/${courseId}/enrollments`),
+  enroll: (courseId: number, staffId: number) =>
+    apiFetch<void>(`/courses/${courseId}/enrollments/${staffId}`, { method: "POST" }),
+  unenroll: (courseId: number, staffId: number) =>
+    apiFetch<void>(`/courses/${courseId}/enrollments/${staffId}`, { method: "DELETE" }),
 };

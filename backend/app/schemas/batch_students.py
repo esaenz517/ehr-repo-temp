@@ -54,9 +54,16 @@ class StudentSingleCreate(BaseModel):
         max_length=100,
     )
 
-    specialization: str = Field(
+    # Discipline code or name, e.g. "NURSE" or "Nursing"
+    discipline: str = Field(
         min_length=1,
-        max_length=100,
+        max_length=150,
+    )
+
+    # Department code or name; defaults to the discipline's department
+    department: str | None = Field(
+        default=None,
+        max_length=150,
     )
 
     email: str = Field(

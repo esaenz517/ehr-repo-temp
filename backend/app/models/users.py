@@ -1,6 +1,8 @@
 """
 Users Model
 SQLAlchemy ORM class mapped to the dbo.Users table.
+The account only (email, password, status). The person behind it (name, role,
+discipline, department) is the dbo.Staff row whose UserId points here.
 """
 
 from sqlalchemy import Column, DateTime, Integer, String
@@ -14,8 +16,6 @@ class User(Base):
 
     user_id = Column("UserId", Integer, primary_key=True, index=True)
 
-    name = Column("Name", String(200), nullable=False)
-
     email = Column("Email", String(320), unique=True, nullable=False)
 
     password_hash = Column("PasswordHash", String(500), nullable=True)
@@ -24,6 +24,8 @@ class User(Base):
         "AccountStatus", String(20), nullable=False, default="active"
     )
 
-    discipline = Column("Discipline", String(100), nullable=True)
-
     created_at = Column("CreatedAt", DateTime, nullable=False)
+
+    @property
+    def is_active(self) -> bool:
+        return self.account_status == "active"
