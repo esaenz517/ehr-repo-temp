@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import logo from "../../images/UTEP-Logo.png";
 import "./sidebar.css";
 
@@ -103,6 +103,26 @@ export function Sidebar({
 
   const [collapsed, setCollapsed] = useState(readCollapsed);
 
+  // Profile menu (holds Log out). Closes on an outside click or Escape.
+  const [menuOpen, setMenuOpen] = useState(false);
+  const footerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (!footerRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
   const toggleCollapsed = () => {
     setCollapsed((previous) => {
       saveCollapsed(!previous);
@@ -158,8 +178,23 @@ export function Sidebar({
         })}
       </div>
 
-      <div className="sidebar-footer">
-        <div className="sidebar-user">
+      <div className="sidebar-footer" ref={footerRef}>
+        {menuOpen && (
+          <div className="sidebar-menu" id="sidebar-profile-menu" role="menu">
+            <button type="button" className="sidebar-menu-item" role="menuitem" onClick={onLogout}>
+              Log out
+            </button>
+          </div>
+        )}
+
+        <button
+          type="button"
+          className={`sidebar-user${menuOpen ? " sidebar-user--open" : ""}`}
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          aria-controls="sidebar-profile-menu"
+        >
           <span className="sidebar-avatar" aria-hidden="true">
             {username.charAt(0).toUpperCase()}
           </span>
@@ -167,10 +202,9 @@ export function Sidebar({
             <span className="sidebar-user-name">{username}</span>
             {role && <span className="sidebar-user-role">{role}</span>}
           </span>
-        </div>
-
-        <button className="sidebar-logout" onClick={onLogout}>
-          Log out
+          <svg className="sidebar-user-chevron" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+            <path d="M4 10l4-4 4 4" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
       </div>
 
