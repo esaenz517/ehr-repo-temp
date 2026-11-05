@@ -16,7 +16,9 @@ services:
     name: ehr-backend-ohio
     region: ohio
     runtime: docker
-    plan: free
+    # Starter ($7/month): stays on (no 30-60 s cold starts after 15 idle minutes)
+    # and has more CPU, which makes the bcrypt password check at login faster.
+    plan: starter
     dockerContext: ./backend
     dockerfilePath: ./backend/Dockerfile
     healthCheckPath: /health
