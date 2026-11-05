@@ -80,8 +80,7 @@ def health():
 
 
 # Same as /health, but also runs a tiny query, so it fails if the database is
-# unreachable. The keep-alive workflow (.github/workflows/keep-alive.yml) calls it,
-# which keeps both the Render backend and the Supabase project from going idle.
+# unreachable (/health never touches the database).
 @app.get("/health/db")
 def health_db(db: Session = Depends(get_db)):
     db.execute(text("SELECT 1"))
