@@ -82,32 +82,12 @@ Open SQL Server Management Studio and connect to:
 
 You'll see the `AppDb` database and its tables once `db-init` has finished.
 
-## Production database: Supabase (Postgres)
-The deployed app (Render) uses a Supabase Postgres database in AWS us-east-2 (Ohio), next to the Render backend.
-
-- **Host:** `aws-0-us-east-2.pooler.supabase.com` (session pooler), **port** `5432`
-- **Database:** `postgres`, **schema:** `dbo`
-- **User:** `postgres.qrsszxfqhwgzdhciyyek`
-- **Password:** the Supabase database password — ask a team member; it is not stored in this repo.
-
-Browse and query it in the Supabase dashboard (**SQL Editor** / **Table Editor**, pick the `dbo` schema). Names match in any case, so `SELECT * FROM dbo.Patients` works like it does in SSMS. Unlike SQL Server, text comparisons are case-sensitive (`'Dev' <> 'dev'`).
-
-The Postgres scripts live in `db/postgres/` (same layout as `db/init/`, which stays the SQL Server version for local Docker and the Azure backup). **When you change a table in `db/init/`, make the same change in `db/postgres/`.** To load them into an empty database, run from the repo root (psql asks for the password):
-
-```bash
-docker run --rm -it -v "$PWD/db/postgres:/pg" postgres:17 \
-  psql "host=aws-0-us-east-2.pooler.supabase.com port=5432 dbname=postgres user=postgres.qrsszxfqhwgzdhciyyek sslmode=require" \
-  -v ON_ERROR_STOP=1 --single-transaction -f /pg/init.sql
-```
-
-The backend picks the database with the `DB_DIALECT` env var: `mssql` (default; local Docker and Azure) or `postgres` (Supabase). See `render.yaml` for the full set of values, including how to switch back to Azure.
-
-## Connecting to Azure Server (backup)
+## Connecting to Azure Server
 - **Server name:** `utepehrserver.database.windows.net`
 - **Location:** Canada Central (resource group `UTEP-EHR-Resource`)
 - **Authentication:** SQL Authentication
 - **Database Name:** `UTEP-EHR-DB`
-- **Login / Password:** the server admin login — ask a team member; it is not stored in this repo.
+- **Login / Password:** `Provided in Render dashboard enviornment variables`
 
 Your IP (or the UTEP VPN range) must be allowed in the server's firewall (Azure Portal → utepehrserver → Networking).
 

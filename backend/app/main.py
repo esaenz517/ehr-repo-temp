@@ -1,7 +1,9 @@
 import os
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from app.routers import (
     appointments,
@@ -28,7 +30,7 @@ from app.routers import (
     deletion_audit,
 )
 from app.security.deletion_audit_middleware import deletion_audit_middleware
-from app.database import use_unquoted_names_on_postgres
+from app.database import get_db, use_unquoted_names_on_postgres
 
 # Every model is imported by now (through the routers above).
 use_unquoted_names_on_postgres()
@@ -75,3 +77,11 @@ app.include_router(deletion_audit.router)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+# Same as /health, but also runs a tiny query, so it fails if the database is
+# unreachable (/health never touches the database).
+@app.get("/health/db")
+def health_db(db: Session = Depends(get_db)):
+    db.execute(text("SELECT 1"))
+    return {"status": "ok", "database": "ok"}
