@@ -28,6 +28,10 @@ from app.routers import (
     deletion_audit,
 )
 from app.security.deletion_audit_middleware import deletion_audit_middleware
+from app.database import use_unquoted_names_on_postgres
+
+# Every model is imported by now (through the routers above).
+use_unquoted_names_on_postgres()
 
 app = FastAPI(title="EHR API")
 

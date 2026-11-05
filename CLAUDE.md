@@ -57,9 +57,13 @@ backend/app/
 └── routers/<resource>.py   # APIRouter endpoints, call crud, use schemas for I/O
 ```
 
-To add a new resource: create the table in a new `db/init/tables/<Table>.sql` and add a `:r` line for it in `db/init/init.sql` first (models describe tables that must already exist in SQL Server — they don't create them), then add matching `models/`, `schemas/`, `crud/`, `routers/` files following an existing resource such as `patients.py` in each, and register the new router in `main.py` (`app.include_router(...)`).
+To add a new resource: create the table in a new `db/init/tables/<Table>.sql` and add a `:r` line for it in `db/init/init.sql` first (plus the Postgres version in `db/postgres/tables/<Table>.sql` and an `\ir` line in `db/postgres/init.sql`) (models describe tables that must already exist in SQL Server — they don't create them), then add matching `models/`, `schemas/`, `crud/`, `routers/` files following an existing resource such as `patients.py` in each, and register the new router in `main.py` (`app.include_router(...)`).
 
 DB config (`DB_SERVER`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`) and CORS origins (`CORS_ORIGINS`) come from env vars set in `docker-compose.yml`, with local defaults in `database.py`/`main.py`.
+
+### Two databases: SQL Server and Postgres
+
+`DB_DIALECT` picks the database: `mssql` (default; local Docker and the Azure SQL backup, scripts in `db/init/`) or `postgres` (production on Supabase via Render, scripts in `db/postgres/`, plus `DB_SSLMODE`). Models keep SQL Server-style mixed-case names (`"Users"`, `"UserId"`); the Postgres scripts create them unquoted (stored lowercase), and `use_unquoted_names_on_postgres()` in `database.py` (called from `main.py`) makes SQLAlchemy send them unquoted so they match. Keep backend queries portable: no raw T-SQL, no `func.sysutcdatetime()` outside `server_default`, and compare user-typed text with `func.lower()` because Postgres is case-sensitive.
 
 ### Frontend: one resource = api + hook + components
 
