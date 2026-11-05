@@ -13,3 +13,7 @@ node_modules/
 dist/
 
 tsconfig.tsbuildinfo
+
+# Local secrets (e.g. .env.supabase with the Supabase DB password)
+.env
+.env.*

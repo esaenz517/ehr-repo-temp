@@ -1,17 +1,17 @@
 # Render Blueprint: deploys the backend and frontend from this repo on every push
-# to main. The database is Azure SQL (utepehrserver.database.windows.net, database
-# UTEP-EHR-DB, Canada Central), not a container. Local development still uses
-# docker-compose.yml and is unaffected.
+# to main. The database is Supabase Postgres (project in AWS us-east-2, Ohio, next to
+# the backend), reached through Supabase's session pooler. Azure SQL
+# (utepehrserver.database.windows.net / UTEP-EHR-DB) stays as a backup; see the
+# backend envVars below to switch back. Local development still uses
+# docker-compose.yml (SQL Server) and is unaffected.
 #
 # Values marked "sync: false" are secrets or depend on the deployed URLs. Render
 # asks for them when the Blueprint is first created and never stores them in git.
 
 services:
   # FastAPI backend, built from backend/Dockerfile.
-  # Runs in Ohio, Render's closest region to the Azure SQL server (Canada Central),
-  # because each request makes several database round trips one after another.
-  # Render can't move a service between regions, so this is a new service
-  # ("ehr-backend-ohio"); the old Oregon "ehr-backend" must be deleted by hand.
+  # Runs in Ohio, the same AWS region as the Supabase project (us-east-2), because
+  # each request makes several database round trips one after another.
   - type: web
     name: ehr-backend-ohio
     region: ohio
@@ -21,16 +21,27 @@ services:
     dockerfilePath: ./backend/Dockerfile
     healthCheckPath: /health
     envVars:
+      # Supabase. To switch back to the Azure SQL backup, change these to
+      # DB_DIALECT=mssql, DB_SERVER=utepehrserver.database.windows.net, DB_PORT=1433,
+      # DB_NAME=UTEP-EHR-DB, DB_USER=<Azure SQL login>, set DB_PASSWORD in the
+      # dashboard to the Azure password, and re-add Render's outbound IPs to the
+      # Azure firewall if they were removed.
+      - key: DB_DIALECT
+        value: postgres
       - key: DB_SERVER
-        value: utepehrserver.database.windows.net
+        value: aws-0-us-east-2.pooler.supabase.com
       - key: DB_PORT
-        value: "1433"
+        value: "5432"
       - key: DB_NAME
-        value: UTEP-EHR-DB
+        value: postgres
       - key: DB_USER
-        sync: false
+        value: postgres.qrsszxfqhwgzdhciyyek
+      # The Supabase database password (Project Settings -> Database). Never in git.
       - key: DB_PASSWORD
         sync: false
+      - key: DB_SSLMODE
+        value: require
+      # Used only when DB_DIALECT=mssql (Azure SQL backup).
       - key: DB_TRUST_CERT
         value: "no"
       - key: DB_LOGIN_TIMEOUT
