@@ -4,11 +4,10 @@ import { apiFetch } from "./client";
 
 export interface AssignmentRequest {
   case_id: number;
-  course?: string | null;
+  course_id?: number | null; // the course offering; every student must be enrolled in it
   due_date?: string | null;
   assignment_type?: "graded" | "practice";
-  assigned_to: number[];
-  assigned_by: number;
+  assigned_to: number[]; // the signed-in instructor is recorded as assigned_by
 }
 
 export const assignmentApi = {

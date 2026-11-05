@@ -1,11 +1,11 @@
-import type { Role, User } from "../types";
+import type { User } from "../types";
 import { apiFetch } from "./client";
 
+// Accounts only (email + password). A person's role is on their Staff row:
+// see staffApi.setRole.
 export interface CreateUserInput {
-    name: string;
     email: string;
     password: string;
-    discipline: string | null;
 }
 
 export const usersApi = {
@@ -20,18 +20,9 @@ export const usersApi = {
             body: JSON.stringify(input),
         }),
 
-    roles: (userId: number) =>
-        apiFetch<Role[]>(`/users/${userId}/roles`),
-
-    assignRole: (userId: number, roleId: number) =>
-        apiFetch<void>(
-            `/users/${userId}/roles/${roleId}`,
-            { method: "POST" }
-        ),
-
-    removeRole: (userId: number, roleId: number) =>
-        apiFetch<void>(
-            `/users/${userId}/roles/${roleId}`,
-            { method: "DELETE" }
-        ),
+    setStatus: (userId: number, accountStatus: User["account_status"]) =>
+        apiFetch<User>(`/users/${userId}/status`, {
+            method: "PATCH",
+            body: JSON.stringify({ account_status: accountStatus }),
+        }),
 };

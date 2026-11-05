@@ -1,8 +1,27 @@
+// The three roles. Every person (Staff) has exactly one.
+export type RoleName = "ADMIN" | "FACULTY_INSTRUCTOR" | "STUDENT";
+
 export interface Role {
   role_id: number;
-  role_name: string;
+  role_name: RoleName | string;
   display_name: string;
-  discipline: string | null;
+  is_active: boolean;
+}
+
+// Academic department (Nursing, Pharmacy, ...). People and courses belong to one.
+export interface Department {
+  department_id: number;
+  code: string; // e.g. "NURS"
+  name: string;
+  is_active: boolean;
+}
+
+// The kind of clinician a person acts as in a chart (Nursing, Pharmacy, ...).
+export interface Discipline {
+  discipline_id: number;
+  code: string; // e.g. "NURSE"
+  name: string;
+  department_id: number | null;
   is_active: boolean;
 }
 
@@ -18,12 +37,12 @@ export interface Permission {
   is_active: boolean;
 }
 
+// An account (email + password). The person behind it is a Staff row.
 export interface User {
   user_id: number;
-  name: string;
   email: string;
-  discipline: string | null;
-  account_status: string;
+  account_status: "active" | "disabled" | "locked" | string;
+  is_active: boolean;
   created_at: string;
 }
 
@@ -59,19 +78,47 @@ export interface Patient {
   drugs: Drug[];
 }
 
+// A person: staff member or student, with their role, discipline, and department.
 export interface Staff {
   staffid: number;
+  user_id: number | null; // null when the person has no account
   first_name: string;
   middle_name: string | null;
   last_name: string;
-  specialization: string;
-  student: boolean;
-  admin: boolean;
+  role_id: number;
+  role_name: RoleName | string | null;
+  discipline_id: number | null;
+  discipline_name: string | null;
+  department_id: number | null;
+  department_name: string | null;
+  student: boolean; // role_name === "STUDENT"
+  admin: boolean; // role_name === "ADMIN"
 }
 
+// What the app needs to create or edit a person.
+export interface StaffInput {
+  first_name: string;
+  middle_name: string | null;
+  last_name: string;
+  role_id: number;
+  discipline_id: number | null;
+  department_id: number | null;
+}
+
+// Who is signed in and what they may do.
 export interface LoginResponse {
   username: string;
-  staffid: number;
+  staffid: number | null;
+  first_name: string | null;
+  last_name: string | null;
+  role: RoleName | null;
+  role_display_name: string | null;
+  department_id: number | null;
+  department_code: string | null;
+  department_name: string | null;
+  discipline_id: number | null;
+  discipline_name: string | null;
+  permissions: string[]; // e.g. "patient.read", "note.read.general"
   student: boolean;
   admin: boolean;
 }
@@ -143,7 +190,8 @@ export interface Assignment {
   assignment_id: number;
   case_id: number;
   encounter_status: EncounterStatus;
-  course: string | null;
+  course_id: number | null;
+  course: string | null; // label, e.g. "NURS 3310"
   due_date: string | null;
   assignment_type?: "graded" | "practice";
   assigned_to: number;
@@ -197,6 +245,8 @@ export interface Course {
   title: string;
   term: CourseTerm;
   term_year: number;
+  department_id: number;
+  department_name: string | null;
   is_active: boolean;
   created_at: string;
   short_label: string; // e.g. "PHAR 5310" (computed by the backend)

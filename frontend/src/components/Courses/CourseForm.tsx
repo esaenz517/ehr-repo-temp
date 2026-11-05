@@ -1,8 +1,9 @@
 import { FormEvent, useState } from "react";
 import type { CreateCourseInput } from "../../api/courses";
-import type { CourseTerm } from "../../types";
+import type { CourseTerm, Department } from "../../types";
 
 interface CourseFormProps {
+  departments: Department[];
   onSubmit: (input: CreateCourseInput) => Promise<boolean>;
   onCancel?: () => void; // shows a Cancel button that closes the form
 }
@@ -16,8 +17,9 @@ export const YEARS = Array.from({ length: 11 }, (_, i) => CURRENT_YEAR - 5 + i);
 // Form for creating a new course. Collects input and hands it up to onSubmit
 // (CoursesPage wires this to useCourses().create). Only clears on success so
 // a rejected course (e.g. a duplicate) can be corrected instead of retyped.
-export function CourseForm({ onSubmit, onCancel }: CourseFormProps) {
+export function CourseForm({ departments, onSubmit, onCancel }: CourseFormProps) {
   const [subjectCode, setSubjectCode] = useState("");
+  const [departmentId, setDepartmentId] = useState(""); // "" until chosen
   const [courseNumber, setCourseNumber] = useState("");
   const [title, setTitle] = useState("");
   const [term, setTerm] = useState<CourseTerm>("Fall");
@@ -26,13 +28,14 @@ export function CourseForm({ onSubmit, onCancel }: CourseFormProps) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     // require every field before submitting (all are NOT NULL in the DB)
-    if (!subjectCode.trim() || !courseNumber.trim() || !title.trim() || !termYear) return;
+    if (!subjectCode.trim() || !courseNumber.trim() || !title.trim() || !termYear || !departmentId) return;
     const saved = await onSubmit({
       subject_code: subjectCode.trim().toUpperCase(),
       course_number: courseNumber.trim(),
       title: title.trim(),
       term,
       term_year: termYear,
+      department_id: Number(departmentId),
     });
     if (saved) {
       setSubjectCode("");
@@ -57,7 +60,12 @@ export function CourseForm({ onSubmit, onCancel }: CourseFormProps) {
             <input
               id="course-subject"
               value={subjectCode}
-              onChange={(e) => setSubjectCode(e.target.value)}
+              onChange={(e) => {
+                setSubjectCode(e.target.value);
+                // A subject that matches a department code (NURS, PHAR, ...) picks that department
+                const match = departments.find((d) => d.code === e.target.value.trim().toUpperCase());
+                if (match) setDepartmentId(String(match.department_id));
+              }}
               placeholder="e.g. PHAR"
               maxLength={10}
               required
@@ -87,6 +95,21 @@ export function CourseForm({ onSubmit, onCancel }: CourseFormProps) {
               required
               className="ui-input"
             />
+          </div>
+          <div className="form-field">
+            <label htmlFor="course-department">Department</label>
+            <select
+              id="course-department"
+              value={departmentId}
+              onChange={(e) => setDepartmentId(e.target.value)}
+              required
+              className="ui-input"
+            >
+              <option value="">Select department</option>
+              {departments.map((d) => (
+                <option key={d.department_id} value={d.department_id}>{d.name}</option>
+              ))}
+            </select>
           </div>
           <div className="form-field">
             <label htmlFor="course-term">Semester</label>

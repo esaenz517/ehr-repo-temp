@@ -76,7 +76,10 @@ INSERT INTO dbo.Permissions (PermissionCode, ResourceType, Action) VALUES
     ('role.read',               'role', 'read'),
     ('role.manage_permissions', 'role', 'manage_permissions'),
 
-    ('permission.read', 'permission', 'read')
+    ('permission.read', 'permission', 'read'),
+
+    ('department.manage', 'department', 'manage'),
+    ('discipline.manage', 'discipline', 'manage')
 ON CONFLICT (PermissionCode) DO NOTHING;
 
 -- Contextual note permissions: general grants do not cover restricted notes.

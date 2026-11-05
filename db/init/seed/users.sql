@@ -1,173 +1,69 @@
 -- PEOPLE SEED
--- Users, their roles, and their logins (a Staff row + a T_Login row each).
+-- Each demo person gets an account (dbo.Users), a person row (dbo.Staff) with their
+-- role, discipline, and department, and a login (dbo.T_Login).
 -- Included by init.sql with :r, after the Staff and T_Login tables exist.
 -- Every block skips rows that already exist, so re-running is safe.
+--
+-- Logins (username / password):
+--   instructor / instructor123   Nursing instructor
+--   pharmacy   / pharmacy123     Pharmacy instructor
+--   therapy    / therapy123      Physical therapy instructor
+--   admin      / admin123        Administrator
+--   student    / student123      Nursing student
+--   emmanuel, daniel, jacob, kinley, zachary, ana, luis: password is the username
 
--- DEMO STUDENT AND INSTRUCTOR USERS
--- Passwords live in dbo.T_Login (seeded below), so PasswordHash stays NULL.
-MERGE dbo.Users AS target
-USING (
-    VALUES
-        ('Sam Student',     'student@example.local',    'Nursing'),
-        ('Emmanuel Saenz',     'esaenz16@miners.utep.edu',    'Nursing'),
-        ('Daniel Marin',     'djmarin1@miners.utep.edu',    'Physician'),
-        ('Jacob Silva',     'jasilva6@miners.utep.edu',    'Physical Therapy'),
-        ('Kinley Wangyel',     'ktwangyel@miners.utep.edu',    'Psychiatry'),
-        ('Zachary Wittmann',     'zawittmann@miners.utep.edu',    'Nursing'),
-        ('Daniel Mejia',  'instructor@example.local', 'Nursing')
-) AS source (Name, Email, Discipline)
-ON target.Email = source.Email
+IF OBJECT_ID('tempdb..#People') IS NOT NULL DROP TABLE #People;
 
-WHEN NOT MATCHED THEN
-    INSERT (Name, Email, PasswordHash, AccountStatus, Discipline)
-    VALUES (source.Name, source.Email, NULL, 'active', source.Discipline);
-GO
-
-INSERT INTO dbo.UserRoles (
-    UserId,
-    RoleId
-)
-SELECT
-    u.UserId,
-    r.RoleId
-FROM (
-    VALUES
-        -- Students: STUDENT grants patient/case/drug read, the discipline role grants notes
-        ('student@example.local',      'STUDENT'),
-        ('student@example.local',      'NURSE'),
-        ('esaenz16@miners.utep.edu',   'STUDENT'),
-        ('esaenz16@miners.utep.edu',   'NURSE'),
-        ('djmarin1@miners.utep.edu',   'STUDENT'),
-        ('djmarin1@miners.utep.edu',   'PHYSICIAN'),
-        ('jasilva6@miners.utep.edu',   'STUDENT'),
-        ('jasilva6@miners.utep.edu',   'PHYSICAL_THERAPY'),
-        ('ktwangyel@miners.utep.edu',  'STUDENT'),
-        ('ktwangyel@miners.utep.edu',  'PSYCHIATRY'),
-        ('zawittmann@miners.utep.edu', 'STUDENT'),
-        ('zawittmann@miners.utep.edu', 'NURSE'),
-        -- Faculty
-        ('instructor@example.local',          'FACULTY_INSTRUCTOR')
-) AS assignments (Email, RoleName)
-JOIN dbo.Users u ON u.Email = assignments.Email
-JOIN dbo.Roles r ON r.RoleName = assignments.RoleName
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM dbo.UserRoles ur
-    WHERE
-        ur.UserId = u.UserId
-        AND ur.RoleId = r.RoleId
+CREATE TABLE #People (
+    Username       NVARCHAR(254),
+    PasswordHash   NVARCHAR(100),
+    Email          NVARCHAR(320),
+    FirstName      NVARCHAR(100),
+    LastName       NVARCHAR(100),
+    RoleName       NVARCHAR(100),
+    DisciplineCode NVARCHAR(50),
+    DepartmentCode NVARCHAR(10)
 );
-GO
 
--- DEMO STUDENT LOGIN: "student" / "student123"
-IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'student')
-BEGIN
-    INSERT INTO dbo.Staff (FirstName, MiddleName, LastName, Specialization, Student, Admin)
-    VALUES (N'Sam', NULL, N'Student', N'Nursing', 1, 0)
+INSERT INTO #People VALUES
+    -- Instructors
+    (N'instructor', N'$2b$12$IEeerdd1YbKnoui2WeZLHOoZgh7shNXg/6wA2Z4Z7uTzwCK5BGaSG', N'instructor@example.local',          N'Daniel',   N'Mejia',    N'FACULTY_INSTRUCTOR', N'NURSE',            N'NURS'),
+    (N'pharmacy',   N'$2b$12$PatfTvI0ezc6sY5O14S8BOE8QKn7OOyXoqsUEmiP7.5YkQGgCLcoG', N'pharmacy.instructor@example.local', N'Maria',    N'Alvarez',  N'FACULTY_INSTRUCTOR', N'PHARMACY',         N'PHAR'),
+    (N'therapy',    N'$2b$12$AVrcPD8oAWz3jsXnzLTR8.7gF8/qipfrVdMoY4Arru6l0xnQsyAIi', N'therapy.instructor@example.local',  N'Robert',   N'Chen',     N'FACULTY_INSTRUCTOR', N'PHYSICAL_THERAPY', N'PT'),
+    -- Administrator (no discipline or department: sees all departments)
+    (N'admin',      N'$2b$12$A9vbFqkRvQ0LQ72dVNyure12xBdeAJEvobNYQEDUXmWImFX0MPMPu', N'admin@example.local',               N'Jordan',   N'Reyes',    N'ADMIN',              NULL,               NULL),
+    -- Students
+    (N'student',    N'$2b$12$i.woXWQz6qB2m17SC2fYneRExFaPefSJ1hEfL6spySNCFDlrovVky', N'student@example.local',             N'Sam',      N'Student',  N'STUDENT',            N'NURSE',            N'NURS'),
+    (N'emmanuel',   N'$2b$12$5OCsrcn4pEVdHYP8xHkGRODzNM.XhR.2uI6XMPI8F3OPqtwuV4Vca', N'esaenz16@miners.utep.edu',          N'Emmanuel', N'Saenz',    N'STUDENT',            N'NURSE',            N'NURS'),
+    (N'daniel',     N'$2b$12$b6FN9us0SmgbUhj./CY9W.kt9QPxc/GrPoGuao4rZfBFdYO901h1a', N'djmarin1@miners.utep.edu',          N'Daniel',   N'Marin',    N'STUDENT',            N'PHYSICIAN',        N'IHS'),
+    (N'jacob',      N'$2b$12$9ViNyGrsjoMQUuJfs4Uzhul9WWdJIYA24dpwh8lOeOhbTTt/UTr7q', N'jasilva6@miners.utep.edu',          N'Jacob',    N'Silva',    N'STUDENT',            N'PHYSICAL_THERAPY', N'PT'),
+    (N'kinley',     N'$2b$12$2IuPgPE7VvZF7tpa0vGgfuOSPxuOfnAtdgPEsy7HPgY84qeaEKc.a', N'ktwangyel@miners.utep.edu',         N'Kinley',   N'Wangyel',  N'STUDENT',            N'PSYCHIATRY',       N'IHS'),
+    (N'zachary',    N'$2b$12$Ie/ipuMHu4WiPnO9T8Mnxud/AxGNKMwjdKS3B1IZGVpEkAa9uCGfq', N'zawittmann@miners.utep.edu',        N'Zachary',  N'Wittmann', N'STUDENT',            N'NURSE',            N'NURS'),
+    (N'ana',        N'$2b$12$rZpJGhONrwWM67Dp5u5VC.eh.yBMpP2aZjjYYWr2bzwAL3/RuByXe', N'ana.torres@example.local',          N'Ana',      N'Torres',   N'STUDENT',            N'PHARMACY',         N'PHAR'),
+    (N'luis',       N'$2b$12$kgokr/bw6xqHzVoxCOaGueUXnJD8jC8m87MkiZFumsovdAI5BKI.u', N'luis.herrera@example.local',        N'Luis',     N'Herrera',  N'STUDENT',            N'PHARMACY',         N'PHAR');
 
-    INSERT INTO dbo.T_Login (username, password_hash, staffid, userid)
-    VALUES (
-        N'student',
-        N'$2b$12$i.woXWQz6qB2m17SC2fYneRExFaPefSJ1hEfL6spySNCFDlrovVky',
-        SCOPE_IDENTITY(),
-        (SELECT UserId FROM dbo.Users WHERE Email = 'student@example.local')
-    );
-END
-GO
+-- ACCOUNTS
+INSERT INTO dbo.Users (Email, PasswordHash, AccountStatus)
+SELECT p.Email, NULL, 'active'
+FROM #People p
+WHERE NOT EXISTS (SELECT 1 FROM dbo.Users u WHERE u.Email = p.Email);
 
--- DEMO INSTRUCTOR LOGIN: "instructor" / "instructor123"
-IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'instructor')
-BEGIN
-    INSERT INTO dbo.Staff (FirstName, MiddleName, LastName, Specialization, Student, Admin)
-    VALUES (N'Daniel', NULL, N'Mejia', N'Nursing', 0, 0)
+-- PEOPLE: one Staff row per account
+INSERT INTO dbo.Staff (UserId, FirstName, MiddleName, LastName, RoleId, DisciplineId, DepartmentId)
+SELECT u.UserId, p.FirstName, NULL, p.LastName, r.RoleId, d.DisciplineId, dep.DepartmentId
+FROM #People p
+JOIN dbo.Users u              ON u.Email = p.Email
+JOIN dbo.Roles r              ON r.RoleName = p.RoleName
+LEFT JOIN dbo.Disciplines d   ON d.Code = p.DisciplineCode
+LEFT JOIN dbo.Departments dep ON dep.Code = p.DepartmentCode
+WHERE NOT EXISTS (SELECT 1 FROM dbo.Staff s WHERE s.UserId = u.UserId);
 
-    INSERT INTO dbo.T_Login (username, password_hash, staffid, userid)
-    VALUES (
-        N'instructor',
-        N'$2b$12$IEeerdd1YbKnoui2WeZLHOoZgh7shNXg/6wA2Z4Z7uTzwCK5BGaSG',
-        SCOPE_IDENTITY(),
-        (SELECT UserId FROM dbo.Users WHERE Email = 'instructor@example.local')
-    );
-END
-GO
+-- LOGINS
+INSERT INTO dbo.T_Login (username, password_hash, userid)
+SELECT p.Username, p.PasswordHash, u.UserId
+FROM #People p
+JOIN dbo.Users u ON u.Email = p.Email
+WHERE NOT EXISTS (SELECT 1 FROM dbo.T_Login l WHERE l.username = p.Username);
 
--- STUDENT LOGINS: username is the first name, password is the first name in lowercase
--- "emmanuel" / "emmanuel"
-IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'emmanuel')
-BEGIN
-    INSERT INTO dbo.Staff (FirstName, MiddleName, LastName, Specialization, Student, Admin)
-    VALUES (N'Emmanuel', NULL, N'Saenz', N'Nursing', 1, 0)
-
-    INSERT INTO dbo.T_Login (username, password_hash, staffid, userid)
-    VALUES (
-        N'emmanuel',
-        N'$2b$12$5OCsrcn4pEVdHYP8xHkGRODzNM.XhR.2uI6XMPI8F3OPqtwuV4Vca',
-        SCOPE_IDENTITY(),
-        (SELECT UserId FROM dbo.Users WHERE Email = 'esaenz16@miners.utep.edu')
-    );
-END
-GO
-
--- "daniel" / "daniel"
-IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'daniel')
-BEGIN
-    INSERT INTO dbo.Staff (FirstName, MiddleName, LastName, Specialization, Student, Admin)
-    VALUES (N'Daniel', NULL, N'Marin', N'Physician', 1, 0)
-
-    INSERT INTO dbo.T_Login (username, password_hash, staffid, userid)
-    VALUES (
-        N'daniel',
-        N'$2b$12$b6FN9us0SmgbUhj./CY9W.kt9QPxc/GrPoGuao4rZfBFdYO901h1a',
-        SCOPE_IDENTITY(),
-        (SELECT UserId FROM dbo.Users WHERE Email = 'djmarin1@miners.utep.edu')
-    );
-END
-GO
-
--- "jacob" / "jacob"
-IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'jacob')
-BEGIN
-    INSERT INTO dbo.Staff (FirstName, MiddleName, LastName, Specialization, Student, Admin)
-    VALUES (N'Jacob', NULL, N'Silva', N'Physical Therapy', 1, 0)
-
-    INSERT INTO dbo.T_Login (username, password_hash, staffid, userid)
-    VALUES (
-        N'jacob',
-        N'$2b$12$9ViNyGrsjoMQUuJfs4Uzhul9WWdJIYA24dpwh8lOeOhbTTt/UTr7q',
-        SCOPE_IDENTITY(),
-        (SELECT UserId FROM dbo.Users WHERE Email = 'jasilva6@miners.utep.edu')
-    );
-END
-GO
-
--- "kinley" / "kinley"
-IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'kinley')
-BEGIN
-    INSERT INTO dbo.Staff (FirstName, MiddleName, LastName, Specialization, Student, Admin)
-    VALUES (N'Kinley', NULL, N'Wangyel', N'Psychiatry', 1, 0)
-
-    INSERT INTO dbo.T_Login (username, password_hash, staffid, userid)
-    VALUES (
-        N'kinley',
-        N'$2b$12$2IuPgPE7VvZF7tpa0vGgfuOSPxuOfnAtdgPEsy7HPgY84qeaEKc.a',
-        SCOPE_IDENTITY(),
-        (SELECT UserId FROM dbo.Users WHERE Email = 'ktwangyel@miners.utep.edu')
-    );
-END
-GO
-
--- "zachary" / "zachary"
-IF NOT EXISTS (SELECT * FROM dbo.T_Login WHERE username = N'zachary')
-BEGIN
-    INSERT INTO dbo.Staff (FirstName, MiddleName, LastName, Specialization, Student, Admin)
-    VALUES (N'Zachary', NULL, N'Wittmann', N'Nursing', 1, 0)
-
-    INSERT INTO dbo.T_Login (username, password_hash, staffid, userid)
-    VALUES (
-        N'zachary',
-        N'$2b$12$Ie/ipuMHu4WiPnO9T8Mnxud/AxGNKMwjdKS3B1IZGVpEkAa9uCGfq',
-        SCOPE_IDENTITY(),
-        (SELECT UserId FROM dbo.Users WHERE Email = 'zawittmann@miners.utep.edu')
-    );
-END
+DROP TABLE #People;
 GO

@@ -105,3 +105,73 @@
     flex-wrap: wrap;
   }
 }
+
+/* Course roster (CourseRoster): instructors and students enrolled in a course */
+.courses-roster-row > td {
+  background: var(--color-primary-tint-soft);
+}
+
+.courses-roster {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+
+.courses-roster-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.courses-roster-title {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+}
+
+.courses-roster-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.courses-roster-person {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.courses-roster-add {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  max-width: 520px;
+}
+
+.courses-roster-add .ui-input {
+  flex: 1;
+}
+
+.courses-department {
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .courses-roster-groups {
+    grid-template-columns: 1fr;
+  }
+
+  .courses-department {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    color: var(--color-text-muted);
+  }
+
+  .ui-table.courses-table tr.courses-roster-row {
+    display: block;
+  }
+}

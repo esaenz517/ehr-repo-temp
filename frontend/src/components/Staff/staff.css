@@ -7,8 +7,17 @@
   white-space: nowrap;
 }
 
-.staff-specialization {
-  width: 100%; /* specialization takes the spare width; the other columns stay snug */
+.staff-department,
+.staff-discipline {
+  white-space: nowrap;
+}
+
+/* Marks people who have no account (they can't sign in) */
+.staff-no-login {
+  margin-left: 8px;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
 }
 
 /* First, middle and last name side by side while editing */
@@ -62,8 +71,9 @@
     border: none;
   }
 
-  .staff-specialization {
-    width: auto;
+  .staff-department,
+  .staff-discipline {
+    white-space: normal;
   }
 
   .staff-name-inputs {
@@ -71,14 +81,15 @@
     min-width: 0;
   }
 
-  .staff-specialization::before,
+  .staff-department::before,
+  .staff-discipline::before,
   .staff-role::before {
     content: attr(data-label) ": ";
     color: var(--color-text-muted);
     font-weight: 600;
   }
 
-  /* Keep the "Role:" label on the same line as its tags */
+  /* Keep the "Role:" label on the same line as its badge */
   .staff-role {
     display: flex;
     align-items: center;

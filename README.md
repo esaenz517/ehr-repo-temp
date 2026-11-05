@@ -62,12 +62,41 @@ Once everything is up:
 
 Sign in to the frontend at http://localhost:3000 with one of these seeded accounts:
 
-| Role       | Username     | Password        |
-|------------|--------------|-----------------|
-| Student    | `student`    | `student123`    |
-| Instructor | `instructor` | `instructor123` |
+| Role          | Department         | Username     | Password        |
+|---------------|--------------------|--------------|-----------------|
+| Administrator | (all)              | `admin`      | `admin123`      |
+| Instructor    | Nursing            | `instructor` | `instructor123` |
+| Instructor    | Pharmacy           | `pharmacy`   | `pharmacy123`   |
+| Instructor    | Physical Therapy   | `therapy`    | `therapy123`    |
+| Student       | Nursing            | `student`    | `student123`    |
+| Student       | Pharmacy           | `ana`        | `ana`           |
+| Student       | Pharmacy           | `luis`       | `luis`          |
 
-These are created by `db/init/init.sql` for local dev only. Change or remove them before deploying anywhere real.
+More students (`emmanuel`, `daniel`, `jacob`, `kinley`, `zachary`) use their username as the password. These are created by `db/init/seed/users.sql` for local dev only. Change or remove them before deploying anywhere real.
+
+`db/init/seed/demo.sql` fills every other page with fake data: course enrollments, case rubrics, SOAP notes in every assignment state (with versions, an addendum, and audit events), published grades, room assignments, appointments, billing, insurance, and deletion-audit rows.
+
+### Who can do what
+
+Each person (`dbo.Staff`) has exactly one role, a department, and usually a discipline:
+
+- **Administrator** (`ADMIN`): every permission; no department (oversees all).
+- **Instructor** (`FACULTY_INSTRUCTOR`): writes cases, assigns them to students enrolled in their courses, reviews and grades.
+- **Student** (`STUDENT`): works on their own assignments and sees their published grades.
+
+The account (`dbo.Users`: email, password, status) is separate from the person, and `dbo.T_Login` holds the username for an account.
+
+## Tests
+
+The backend tests run the real API against a throwaway database that is rebuilt from the init scripts (including the demo data) on every run:
+
+```bash
+docker compose --profile test run --rm backend-tests      # SQL Server (database AppDbTest)
+docker compose --profile test run --rm backend-tests-pg   # Postgres (a temporary postgres:16 container)
+docker compose --profile test run --rm backend-tests -k assignments   # extra arguments go to pytest
+```
+
+The frontend has unit tests for the page-access rules: `cd frontend && npm test`.
 
 The `db-init` container waits for SQL Server's healthcheck to pass, then runs `db/init/init.sql`, which creates the `AppDb` database and runs each table script in `db/init/tables/` and the demo data in `db/init/seed/`. It exits once done — that's expected, it's not meant to stay running.
 

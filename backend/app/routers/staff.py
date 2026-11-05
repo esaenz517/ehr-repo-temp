@@ -1,6 +1,7 @@
 """
 Staff Router
-This file defines API endpoints for managing staff. It includes routes for listing, retrieving, creating, updating, and deleting staff.
+This file defines API endpoints for managing people (staff and students):
+listing, retrieving, creating, updating, deleting, and changing their role.
 """
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -14,12 +15,15 @@ from app.security.authorization import require_permission
 router = APIRouter(prefix="/staff", tags=["staff"])
 
 
+# Optional filters, e.g. /staff?role=STUDENT&department_id=2
 @router.get("", response_model=list[Staff])
 def list_staff(
+    role: str | None = None,
+    department_id: int | None = None,
     db: Session = Depends(get_db),
     current_user=Depends(require_permission("staff", "read")),
 ):
-    return crud.list_staff(db)
+    return crud.list_staff(db, role=role, department_id=department_id)
 
 
 @router.get("/{staffid}", response_model=Staff)
@@ -40,10 +44,13 @@ def create_staff(
     db: Session = Depends(get_db),
     current_user=Depends(require_permission("staff", "create")),
 ):
-    return crud.create_staff(db, staff)
+    try:
+        return crud.create_staff(db, staff)
+    except crud.InvalidReference as error:
+        raise HTTPException(status_code=400, detail=str(error))
 
 
-# Partial update, e.g. {"specialization": "Cardiology"}.
+# Partial update, e.g. {"department_id": 2}.
 @router.patch("/{staffid}", response_model=Staff)
 def update_staff(
     staffid: int,
@@ -51,7 +58,27 @@ def update_staff(
     db: Session = Depends(get_db),
     current_user=Depends(require_permission("staff", "update")),
 ):
-    staff = crud.update_staff(db, staffid, changes)
+    try:
+        staff = crud.update_staff(db, staffid, changes)
+    except crud.InvalidReference as error:
+        raise HTTPException(status_code=400, detail=str(error))
+    if staff is None:
+        raise HTTPException(status_code=404, detail="Staff member not found")
+    return staff
+
+
+# Changing someone's role changes what they can do, so it has its own permission.
+@router.put("/{staffid}/role/{role_id}", response_model=Staff)
+def set_role(
+    staffid: int,
+    role_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("user", "manage_roles")),
+):
+    try:
+        staff = crud.set_role(db, staffid, role_id)
+    except crud.InvalidReference as error:
+        raise HTTPException(status_code=400, detail=str(error))
     if staff is None:
         raise HTTPException(status_code=404, detail="Staff member not found")
     return staff

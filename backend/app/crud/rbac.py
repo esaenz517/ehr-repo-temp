@@ -1,6 +1,7 @@
 """
 RBAC CRUD
 DB access functions for evaluating user role and permission assignments.
+A user's role is the RoleId on their person row (dbo.Staff.UserId = user_id).
 """
 
 from sqlalchemy.orm import Session
@@ -8,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.models.permissions import Permission
 from app.models.role_permissions import RolePermission
 from app.models.roles import Role
-from app.models.user_roles import UserRole
+from app.models.staff import Staff
 
 
 def user_has_permission(
@@ -18,7 +19,7 @@ def user_has_permission(
     action: str,
 ) -> bool:
     """
-    Checks whether a user has a general permission through any active role.
+    Checks whether a user has a general permission through their role.
     General permissions are permissions that do not contain contextual
     restrictions for discipline, sensitivity, note type, or care context.
     """
@@ -33,13 +34,13 @@ def user_has_permission(
             Role.role_id == RolePermission.role_id,
         )
         .join(
-            UserRole,
-            UserRole.role_id == Role.role_id,
+            Staff,
+            Staff.role_id == Role.role_id,
         )
         # SQL Server BIT columns need equality comparisons here.
         # Using .is_(True) can compile to "IS 1" and cause a SQL syntax error.
         .filter(
-            UserRole.user_id == user_id,
+            Staff.user_id == user_id,
             Role.is_active == True,
             Permission.is_active == True,
             Permission.resource_type == resource_type,
@@ -85,13 +86,13 @@ def user_has_contextual_permission(
             Role.role_id == RolePermission.role_id,
         )
         .join(
-            UserRole,
-            UserRole.role_id == Role.role_id,
+            Staff,
+            Staff.role_id == Role.role_id,
         )
         # SQL Server BIT columns need equality comparisons here.
         # Using .is_(True) can compile to "IS 1" and cause a SQL syntax error.
         .filter(
-            UserRole.user_id == user_id,
+            Staff.user_id == user_id,
             Role.is_active == True,
             Permission.is_active == True,
             Permission.resource_type == resource_type,
@@ -120,3 +121,32 @@ def user_has_contextual_permission(
         query = query.filter(Permission.care_context == care_context)
 
     return query.first() is not None
+
+
+def get_role_permission_codes(db: Session, role_id: int | None) -> list[str]:
+    """Every active permission code granted to a role, sorted (e.g. "patient.read",
+    "note.read.general"). For display and for showing or hiding screens; the
+    endpoints still check permissions themselves."""
+    if role_id is None:
+        return []
+
+    rows = (
+        db.query(Permission.permission_code)
+        .join(
+            RolePermission,
+            RolePermission.permission_id == Permission.permission_id,
+        )
+        .join(
+            Role,
+            Role.role_id == RolePermission.role_id,
+        )
+        .filter(
+            Role.role_id == role_id,
+            Role.is_active == True,
+            Permission.is_active == True,
+        )
+        .order_by(Permission.permission_code)
+        .all()
+    )
+
+    return [code for (code,) in rows]

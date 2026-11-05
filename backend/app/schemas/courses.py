@@ -9,14 +9,16 @@ class CourseBase(BaseModel):
     title: str = Field(min_length=1, max_length=200)
     term: Literal["Fall", "Spring", "Summer"]
     term_year: int = Field(ge=2000, le=2100)
+    department_id: int
     is_active: bool = True
-    
+
 class CourseCreate(CourseBase):
     pass
 
 class Course(CourseBase):
     course_id: int
     created_at: datetime
+    department_name: str | None = None
 
     # Display labels built from the stored fields, e.g. "PHAR 5310" and
     # "PHAR 5310 – Pharmacotherapy I (Fall 2026)". Not DB columns.
@@ -36,4 +38,5 @@ class Course(CourseBase):
 #Used for deactivating courses
 class CourseUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
+    department_id: int | None = None
     is_active: bool | None = None

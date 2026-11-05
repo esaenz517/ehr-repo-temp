@@ -2,7 +2,8 @@
 Current User Dependency
 Identifies the caller from the session cookie set by POST /auth/login.
 
-get_current_login() returns the T_Login row (staffid for cases/assignments).
+get_current_login() returns the T_Login row; login.staff is the person (role,
+  department, discipline) and login.staffid is used by cases and assignments.
 get_current_user() returns the linked Users row (user_id for RBAC checks).
 """
 

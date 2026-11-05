@@ -7,7 +7,7 @@ checking the current session, and signing out.
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 from app.models.login import Login
-from app.models.staff import Staff
+from app.crud.rbac import get_role_permission_codes
 
 from app.crud import login as crud
 from app.crud import sessions as sessions_crud
@@ -19,13 +19,26 @@ from app.security.session_cookie import SESSION_COOKIE, clear_session_cookie, se
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-def to_response(db: Session, user: Login) -> LoginResponse:
-    staff = db.query(Staff).filter(Staff.staffid == user.staffid).first()
+def to_response(db: Session, login: Login) -> LoginResponse:
+    staff = login.staff
+    if staff is None:
+        return LoginResponse(username=login.username)
+
     return LoginResponse(
-        username=user.username,
-        staffid=user.staffid,
-        student=bool(staff and staff.student),
-        admin=bool(staff and staff.admin),
+        username=login.username,
+        staffid=staff.staffid,
+        first_name=staff.first_name,
+        last_name=staff.last_name,
+        role=staff.role_name,
+        role_display_name=staff.role.display_name if staff.role else None,
+        department_id=staff.department_id,
+        department_code=staff.department_code,
+        department_name=staff.department_name,
+        discipline_id=staff.discipline_id,
+        discipline_name=staff.discipline_name,
+        permissions=get_role_permission_codes(db, staff.role_id),
+        student=staff.is_student,
+        admin=staff.is_admin,
     )
 
 

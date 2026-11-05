@@ -28,6 +28,8 @@ from app.routers import (
     grades_progress,
     rubric,
     deletion_audit,
+    departments,
+    disciplines,
 )
 from app.security.deletion_audit_middleware import deletion_audit_middleware
 from app.database import get_db, use_unquoted_names_on_postgres
@@ -63,6 +65,8 @@ app.include_router(billing.router)
 app.include_router(insurance.router)
 app.include_router(cases.router)
 app.include_router(courses.router)
+app.include_router(departments.router)
+app.include_router(disciplines.router)
 
 app.include_router(users.router)
 app.include_router(roles.router)

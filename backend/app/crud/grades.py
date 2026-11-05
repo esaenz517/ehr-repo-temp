@@ -36,6 +36,7 @@ def save_grade(
         grade = AssignmentGrade(
             assignment_id=assignment_id,
             graded_by_staff_id=staff_id,
+            updated_at=utc_now(),  # NOT NULL, and the row is flushed right away
         )
 
         db.add(grade)

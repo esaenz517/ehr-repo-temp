@@ -202,7 +202,7 @@ export function StudentBatchImport({ onImported }: Props) {
                 <div className="ui-panel-heading">
                     <h2 className="ui-panel-title">Import students</h2>
                     <p className="ui-panel-description">
-                        Upload a CSV with FirstName, LastName, Specialization, and Email (or UserPrincipalName). MiddleName and Username are optional. Students receive the STUDENT role automatically.
+                        Upload a CSV with FirstName, LastName, Discipline (code or name, e.g. NURSE or Nursing), and Email (or UserPrincipalName). MiddleName, Department, and Username are optional; without a Department the discipline's department is used. Students receive the Student role automatically.
                     </p>
                 </div>
             </header>

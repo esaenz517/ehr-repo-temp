@@ -37,18 +37,19 @@ GO
 -- older databases, and seed data. Order matters: a table comes after the tables it
 -- references, and seed data after the rows it depends on.
 -- sqlcmd resolves :r paths from its working directory, so the paths are container paths.
+:r /init/tables/Departments.sql
+:r /init/tables/Disciplines.sql
 :r /init/tables/Users.sql
 :r /init/tables/Providers.sql
 :r /init/tables/Roles.sql
 :r /init/tables/Drugs.sql
 :r /init/tables/Permissions.sql
-:r /init/tables/UserRoles.sql
 :r /init/tables/RolePermissions.sql
 :r /init/tables/Patients.sql
 :r /init/tables/Staff.sql
 :r /init/tables/T_Login.sql
 
--- PEOPLE: Team users, roles, and logins
+-- PEOPLE: accounts, people (role, discipline, department), and logins
 :r /init/seed/users.sql
 
 :r /init/tables/Sessions.sql
@@ -57,6 +58,8 @@ GO
 :r /init/tables/Rooms.sql
 :r /init/tables/FamilyHistory.sql
 :r /init/tables/RoomAssignments.sql
+:r /init/tables/Courses.sql
+:r /init/tables/CourseEnrollments.sql
 :r /init/tables/Cases.sql
 :r /init/tables/Encounters.sql
 :r /init/tables/Assignment.sql
@@ -76,9 +79,9 @@ GO
 :r /init/tables/NoteAuditEvents.sql
 :r /init/tables/BillingCharges.sql
 :r /init/tables/PatientInsurance.sql
-:r /init/tables/Courses.sql
 :r /init/tables/DeletionAuditLog.sql
 
 -- DEMO DATA: needs every table above and the logins from seed/users.sql
 :r /init/seed/chart.sql
 :r /init/seed/cases.sql
+:r /init/seed/demo.sql

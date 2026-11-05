@@ -9,6 +9,7 @@ from app.crud import clinical_notes as crud
 from app.crud import note_addenda as addenda_crud
 from app.crud.assignment import is_locked
 from app.crud.patients import get_patient
+from app.crud.staff import get_staff_for_user
 from app.crud.rbac import (
     user_has_contextual_permission,
     user_has_permission,
@@ -52,6 +53,12 @@ def permitted(
             status_code=403,
             detail="Insufficient note permission",
         )
+
+
+# The author's discipline name (e.g. "Nursing") from their person row, or None.
+def author_discipline(db: Session, user_id: int) -> str | None:
+    staff = get_staff_for_user(db, user_id)
+    return staff.discipline_name if staff else None
 
 
 def patient_or_404(db: Session, patient_id: int):
@@ -268,7 +275,7 @@ def create_note(
         encounter_id=payload.encounter_id,
         provider_id=provider_id,
         author_id=user.user_id,
-        discipline=user.discipline,
+        discipline=author_discipline(db, user.user_id),
         sensitivity=payload.sensitivity_classification,
         content=payload.content,
     )

@@ -11,7 +11,6 @@ from pydantic import BaseModel
 class RoleBase(BaseModel):
     role_name: str
     display_name: str
-    discipline: str | None = None
     is_active: bool = True
 
 
