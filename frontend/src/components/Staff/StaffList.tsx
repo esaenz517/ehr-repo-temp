@@ -112,7 +112,7 @@ export function StaffList({ staff, emptyText, onUpdate, onDelete }: StaffListPro
                 <td className="staff-role" data-label="Role">
                   <div className="staff-role-tags">
                     {/* The student flag isn't editable here, so it shows as a tag either way */}
-                    {member.student && <span className="ui-badge ui-badge--muted">Student</span>}
+                    {member.student && <span className="ui-badge">Student</span>}
                     {editing ? (
                       <select
                         value={draft.admin ? "yes" : "no"}
@@ -126,8 +126,8 @@ export function StaffList({ staff, emptyText, onUpdate, onDelete }: StaffListPro
                       </select>
                     ) : (
                       <>
-                        {member.admin && <span className="ui-badge">Admin</span>}
-                        {!member.admin && !member.student && <span className="ui-muted">Staff</span>}
+                        {member.admin && <span className="ui-badge ui-badge--solid">Admin</span>}
+                        {!member.admin && !member.student && <span className="ui-badge ui-badge--muted">Staff</span>}
                       </>
                     )}
                   </div>

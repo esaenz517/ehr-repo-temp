@@ -6,6 +6,8 @@ import { useAssignments } from "../../hooks/useAssignments";
 import { useStaff } from "../../hooks/useStaff";
 import { STATUS_LABELS } from "../StatusBadge";
 import type { Assignment, EncounterStatus } from "../../types";
+import { PageHeader } from "../PageHeader";
+import { Panel } from "../Panel";
 
 interface AssignedCasesPageProps {
   staffId: number; // the instructor who handed out the assignments
@@ -57,7 +59,7 @@ export function AssignedCasesPage({ staffId, initialViewingId = null }: Assigned
   // Sign off / Send back happen inside the note view, next to the feedback box
   const actions = (a: Assignment) =>
     a.encounter_status !== "not_started" && (
-      <button className={`ui-button${a.encounter_status === "submitted" ? "" : " ui-button--secondary"}`} onClick={() => setViewingId(a.assignment_id)}>
+      <button className={`ui-button ui-button--small${a.encounter_status === "submitted" ? "" : " ui-button--secondary"}`} onClick={() => setViewingId(a.assignment_id)}>
         {a.encounter_status === "submitted" ? "Review" : "View note"}
       </button>
     );
@@ -83,73 +85,80 @@ export function AssignedCasesPage({ staffId, initialViewingId = null }: Assigned
 
   return (
     <div className="ui-page">
-      <h1 className="ui-page-title">Assigned Cases</h1>
-      <div className="ui-toolbar">
-        <button className="ui-button ui-button--secondary" onClick={reload}>Refresh</button>
-      </div>
-
-      <div className="ui-filter-bar" role="search" aria-label="Filter assigned cases">
-        <label className={`ui-filter-field${query ? " ui-filter-field--active" : ""}`}>
-          <span className="ui-filter-label">Search</span>
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Case #, student, or patient"
-            className="ui-input"
-          />
-        </label>
-
-        <label className={`ui-filter-field${status !== "all" ? " ui-filter-field--active" : ""}`}>
-          <span className="ui-filter-label">Status</span>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as EncounterStatus | "all")}
-            className="ui-input"
-          >
-            <option value="all">All statuses</option>
-            {(Object.keys(STATUS_LABELS) as EncounterStatus[]).map((s) => (
-              <option key={s} value={s}>{STATUS_LABELS[s]}</option>
-            ))}
-          </select>
-        </label>
-
-        <label className={`ui-filter-field${course !== "all" ? " ui-filter-field--active" : ""}`}>
-          <span className="ui-filter-label">Course</span>
-          <select value={course} onChange={(e) => setCourse(e.target.value)} className="ui-input">
-            <option value="all">All courses</option>
-            {courseOptions.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-            {hasNoCourse && <option value="none">No course</option>}
-          </select>
-        </label>
-
-        {filtering && (
-          <button type="button" className="ui-button ui-button--secondary ui-filter-clear" onClick={clearFilters}>
-            Clear filters
-          </button>
-        )}
-
-        <div className="ui-filter-summary">
-          {!loading && (
-            <span aria-live="polite">
-              Showing <strong>{shown.length}</strong> of {assignments.length} assignment{assignments.length === 1 ? "" : "s"}
-            </span>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="Assigned Cases"
+        description="Every case you've handed out. Open a note to review, score and sign off."
+        actions={<button className="ui-button ui-button--secondary" onClick={reload}>Refresh</button>}
+      />
 
       {error && <p className="ui-error">{error}</p>}
-      {loading ? (
-        <p className="ui-muted">Loading...</p>
-      ) : assignments.length === 0 ? (
-        <p className="ui-row-empty">You haven't assigned any cases yet.</p>
-      ) : shown.length === 0 ? (
-        <p className="ui-row-empty">No assigned cases match these filters.</p>
-      ) : (
-        <AssignmentList assignments={shown} studentName={studentName} actions={actions} />
-      )}
+
+      <Panel
+        flush
+        toolbar={
+          <div className="ui-filter-bar" role="search" aria-label="Filter assigned cases">
+            <label className={`ui-filter-field${query ? " ui-filter-field--active" : ""}`}>
+              <span className="ui-filter-label">Search</span>
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Case #, student, or patient"
+                className="ui-input"
+              />
+            </label>
+
+            <label className={`ui-filter-field${status !== "all" ? " ui-filter-field--active" : ""}`}>
+              <span className="ui-filter-label">Status</span>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as EncounterStatus | "all")}
+                className="ui-input"
+              >
+                <option value="all">All statuses</option>
+                {(Object.keys(STATUS_LABELS) as EncounterStatus[]).map((s) => (
+                  <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className={`ui-filter-field${course !== "all" ? " ui-filter-field--active" : ""}`}>
+              <span className="ui-filter-label">Course</span>
+              <select value={course} onChange={(e) => setCourse(e.target.value)} className="ui-input">
+                <option value="all">All courses</option>
+                {courseOptions.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+                {hasNoCourse && <option value="none">No course</option>}
+              </select>
+            </label>
+
+            {filtering && (
+              <button type="button" className="ui-button ui-button--secondary ui-filter-clear" onClick={clearFilters}>
+                Clear filters
+              </button>
+            )}
+
+            <div className="ui-filter-summary">
+              {!loading && (
+                <span aria-live="polite">
+                  Showing <strong>{shown.length}</strong> of {assignments.length} assignment{assignments.length === 1 ? "" : "s"}
+                </span>
+              )}
+            </div>
+          </div>
+        }
+      >
+        {loading ? (
+          <p className="ui-row-empty">Loading assignments…</p>
+        ) : assignments.length === 0 ? (
+          <p className="ui-row-empty">You haven't assigned any cases yet.</p>
+        ) : shown.length === 0 ? (
+          <p className="ui-row-empty">No assigned cases match these filters.</p>
+        ) : (
+          <AssignmentList assignments={shown} studentName={studentName} actions={actions} />
+        )}
+      </Panel>
     </div>
   );
 }

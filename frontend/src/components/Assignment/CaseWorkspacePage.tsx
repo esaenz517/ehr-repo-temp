@@ -3,9 +3,11 @@ import { casesApi } from "../../api/cases";
 import { clinicalNotesApi, formatUtc } from "../../api/clinicalNotes";
 import type { ChartContext } from "../../api/clinicalNotes";
 import type { Assignment, Case } from "../../types";
+import { StatusBadge } from "../StatusBadge";
 import { AssignmentNote } from "./AssignmentNote";
 import { MedicalHistoryPanel } from "../MedicalHistory/MedicalHistoryPanel";
 import { Section } from "../Section";
+import { PageHeader } from "../PageHeader";
 
 function Detail({ label, value }: { label: string; value: ReactNode }) {
   return (
@@ -20,11 +22,20 @@ function Detail({ label, value }: { label: string; value: ReactNode }) {
 function WorkSection({ title, children }: { title: string; children: ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
-    <Section title={title}>
-      <button type="button" className="ui-button ui-button--secondary" onClick={() => setOpen((o) => !o)}>
-        {open ? `Close ${title.toLowerCase()}` : `Open ${title.toLowerCase()}`}
-      </button>
-      {open && <div className="ui-section-body">{children}</div>}
+    <Section
+      title={title}
+      actions={
+        <button
+          type="button"
+          className="ui-button ui-button--secondary ui-button--small"
+          aria-expanded={open}
+          onClick={() => setOpen((o) => !o)}
+        >
+          {open ? "Close" : "Open"}
+        </button>
+      }
+    >
+      {open ? children : null}
     </Section>
   );
 }
@@ -69,25 +80,30 @@ export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignme
   
     return (
       <div className="ui-page">
-        <button type="button" className="ui-button ui-button--secondary ui-back" onClick={onBack}>
-          ← Back to {backLabel}
-        </button>
-
-        <h1 className="ui-page-title">
-          Case #{assignment.case_id}
-          {assignment.patient_name && ` · ${assignment.patient_name}`}
-        </h1>
-        <p className="ui-page-intro">
-          {assignment.course ?? "No course"}
-          {assignment.due_date && ` · Due ${formatUtc(assignment.due_date)}`}
-        </p>
+        <PageHeader
+          back={{ label: backLabel, onClick: onBack }}
+          title={
+            <>
+              Case #{assignment.case_id}
+              {assignment.patient_name && ` · ${assignment.patient_name}`}
+            </>
+          }
+          description={
+            <>
+              {assignment.course ?? "No course"}
+              {assignment.due_date && ` · Due ${formatUtc(assignment.due_date)}`}
+            </>
+          }
+          actions={<StatusBadge status={assignment.encounter_status} />}
+        />
 
         {error && <p className="ui-error">{error}</p>}
-        {loading && <p className="ui-muted">Loading...</p>}
+        {loading && <p className="ui-row-empty">Loading case…</p>}
 
         {caseInfo && (
           <>
-            <Section title="Patient Demographics">
+            <div className="ui-columns">
+            <Section title="Patient demographics">
               {patient ? (
                 <dl className="ui-detail-list">
                   <Detail label="Name" value={`${patient.last_name}, ${patient.first_name}`} />
@@ -103,20 +119,21 @@ export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignme
               )}
             </Section>
 
-            <Section title="Case Content">
+            <Section title="Case content">
               <dl className="ui-detail-list">
                 <Detail label="Chief complaint" value={caseInfo.chief_complaint} />
                 <Detail label="Narrative / HPI" value={<span className="ui-prewrap">{caseInfo.narrative ?? "—"}</span>} />
               </dl>
             </Section>
+            </div>
 
             {chart && (
-              <Section title="Chart Data">
+              <Section title="Chart data">
                 <h3 className="ui-subheading">Medications</h3>
                 {chart.medications.length === 0 ? (
                   <p className="ui-muted">None recorded.</p>
                 ) : (
-                  <ul>
+                  <ul className="ui-plain-list">
                     {chart.medications.map((m, i) => (
                       <li key={i}>
                         {m.name}
@@ -130,7 +147,7 @@ export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignme
                 {chart.allergies.length === 0 ? (
                   <p className="ui-muted">No known allergies.</p>
                 ) : (
-                  <ul>
+                  <ul className="ui-plain-list">
                     {chart.allergies.map((a, i) => (
                       <li key={i}>
                         {a.substance}
@@ -186,12 +203,12 @@ export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignme
               </Section>
             )}
 
-            <WorkSection title="Medical and Family History">
+            <WorkSection title="Medical and family history">
               <MedicalHistoryPanel patientId={caseInfo.patient_id} />
             </WorkSection>
 
             {chart && (
-              <Section title="SOAP Note">
+              <Section title="SOAP note" overflow>
                 <AssignmentNote
                   assignment={assignment}
                   patientId={caseInfo.patient_id}

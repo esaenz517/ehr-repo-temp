@@ -1,11 +1,14 @@
 import type { ReactNode } from "react";
+import { Panel } from "./Panel";
 
-// One boxed section of a page, with its title in the border.
-export function Section({ title, children }: { title: string; children: ReactNode }) {
+// One titled section of a detail page (case workspace). Same look as every other Panel.
+// `overflow` lets sticky bars and autocomplete dropdowns inside work (SOAP note).
+export function Section({
+  title, actions, overflow, children,
+}: { title: string; actions?: ReactNode; overflow?: boolean; children?: ReactNode }) {
   return (
-    <fieldset className="ui-section">
-      <legend className="ui-section-title">{title}</legend>
+    <Panel title={title} actions={actions} overflow={overflow}>
       {children}
-    </fieldset>
+    </Panel>
   );
 }

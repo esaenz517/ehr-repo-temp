@@ -1,28 +1,6 @@
 /* Create Case page: every class is prefixed with "case-".
-   Buttons, inputs and field labels come from the shared ui-/form- classes.
-   Rows stack based on the step's own width (container query), not the window.
-   Orange theme: UTEP orange for borders, fills and tints; text stays blue
-   (orange text and white-on-orange are too low-contrast to read). */
-
-/* ---------- Orange accents for the whole page ---------- */
-
-.case-page input[type="checkbox"],
-.case-page input[type="radio"] {
-  accent-color: var(--color-accent);
-}
-
-.case-page :is(input, select, textarea):focus {
-  border-color: var(--color-accent);
-}
-
-/* "+ Add ..." buttons: orange outline, blue text */
-.case-page .ui-button--secondary {
-  border-color: var(--color-accent);
-}
-
-.case-page .ui-button--secondary:hover:not(:disabled) {
-  background: var(--color-accent-tint);
-}
+   Header, buttons, inputs and field labels come from the shared ui-/form- classes.
+   Each step is a panel; rows stack based on the step's own width (container query). */
 
 .case-banners:empty {
   display: none;
@@ -31,9 +9,8 @@
 .case-banners {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
-  scroll-margin-top: 16px;
+  gap: var(--space-2);
+  scroll-margin-top: var(--space-4);
 }
 
 .case-banners .form-message {
@@ -43,71 +20,70 @@
 .case-steps {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 /* Create case button under the last step */
 .case-actions {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
-  margin-top: 16px;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .ui-button.case-submit {
-  padding: 10px 24px;
-  border-color: var(--color-accent);
-  background: var(--color-accent);
-  color: var(--color-primary);
-  font-size: 15px;
+  padding: 0 var(--space-6);
 }
 
-.ui-button.case-submit:hover:not(:disabled) {
-  border-color: var(--color-accent-dark);
-  background: var(--color-accent-dark);
-}
-
-/* ---------- Step card ---------- */
+/* ---------- Step card: same frame as a panel ---------- */
 
 .case-step {
   background: var(--color-surface);
   border: 1px solid var(--color-border-light);
-  border-top: 4px solid var(--color-accent);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  overflow: hidden; /* keep the tinted header inside the rounded corners */
+  box-shadow: var(--shadow-sm);
 }
 
 .case-step-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 20px;
-  background: var(--color-accent-tint);
+  gap: var(--space-3);
+  padding: 14px var(--space-5);
   border-bottom: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--color-primary-tint-soft);
 }
 
+/* Step number in a small orange circle */
 .case-step-number {
   flex: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: var(--color-accent);
   color: var(--color-primary);
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 700;
 }
 
 .case-step-title {
   margin: 0;
-  font-size: 17px;
+  font-size: var(--text-md);
+  font-weight: 600;
 }
 
 .case-step-body {
   container: case-step / inline-size;
-  padding: 16px 20px 20px;
+  padding: var(--space-5);
 }
 
 /* ---------- Shared bits inside steps ---------- */
@@ -118,16 +94,16 @@
   padding: 14px 16px;
   border: 1px dashed var(--color-border);
   border-radius: var(--radius);
-  background: var(--color-bg);
+  background: var(--color-bg-subtle);
   color: var(--color-text-muted);
   font-size: 14px;
 }
 
 /* Same look as .form-field label, for a group label that isn't a <label> */
 .case-field-label {
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 600;
-  color: var(--color-text-muted);
+  color: var(--color-text);
 }
 
 /* ---------- Step 1: new vs existing patient cards ---------- */
@@ -151,17 +127,17 @@
 }
 
 .case-choice:hover {
-  border-color: var(--color-accent);
+  border-color: var(--color-primary);
 }
 
 .case-choice--selected {
-  border-color: var(--color-accent);
-  background: var(--color-accent-tint);
-  box-shadow: inset 0 0 0 1px var(--color-accent);
+  border-color: var(--color-primary);
+  background: var(--color-primary-tint);
+  box-shadow: inset 0 0 0 1px var(--color-primary);
 }
 
 .case-choice:focus-within {
-  box-shadow: inset 0 0 0 1px var(--color-accent), var(--focus-ring);
+  box-shadow: inset 0 0 0 1px var(--color-primary), var(--focus-ring);
 }
 
 .case-choice input {
@@ -191,9 +167,9 @@
 
 .case-patient {
   padding: 14px 16px;
-  background: var(--color-accent-tint);
+  background: var(--color-bg-subtle);
   border: 1px solid var(--color-border-light);
-  border-left: 4px solid var(--color-accent);
+  border-left: 3px solid var(--color-primary);
   border-radius: var(--radius);
 }
 
@@ -292,12 +268,11 @@
 
 .case-grid-row .ui-input {
   width: 100%;
-  height: 34px;
 }
 
 .case-grid-row--readonly {
   padding: 9px 12px;
-  background: var(--color-bg);
+  background: var(--color-bg-subtle);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius);
   font-size: 14px;
@@ -313,14 +288,17 @@
 .case-segmented {
   display: inline-flex;
   align-self: flex-start;
-  border: 1px solid var(--color-accent);
+  height: var(--control-height);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
   overflow: hidden;
 }
 
 .case-segmented-option {
   position: relative;
-  padding: 6px 16px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 16px;
   color: var(--color-primary);
   font-size: 14px;
   font-weight: 600;
@@ -328,23 +306,22 @@
 }
 
 .case-segmented-option + .case-segmented-option {
-  border-left: 1px solid var(--color-accent);
+  border-left: 1px solid var(--color-border);
 }
 
 .case-segmented-option:hover {
-  background: var(--color-accent-tint);
+  background: var(--color-bg-subtle);
 }
 
 .case-segmented-option--selected,
 .case-segmented-option--selected:hover {
-  background: var(--color-accent);
-  color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
 }
 
-/* Inset blue ring: the toggle's overflow: hidden would clip an outer ring,
-   and an orange one wouldn't show on the selected (orange) option */
+/* Inset orange ring: the toggle's overflow: hidden would clip an outer ring */
 .case-segmented-option:focus-within {
-  box-shadow: inset 0 0 0 2px var(--color-primary);
+  box-shadow: inset 0 0 0 2px var(--color-accent);
 }
 
 /* The radio itself is hidden; the label is the button */
@@ -377,12 +354,12 @@
 }
 
 .case-student:hover {
-  border-color: var(--color-accent);
+  border-color: var(--color-primary);
 }
 
 .case-student--selected {
-  border-color: var(--color-accent);
-  background: var(--color-accent-tint);
+  border-color: var(--color-primary);
+  background: var(--color-primary-tint);
 }
 
 .case-student input {

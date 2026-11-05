@@ -3,6 +3,8 @@ import { useAssignments } from "../../hooks/useAssignments";
 import { useStaff } from "../../hooks/useStaff";
 import type { Assignment, EncounterStatus } from "../../types";
 import { STATUS_LABELS, StatusBadge } from "../StatusBadge";
+import { PageHeader } from "../PageHeader";
+import { Panel } from "../Panel";
 import "./instructorDashboard.css";
 
 interface InstructorDashboardProps {
@@ -63,41 +65,48 @@ export function InstructorDashboard({ staffId, onReview }: InstructorDashboardPr
 
   return (
     <div className="ui-page idash">
-      <div className="idash-header">
-        <h1 className="ui-page-title">Instructor Dashboard</h1>
-        <div className="idash-filters">
-          <label className="ui-filter">
-            Course
-            <select className="ui-input" value={course} onChange={(e) => setCourse(e.target.value)}>
-              <option value="all">All courses</option>
-              {courses.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </label>
-          <label className="ui-filter">
-            Type
-            <select className="ui-input" value={type} onChange={(e) => setType(e.target.value)}>
-              <option value="graded">Graded</option>
-              <option value="practice">Practice</option>
-              <option value="all">All</option>
-            </select>
-          </label>
-          <button className="ui-button ui-button--secondary" onClick={reload}>Refresh</button>
-        </div>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        description="What needs review, who is behind, and how each case is going."
+        actions={
+          <>
+            <label className="ui-filter">
+              Course
+              <select className="ui-input" value={course} onChange={(e) => setCourse(e.target.value)}>
+                <option value="all">All courses</option>
+                {courses.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </label>
+            <label className="ui-filter">
+              Type
+              <select className="ui-input" value={type} onChange={(e) => setType(e.target.value)}>
+                <option value="graded">Graded</option>
+                <option value="practice">Practice</option>
+                <option value="all">All</option>
+              </select>
+            </label>
+            <button className="ui-button ui-button--secondary" onClick={reload}>Refresh</button>
+          </>
+        }
+      />
 
       {error && <p className="ui-error">{error}</p>}
 
-      <section className="idash-stats" aria-label="Summary">
-        <Stat label="Needs review" value={reviewQueue.length} tone="review" loading={loading} />
-        <Stat label="Overdue" value={overdue} tone="late" loading={loading} />
-        <Stat label="Due this week" value={dueThisWeek} tone="week" loading={loading} />
-        <Stat label="Signed" value={`${signed} / ${shown.length}`} tone="done" loading={loading} />
+      <section className="ui-stats" aria-label="Summary">
+        <Stat label="Needs review" value={reviewQueue.length} tone="info" loading={loading} />
+        <Stat label="Overdue" value={overdue} tone="error" loading={loading} />
+        <Stat label="Due this week" value={dueThisWeek} tone="accent" loading={loading} />
+        <Stat label="Signed" value={signed} meta={`of ${shown.length} assigned`} tone="success" loading={loading} />
       </section>
 
-      <section>
-        <h2 className="idash-section-title">Review queue ({reviewQueue.length})</h2>
+      <Panel
+        title="Review queue"
+        description="Submitted notes waiting for your sign-off, soonest due first."
+        actions={<span className="ui-badge">{reviewQueue.length} waiting</span>}
+        flush
+      >
         {loading ? (
-          <p className="ui-muted">Loading...</p>
+          <p className="ui-row-empty">Loading…</p>
         ) : reviewQueue.length === 0 ? (
           <p className="ui-row-empty">Nothing waiting for review.</p>
         ) : (
@@ -112,45 +121,55 @@ export function InstructorDashboard({ staffId, onReview }: InstructorDashboardPr
                   </div>
                 </div>
                 <div className="ui-row-actions">
-                  <button className="ui-button" onClick={() => onReview(a)}>Review</button>
+                  <button className="ui-button ui-button--small" onClick={() => onReview(a)}>Review</button>
                 </div>
               </li>
             ))}
           </ul>
         )}
-      </section>
+      </Panel>
 
-      <section>
-        <h2 className="idash-section-title">Progress by case</h2>
-        {!loading && byCase.size === 0 && (
+      <Panel
+        title="Progress by case"
+        description="Click a case to see each student's status."
+        flush
+      >
+        {loading ? (
+          <p className="ui-row-empty">Loading…</p>
+        ) : byCase.size === 0 ? (
           <p className="ui-row-empty">No assignments match these filters.</p>
+        ) : (
+          <div className="idash-cases">
+            {[...byCase.entries()].map(([caseId, rows]) => (
+              <details key={caseId} className="idash-case">
+                <summary className="idash-case-summary">
+                  <span className="idash-case-title">
+                    {rows[0].patient_name ?? `Case #${caseId}`}
+                    {rows[0].chief_complaint && <span className="idash-case-complaint">{rows[0].chief_complaint}</span>}
+                  </span>
+                  <ProgressBar rows={rows} />
+                </summary>
+                <ul className="idash-case-students">
+                  {rows.map((a) => (
+                    <li key={a.assignment_id} className="idash-case-student">
+                      <span className="idash-case-student-name">{studentName(a.assigned_to)}</span>
+                      <span className="ui-muted">Due {formatDue(a)}</span>
+                      <StatusBadge status={a.encounter_status} label={statusLabel(a)} />
+                      <span className="idash-case-student-action">
+                        {a.encounter_status !== "not_started" && (
+                          <button className="ui-button ui-button--secondary ui-button--small" onClick={() => onReview(a)}>
+                            {a.encounter_status === "submitted" ? "Review" : "View note"}
+                          </button>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ))}
+          </div>
         )}
-        {[...byCase.entries()].map(([caseId, rows]) => (
-          <details key={caseId} className="idash-case">
-            <summary className="idash-case-summary">
-              <span className="idash-case-title">
-                {rows[0].patient_name ?? `Case #${caseId}`}
-                {rows[0].chief_complaint && <span className="ui-muted"> · {rows[0].chief_complaint}</span>}
-              </span>
-              <ProgressBar rows={rows} />
-            </summary>
-            <ul className="idash-case-students">
-              {rows.map((a) => (
-                <li key={a.assignment_id} className="idash-case-student">
-                  <span>{studentName(a.assigned_to)}</span>
-                  <span className="ui-muted">Due {formatDue(a)}</span>
-                  <StatusBadge status={a.encounter_status} label={statusLabel(a)} />
-                  {a.encounter_status !== "not_started" && (
-                    <button className="ui-button ui-button--secondary" onClick={() => onReview(a)}>
-                      {a.encounter_status === "submitted" ? "Review" : "View note"}
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </details>
-        ))}
-      </section>
+      </Panel>
     </div>
   );
 }
@@ -158,15 +177,17 @@ export function InstructorDashboard({ staffId, onReview }: InstructorDashboardPr
 interface StatProps {
   label: string;
   value: number | string;
-  tone: "review" | "late" | "week" | "done";
+  meta?: string; // small grey line under the number
+  tone: "info" | "error" | "accent" | "success";
   loading: boolean;
 }
 
-function Stat({ label, value, tone, loading }: StatProps) {
+function Stat({ label, value, meta, tone, loading }: StatProps) {
   return (
-    <div className={`idash-stat idash-stat--${tone}`}>
-      <div className="idash-stat-value">{loading ? "–" : value}</div>
-      <div className="idash-stat-label">{label}</div>
+    <div className={`ui-stat ui-stat--${tone}`}>
+      <span className="ui-stat-value">{loading ? "–" : value}</span>
+      <span className="ui-stat-label">{label}</span>
+      {meta && !loading && <span className="ui-stat-meta">{meta}</span>}
     </div>
   );
 }

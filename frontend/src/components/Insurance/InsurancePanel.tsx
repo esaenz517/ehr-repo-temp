@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { useInsurance } from "../../hooks/useInsurance";
 import type { InsuranceInput } from "../../api/insurance";
 
@@ -63,21 +63,41 @@ export function InsurancePanel({ patientId }: InsurancePanelProps) {
     }
   };
 
+  // One labeled input in the registration form
+  const field = (id: string, label: string, required: boolean, input: ReactNode) => (
+    <div className="form-field">
+      <label htmlFor={`insurance-${id}-${patientId}`}>
+        {label}
+        {required && <span className="required" aria-hidden="true">*</span>}
+      </label>
+      {input}
+    </div>
+  );
+
   return (
-    <section className="ui-row-detail">
-      <h3>Patient Insurance</h3>
+    <section className="insurance-panel">
+      <div className="insurance-header">
+        <h3 className="insurance-title">Patient insurance</h3>
+        <button
+          type="button"
+          className={showForm ? "ui-button ui-button--secondary ui-button--small" : "ui-button ui-button--small"}
+          onClick={() => setShowForm((previous) => !previous)}
+        >
+          {showForm ? "Cancel" : "Add insurance"}
+        </button>
+      </div>
 
       {error && <p className="ui-error" role="alert">{error}</p>}
 
       {loading ? (
-        <p>Loading insurance...</p>
+        <p className="ui-muted ui-flush">Loading insurance…</p>
       ) : insurance.length === 0 ? (
-        <p>No insurance registered for this patient.</p>
+        <p className="insurance-empty">No insurance registered for this patient.</p>
       ) : (
-        <div>
+        <div className="insurance-policies">
           {insurance.map((policy) => (
-            <div key={policy.insurance_id} className="ui-row-detail">
-              <h4>{policy.insurance_company}</h4>
+            <article key={policy.insurance_id} className="insurance-policy">
+              <h4 className="insurance-policy-title">{policy.insurance_company}</h4>
               <dl className="ui-detail-list">
                 <dt>Member ID</dt>
                 <dd>{policy.member_id}</dd>
@@ -100,126 +120,105 @@ export function InsurancePanel({ patientId }: InsurancePanelProps) {
                 <dt>Coverage end</dt>
                 <dd>{policy.coverage_end_date || "—"}</dd>
               </dl>
-            </div>
+            </article>
           ))}
         </div>
       )}
 
-      <button
-        type="button"
-        className="ui-button"
-        onClick={() => setShowForm((previous) => !previous)}
-      >
-        {showForm ? "Cancel" : "Add Insurance"}
-      </button>
-
       {showForm && (
         <form className="insurance-form" onSubmit={handleSubmit}>
-          <h4>Register Insurance</h4>
+          <h4 className="insurance-form-title">Register insurance</h4>
 
-          <label>
-            Insurance company *
-            <input
-              required
-              maxLength={150}
-              value={form.insurance_company}
-              onChange={(e) =>
-                updateField("insurance_company", e.target.value)
-              }
-            />
-          </label>
+          <div className="form-grid">
+            {field("company", "Insurance company", true,
+              <input
+                id={`insurance-company-${patientId}`}
+                required
+                maxLength={150}
+                value={form.insurance_company}
+                onChange={(e) => updateField("insurance_company", e.target.value)}
+              />
+            )}
 
-          <label>
-            Member ID *
-            <input
-              required
-              maxLength={100}
-              value={form.member_id}
-              onChange={(e) => updateField("member_id", e.target.value)}
-            />
-          </label>
+            {field("member", "Member ID", true,
+              <input
+                id={`insurance-member-${patientId}`}
+                required
+                maxLength={100}
+                value={form.member_id}
+                onChange={(e) => updateField("member_id", e.target.value)}
+              />
+            )}
 
-          <label>
-            Group number
-            <input
-              maxLength={100}
-              value={form.group_number ?? ""}
-              onChange={(e) =>
-                updateField("group_number", e.target.value || null)
-              }
-            />
-          </label>
+            {field("group", "Group number", false,
+              <input
+                id={`insurance-group-${patientId}`}
+                maxLength={100}
+                value={form.group_number ?? ""}
+                onChange={(e) => updateField("group_number", e.target.value || null)}
+              />
+            )}
 
-          <label>
-            Policyholder name *
-            <input
-              required
-              maxLength={200}
-              value={form.policyholder_name}
-              onChange={(e) =>
-                updateField("policyholder_name", e.target.value)
-              }
-            />
-          </label>
+            {field("holder", "Policyholder name", true,
+              <input
+                id={`insurance-holder-${patientId}`}
+                required
+                maxLength={200}
+                value={form.policyholder_name}
+                onChange={(e) => updateField("policyholder_name", e.target.value)}
+              />
+            )}
 
-          <label>
-            Policyholder date of birth
-            <input
-              type="date"
-              value={form.policyholder_date_of_birth ?? ""}
-              onChange={(e) =>
-                updateField(
-                  "policyholder_date_of_birth",
-                  e.target.value || null
-                )
-              }
-            />
-          </label>
+            {field("holder-dob", "Policyholder date of birth", false,
+              <input
+                id={`insurance-holder-dob-${patientId}`}
+                type="date"
+                value={form.policyholder_date_of_birth ?? ""}
+                onChange={(e) => updateField("policyholder_date_of_birth", e.target.value || null)}
+              />
+            )}
 
-          <label>
-            Insurance priority *
-            <select
-              value={form.insurance_priority}
-              onChange={(e) =>
-                updateField(
-                  "insurance_priority",
-                  e.target.value as InsuranceInput["insurance_priority"]
-                )
-              }
-            >
-              <option value="primary">Primary</option>
-              <option value="secondary">Secondary</option>
-            </select>
-          </label>
+            {field("priority", "Insurance priority", true,
+              <select
+                id={`insurance-priority-${patientId}`}
+                value={form.insurance_priority}
+                onChange={(e) =>
+                  updateField("insurance_priority", e.target.value as InsuranceInput["insurance_priority"])
+                }
+              >
+                <option value="primary">Primary</option>
+                <option value="secondary">Secondary</option>
+              </select>
+            )}
 
-          <label>
-            Coverage start date
-            <input
-              type="date"
-              value={form.coverage_start_date ?? ""}
-              onChange={(e) =>
-                updateField("coverage_start_date", e.target.value || null)
-              }
-            />
-          </label>
+            {field("start", "Coverage start date", false,
+              <input
+                id={`insurance-start-${patientId}`}
+                type="date"
+                value={form.coverage_start_date ?? ""}
+                onChange={(e) => updateField("coverage_start_date", e.target.value || null)}
+              />
+            )}
 
-          <label>
-            Coverage end date
-            <input
-              type="date"
-              min={form.coverage_start_date ?? undefined}
-              value={form.coverage_end_date ?? ""}
-              onChange={(e) =>
-                updateField("coverage_end_date", e.target.value || null)
-              }
-            />
-          </label>
+            {field("end", "Coverage end date", false,
+              <input
+                id={`insurance-end-${patientId}`}
+                type="date"
+                min={form.coverage_start_date ?? undefined}
+                value={form.coverage_end_date ?? ""}
+                onChange={(e) => updateField("coverage_end_date", e.target.value || null)}
+              />
+            )}
+          </div>
 
-          <p>Insurance will remain Unverified until eligibility is checked.</p>
-
-          <button type="submit" className="ui-button" disabled={saving}>
-            {saving ? "Saving..." : "Save Insurance"}
-          </button>
+          <div className="ui-form-actions">
+            <span className="field-hint insurance-form-hint">
+              Insurance stays Unverified until eligibility is checked.
+            </span>
+            <button type="submit" className="ui-button" disabled={saving}>
+              {saving ? "Saving…" : "Save insurance"}
+            </button>
+          </div>
         </form>
       )}
     </section>

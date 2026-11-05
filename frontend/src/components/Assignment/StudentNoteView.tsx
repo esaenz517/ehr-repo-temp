@@ -6,6 +6,8 @@ import type { ChartContext, ClinicalNote } from "../../api/clinicalNotes";
 import type { Assignment } from "../../types";
 import { SoapEditor } from "../ClinicalNotes/SoapEditor";
 import "../ClinicalNotes/clinicalNotes.css";
+import { PageHeader } from "../PageHeader";
+import { StatusBadge } from "../StatusBadge";
 import "./assignmentNote.css";
 
 interface StudentNoteViewProps {
@@ -49,17 +51,17 @@ export function StudentNoteView({ assignment, studentName, actions, review, onRe
 
   return (
     <div className="ui-page">
-      <button type="button" className="ui-button ui-button--secondary ui-back" onClick={onBack}>
-        ← Back to Assigned Cases
-      </button>
-
-      <h1 className="ui-page-title">
-        {studentName} · Case #{assignment.case_id}
-        {assignment.patient_name && ` · ${assignment.patient_name}`}
-      </h1>
-      <p className="ui-page-intro">
-        {assignment.chief_complaint ?? "No chief complaint"} · {assignment.course ?? "No course"}
-      </p>
+      <PageHeader
+        back={{ label: "Assigned Cases", onClick: onBack }}
+        title={
+          <>
+            {studentName} · Case #{assignment.case_id}
+            {assignment.patient_name && ` · ${assignment.patient_name}`}
+          </>
+        }
+        description={`${assignment.chief_complaint ?? "No chief complaint"} · ${assignment.course ?? "No course"}`}
+        actions={<StatusBadge status={assignment.encounter_status} />}
+      />
 
       <div className="assignment-note-toolbar">
         <span className="ui-muted">
@@ -67,14 +69,14 @@ export function StudentNoteView({ assignment, studentName, actions, review, onRe
             ? `Version ${note.current_version} · last saved ${formatUtc(note.last_modified_at)}`
             : "No draft saved yet"}
         </span>
-        <button type="button" className="ui-button ui-button--secondary" onClick={() => { load(); onRefresh?.(); }} disabled={loading}>
+        <button type="button" className="ui-button ui-button--secondary ui-button--small" onClick={() => { load(); onRefresh?.(); }} disabled={loading}>
           Refresh
         </button>
         {actions}
       </div>
 
       {error && <p className="ui-error">{error}</p>}
-      {loading && <p className="ui-muted">Loading note…</p>}
+      {loading && <p className="ui-row-empty">Loading note…</p>}
 
       {!loading && note && chart && (
         <>

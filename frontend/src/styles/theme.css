@@ -6,6 +6,7 @@
   --color-primary-dark: #021430; /* hover / pressed */
   --color-primary-light: #1a4f9c; /* gradients, avatars */
   --color-primary-tint: #e6ecf5; /* soft blue background */
+  --color-primary-tint-soft: #f2f6fb; /* panel headers, toolbars, row hover */
   --color-accent: #ff8200;       /* UTEP orange: accents only, not body text */
   --color-accent-dark: #e67300;  /* orange hover */
   --color-accent-tint: #fff1e0;  /* soft orange background */
@@ -13,12 +14,17 @@
 
   /* Neutrals */
   --color-surface: #ffffff;
-  --color-bg: #f4f6f9;
+  --color-bg: #eef2f7;
   --color-bg-strong: #e6e9ef;    /* skeletons, chart tracks */
+  --color-bg-subtle: #f9fafb;    /* table headers, panel toolbars, hovered rows */
   --color-text: #1c2430;
   --color-text-muted: #5f6b7a;
   --color-border: var(--color-silver);
-  --color-border-light: #dce1e6; /* table rows, inner dividers */
+  --color-border-light: #e3e7ec; /* card edges, table rows, inner dividers */
+
+  /* Brand gradient: page banners and the sidebar */
+  --gradient-brand: linear-gradient(115deg, #041e42 0%, #0a2f63 55%, #1a4f9c 100%);
+  --gradient-sidebar: linear-gradient(180deg, #041e42 0%, #031735 100%);
 
   /* Text/lines on top of the blue (sidebar, etc.) */
   --color-on-primary: #ffffff;
@@ -53,15 +59,39 @@
   --status-signed-fill: #1a7f4b;
 
   /* Layout */
-  --sidebar-width: 220px;
+  --sidebar-width: 232px;
   --sidebar-width-collapsed: 72px;
+  --content-max-width: 1200px;
 
-  /* Shape and type */
+  /* Shape and elevation */
+  --radius-sm: 4px;     /* badges inside tables, small chips */
   --radius: 6px;        /* inputs, buttons, small boxes */
-  --radius-lg: 12px;    /* cards, panels */
-  --radius-pill: 999px; /* chips, badges */
-  --shadow: 0 4px 16px rgba(4, 30, 66, 0.08);
-  --shadow-hover: 0 10px 24px rgba(4, 30, 66, 0.14);
+  --radius-lg: 8px;     /* cards, panels */
+  --radius-pill: 999px; /* status chips, counters */
+  --shadow-sm: 0 1px 2px rgba(4, 30, 66, 0.06);
+  --shadow: 0 1px 3px rgba(4, 30, 66, 0.08), 0 1px 2px rgba(4, 30, 66, 0.04);
+  --shadow-hover: 0 4px 12px rgba(4, 30, 66, 0.12);
   --focus-ring: 0 0 0 3px rgba(255, 130, 0, 0.35); /* orange focus ring */
+
+  /* Spacing scale: use these instead of one-off pixel values */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Type scale */
   --font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --text-xs: 12px;   /* labels, table headers, badges */
+  --text-sm: 13px;   /* hints, meta lines */
+  --text-base: 14px; /* body, inputs, buttons */
+  --text-md: 16px;   /* panel titles */
+  --text-lg: 20px;   /* stat values, section headings */
+  --text-xl: 24px;   /* page titles */
+
+  /* Control heights so inputs and buttons in a row line up */
+  --control-height: 36px;
+  --control-height-sm: 30px;
 }

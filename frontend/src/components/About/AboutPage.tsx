@@ -1,4 +1,5 @@
-import logo from "../../images/UTEP-Logo.png";
+import { PageHeader } from "../PageHeader";
+import { Panel } from "../Panel";
 import "./about.css";
 
 // The three steps a case goes through, shown as a numbered flow.
@@ -41,33 +42,26 @@ const initials = (name: string) =>
 export function AboutPage() {
   return (
     <div className="ui-page about">
-      <section className="about-hero">
-        <img className="about-logo" src={logo} alt="UTEP logo" />
-        <div>
-          <p className="about-eyebrow">About us</p>
-          <h1 className="about-title">Electronic Medical Records training</h1>
-          <p className="about-lead">
-            A practice EMR built at The University of Texas at El Paso, where students learn clinical
-            documentation on realistic patient cases before they work with real records.
-          </p>
-        </div>
-      </section>
+      <PageHeader
+        title="About this EMR"
+        description="A practice electronic medical record built at The University of Texas at El Paso, where students learn clinical documentation on realistic patient cases before they work with real records."
+      />
 
-      <section className="about-section">
-        <h2 className="about-section-title">How it works</h2>
+      <Panel title="How it works">
         <ol className="about-steps">
           {WORKFLOW.map((step, i) => (
             <li key={step.title} className="about-step">
               <span className="about-step-number" aria-hidden="true">{i + 1}</span>
-              <h3 className="about-step-title">{step.title}</h3>
-              <p className="ui-muted">{step.text}</p>
+              <div>
+                <h3 className="about-step-title">{step.title}</h3>
+                <p className="ui-muted">{step.text}</p>
+              </div>
             </li>
           ))}
         </ol>
-      </section>
+      </Panel>
 
-      <section className="about-section">
-        <h2 className="about-section-title">What's inside</h2>
+      <Panel title="What's inside">
         <ul className="about-features">
           {FEATURES.map((f) => (
             <li key={f.title} className="about-feature">
@@ -76,28 +70,28 @@ export function AboutPage() {
             </li>
           ))}
         </ul>
-      </section>
+      </Panel>
 
-      <section className="about-section">
-        <h2 className="about-section-title">Our team</h2>
-        <ul className="about-team">
-          {TEAM.map((name) => (
-            <li key={name} className="about-member">
-              <span className="about-avatar" aria-hidden="true">{initials(name)}</span>
-              <span className="about-member-name">{name}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <div className="ui-columns">
+        <Panel title="Our team">
+          <ul className="about-team">
+            {TEAM.map((name) => (
+              <li key={name} className="about-member">
+                <span className="about-avatar" aria-hidden="true">{initials(name)}</span>
+                <span className="about-member-name">{name}</span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
 
-      <section className="about-section">
-        <h2 className="about-section-title">Built with</h2>
-        <ul className="about-tech">
-          {TECH.map((t) => (
-            <li key={t} className="ui-badge">{t}</li>
-          ))}
-        </ul>
-      </section>
+        <Panel title="Built with">
+          <ul className="about-tech">
+            {TECH.map((t) => (
+              <li key={t} className="ui-badge">{t}</li>
+            ))}
+          </ul>
+        </Panel>
+      </div>
     </div>
   );
 }

@@ -115,21 +115,17 @@ export function StudentCreateForm({
 
 
     return (
-        <section
-            className="ui-form-panel"
-            aria-label="Create student account"
-        >
-            <h2 className="ui-form-panel-title">
-                Add Individual Student
-            </h2>
+        <section className="ui-panel" aria-label="Create student account">
+            <header className="ui-panel-header">
+                <div className="ui-panel-heading">
+                    <h2 className="ui-panel-title">New student</h2>
+                    <p className="ui-panel-description">
+                        Create a student account manually. Login credentials and student roles are generated automatically.
+                    </p>
+                </div>
+            </header>
 
-            <p
-                className="ui-muted ui-flush"
-            >
-                Create a student account manually.
-                Login credentials and student roles are
-                generated automatically.
-            </p>
+            <div className="ui-panel-body form-stack">
 
             <form
                 onSubmit={handleSubmit}
@@ -273,7 +269,7 @@ export function StudentCreateForm({
                 </div>
 
                 <div
-                    className="ui-form-row ui-form-row--actions"
+                    className="ui-form-actions"
                 >
                     <button
                         type="submit"
@@ -343,6 +339,7 @@ export function StudentCreateForm({
                 </div>
             )}
 
+            </div>
         </section>
     );
 }

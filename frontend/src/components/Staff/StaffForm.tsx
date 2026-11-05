@@ -7,11 +7,13 @@ import type {
 
 interface StaffFormProps {
   onSubmit: (input: CreateStaffInput) => void;
+  onCancel?: () => void; // shows a Cancel button that closes the form
 }
 
 
 export function StaffForm({
   onSubmit,
+  onCancel,
 }: StaffFormProps) {
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
@@ -51,72 +53,92 @@ export function StaffForm({
 
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="ui-form-bar"
-    >
-      <input
-        value={firstName}
-        onChange={(e) =>
-          setFirstName(e.target.value)
-        }
-        placeholder="First Name"
-        className="ui-input"
-        required
-      />
+    <form onSubmit={handleSubmit} className="ui-panel" aria-label="New staff member">
+      <header className="ui-panel-header">
+        <div className="ui-panel-heading">
+          <h2 className="ui-panel-title">New staff member</h2>
+          <p className="ui-panel-description">
+            For instructors and other staff. Students are added with New student.
+          </p>
+        </div>
+      </header>
 
-      <input
-        value={middleName}
-        onChange={(e) =>
-          setMiddleName(e.target.value)
-        }
-        placeholder="Middle Name"
-        className="ui-input"
-      />
+      <div className="ui-panel-body">
+        <div className="form-grid form-grid--4">
+          <div className="form-field">
+            <label htmlFor="staff-first-name">
+              First name<span className="required" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="staff-first-name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="ui-input"
+              required
+            />
+          </div>
 
-      <input
-        value={lastName}
-        onChange={(e) =>
-          setLastName(e.target.value)
-        }
-        placeholder="Last Name"
-        className="ui-input"
-        required
-      />
+          <div className="form-field">
+            <label htmlFor="staff-middle-name">Middle name</label>
+            <input
+              id="staff-middle-name"
+              value={middleName}
+              onChange={(e) => setMiddleName(e.target.value)}
+              className="ui-input"
+            />
+          </div>
 
-      <input
-        value={specialization}
-        onChange={(e) =>
-          setSpecialization(e.target.value)
-        }
-        placeholder="Specialization"
-        className="ui-input"
-        required
-      />
+          <div className="form-field">
+            <label htmlFor="staff-last-name">
+              Last name<span className="required" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="staff-last-name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="ui-input"
+              required
+            />
+          </div>
 
-      <select
-        value={admin ? "yes" : "no"}
-        onChange={(e) =>
-          setAdmin(e.target.value === "yes")
-        }
-        aria-label="Admin"
-        className="ui-input"
-      >
-        <option value="no">
-          Admin: No
-        </option>
+          <div className="form-field">
+            <label htmlFor="staff-specialization">
+              Specialization<span className="required" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="staff-specialization"
+              value={specialization}
+              onChange={(e) => setSpecialization(e.target.value)}
+              className="ui-input"
+              required
+            />
+          </div>
 
-        <option value="yes">
-          Admin: Yes
-        </option>
-      </select>
+          <div className="form-field">
+            <label htmlFor="staff-admin">Administrator</label>
+            <select
+              id="staff-admin"
+              value={admin ? "yes" : "no"}
+              onChange={(e) => setAdmin(e.target.value === "yes")}
+              className="ui-input"
+            >
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-      <button
-        type="submit"
-        className="ui-button"
-      >
-        Add Staff
-      </button>
+      <div className="ui-panel-footer">
+        {onCancel && (
+          <button type="button" className="ui-button ui-button--secondary" onClick={onCancel}>
+            Cancel
+          </button>
+        )}
+        <button type="submit" className="ui-button">
+          Add staff member
+        </button>
+      </div>
     </form>
   );
 }

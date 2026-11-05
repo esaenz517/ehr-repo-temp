@@ -1,20 +1,23 @@
+/* Clinical Notes page and the SOAP editor (also used inside the case workspace).
+   Classes are prefixed "note-" / "soap-"; headers, panels and alerts come from ui- classes. */
+
 .clinical-notes {
     color: var(--color-text);
 }
 
 .clinical-notes .note-muted {
     color: var(--color-text-muted);
-    font-size: .9rem;
+    font-size: var(--text-sm);
 }
 
+/* Labeled selects in a row (patient, encounter, template, sensitivity) */
 .note-controls,
 .note-toolbar,
 .note-actions {
     display: flex;
     flex-wrap: wrap;
-    align-items: end;
-    gap: 1rem;
-    margin: 1rem 0;
+    align-items: flex-end;
+    gap: var(--space-3) var(--space-4);
 }
 
 .note-controls label,
@@ -22,21 +25,45 @@
 .note-actions label {
     display: flex;
     flex-direction: column;
-    gap: .35rem;
+    gap: 6px;
+    font-size: var(--text-sm);
     font-weight: 600;
+    color: var(--color-text);
+}
+
+.note-controls select {
+    min-width: 260px;
+}
+
+.note-toolbar select {
+    min-width: 180px;
+}
+
+.note-actions input {
+    min-width: 260px;
+    font-weight: 400;
+}
+
+/* Patient summary line under the pickers */
+.note-patient {
+    margin: var(--space-3) 0 0;
 }
 
 /* Plain buttons in a note look like .ui-button--secondary; ui-buttons keep their own look */
 .clinical-notes button:not(.ui-button) {
-    border: 1px solid var(--color-primary);
+    min-height: var(--control-height-sm);
+    padding: 4px 10px;
+    border: 1px solid var(--color-border);
     border-radius: var(--radius);
     background: var(--color-surface);
     color: var(--color-primary);
+    font-size: var(--text-sm);
     font-weight: 600;
 }
 
 .clinical-notes button:not(.ui-button):hover:not(:disabled) {
-    background: var(--color-bg);
+    border-color: var(--color-primary);
+    background: var(--color-bg-subtle);
 }
 
 .clinical-notes button:not(.ui-button):disabled {
@@ -47,37 +74,50 @@
 .clinical-notes select,
 .clinical-notes input,
 .clinical-notes textarea {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
     max-width: 100%;
 }
 
+/* ---------- Notes list beside the editor ---------- */
+
 .notes-layout {
     display: grid;
-    grid-template-columns: 190px minmax(0, 1fr);
-    gap: 1.2rem;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: var(--space-5);
     align-items: start;
 }
 
 .note-list {
-    padding: .8rem;
+    position: sticky;
+    top: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-lg);
-    background: var(--color-bg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
 }
 
 .note-list h2 {
-    font-size: 1rem;
+    margin: 0;
+    font-size: var(--text-md);
+    font-weight: 600;
+}
+
+.note-list > p {
+    margin: 0;
 }
 
 .note-list ul,
 .note-history ul {
     list-style: none;
+    margin: 0;
     padding: 0;
 }
 
-.note-list li {
-    margin: .5rem 0;
+.note-list li + li {
+    margin-top: 6px;
 }
 
 .note-list li button {
@@ -92,53 +132,78 @@
 
 .note-list small {
     display: block;
+    margin-top: 2px;
     color: var(--color-text-muted);
-    margin-top: .3rem;
+    font-weight: 400;
 }
 
 .note-archive-toggle {
     display: flex;
     align-items: center;
-    gap: .25rem;
-    margin-top: .75rem;
-    font-size: .85rem;
+    gap: 6px;
+    font-size: var(--text-sm);
 }
 
 .note-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
     min-width: 0;
 }
 
+.note-workspace > * {
+    margin: 0;
+}
+
+/* ---------- SOAP sections: same frame as a panel ---------- */
+
+.soap-editor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
 .soap-section {
-    margin: 0 0 1rem;
-    padding: 1rem;
+    margin: 0;
+    padding: var(--space-5);
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-lg);
     background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Inside a panel (case workspace) the sections are flat boxes, not raised cards */
+.ui-panel .soap-section {
+    box-shadow: none;
 }
 
 .soap-section h2 {
-    color: var(--color-primary);
     display: flex;
-    gap: .65rem;
+    gap: 10px;
     align-items: center;
-    font-size: 1.2rem;
-    margin: 0 0 1rem;
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--color-primary);
 }
 
+/* S / O / A / P letter tile */
 .soap-section h2 span {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    width: 28px;
+    height: 28px;
     border-radius: var(--radius);
-    color: var(--color-on-primary);
     background: var(--color-primary);
+    color: var(--color-on-primary);
+    font-size: var(--text-base);
 }
 
 .soap-section h3 {
-    font-size: .94rem;
-    margin: 1.2rem 0 .4rem;
+    margin: var(--space-5) 0 var(--space-2);
+    font-size: var(--text-base);
+    font-weight: 600;
 }
 
 .soap-section h3 small {
@@ -147,23 +212,28 @@
 }
 
 .soap-section ul {
-    margin: .3rem 0 .8rem;
+    margin: var(--space-1) 0 var(--space-3);
     padding-left: 1.5rem;
+}
+
+/* Lab list inside a SOAP section keeps the shared ui-lab-list spacing */
+.soap-section .ui-lab-list {
+    padding: 0;
 }
 
 .note-field {
     display: flex;
     flex-direction: column;
-    gap: .35rem;
-    margin: .8rem 0;
-    font-size: .91rem;
+    gap: 6px;
+    margin: var(--space-3) 0;
+    font-size: var(--text-sm);
     font-weight: 600;
 }
 
 .note-field textarea {
     resize: vertical;
     width: 100%;
-    padding: .6rem;
+    padding: var(--space-2) 10px;
     font: inherit;
     font-weight: normal;
 }
@@ -175,33 +245,34 @@
 .note-columns {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
+    gap: var(--space-4);
 }
 
 .note-prompts {
     display: flex;
     flex-wrap: wrap;
-    gap: .4rem;
+    gap: 6px;
 }
 
 .note-prompts button {
-    font-size: .8rem;
+    font-size: var(--text-xs);
 }
 
 .note-empty {
-    background: var(--color-bg);
-    padding: .65rem;
+    padding: 10px var(--space-3);
     border-radius: var(--radius);
+    background: var(--color-bg-subtle);
     color: var(--color-text-muted);
 }
 
 .note-chart-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: .6rem;
-    background: var(--color-bg);
+    gap: var(--space-2) var(--space-4);
+    padding: var(--space-3);
+    border: 1px solid var(--color-border-light);
     border-radius: var(--radius);
-    padding: .8rem;
+    background: var(--color-bg-subtle);
 }
 
 .note-error {
@@ -212,29 +283,59 @@
     color: var(--color-success);
 }
 
+/* Reviewing an old version: same look as .ui-alert--info */
 .note-review {
-    background: var(--color-primary-tint);
-    border-radius: var(--radius);
-    padding: .8rem;
     display: flex;
-    gap: 1rem;
+    flex-wrap: wrap;
+    gap: var(--space-3);
     align-items: center;
+    padding: 10px var(--space-3);
+    border: 1px solid #c3d4ea;
+    border-left: 4px solid var(--color-primary);
+    border-radius: var(--radius);
+    background: var(--color-primary-tint);
+    color: var(--color-primary);
+}
+
+/* Save / archive row under the editor */
+.note-actions {
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
 }
 
 .note-history {
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+}
+
+.note-history h2 {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-md);
+    font-weight: 600;
+}
+
+.note-history li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
     border-top: 1px solid var(--color-border-light);
-    margin-top: 1.5rem;
+    font-size: var(--text-sm);
 }
 
 @media (max-width: 760px) {
-
     .notes-layout,
     .note-columns,
     .note-chart-grid {
         grid-template-columns: minmax(0, 1fr);
     }
-}
-/* Lab list inside a SOAP section keeps the shared ui-lab-list spacing */
-.soap-section .ui-lab-list {
-    padding: 0;
+
+    .note-list {
+        position: static;
+    }
 }

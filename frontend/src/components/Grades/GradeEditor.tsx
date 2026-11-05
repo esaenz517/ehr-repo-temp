@@ -243,15 +243,16 @@ export function GradeEditor({
 
     return (
         <section className="grades-panel">
-            <h2>Assignment grade</h2>
-
-            <p className="ui-muted">
-                Edit the rubric sections for this case.
-                Scores are saved as a draft until published.
-            </p>
+            <header className="grades-panel-header">
+                <h2 className="ui-panel-title">Assignment grade</h2>
+                <p className="ui-panel-description">
+                    Edit the rubric sections for this case.
+                    Scores are saved as a draft until published.
+                </p>
+            </header>
 
             {loading ? (
-                <p>Loading grade...</p>
+                <p className="ui-muted">Loading grade…</p>
             ) : loadFailed ? (
                 <p className="ui-error" role="alert">
                     Could not load the saved grade: {error}.
@@ -355,7 +356,7 @@ export function GradeEditor({
 
                     <button
                         type="button"
-                        className="ui-button ui-button--secondary"
+                        className="ui-button ui-button--secondary ui-button--small grades-add"
                         onClick={addItem}
                     >
                         Add criterion
@@ -422,7 +423,7 @@ export function GradeEditor({
                     )}
 
                     {message && (
-                        <p role="status">
+                        <p className="ui-alert ui-alert--success" role="status">
                             {message}
                         </p>
                     )}

@@ -90,6 +90,7 @@ function App() {
   return (
     <div className="app-layout">
       <Sidebar active={view} username={user.username}
+        role={user.admin ? "Administrator" : user.student ? "Student" : "Instructor"}
         progressAlertCount={progressAlertCount}
         onNavigate={(v) => {
           setOpenAssignment(null); // Clicking out of a case closes it
@@ -132,7 +133,8 @@ function App() {
         {view === "patients" && canView("patients") && <PatientsPage />}
         {view === "staff" && canView("staff") && (
           <StaffPage canBatchImport={user.admin} />
-        )}        {view === "providers" && canView("providers") && <ProvidersPage />}
+        )}
+        {view === "providers" && canView("providers") && <ProvidersPage />}
         {view === "rooms" && canView("rooms") && <RoomsPage />}
         {view === "courses" && canView("courses") && <CoursesPage />}
         {view === "createCase" && canView("createCase") && <CreateCasePage staffId={user.staffid} />}

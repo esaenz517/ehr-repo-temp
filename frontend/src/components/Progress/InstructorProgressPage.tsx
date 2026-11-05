@@ -1,6 +1,7 @@
 import {
     useCallback,
     useEffect,
+    useRef,
     useState,
 } from "react";
 
@@ -14,18 +15,27 @@ import type {
 import { GradeEditor } from "../Grades/GradeEditor";
 import { ScoreBars, StatusBreakdown } from "../Charts/Charts";
 import { StatusBadge } from "../StatusBadge";
+import { PageHeader } from "../PageHeader";
+import { Panel } from "../Panel";
 
 import "../Grades/grades.css";
 
 
+// Short date + time ("Oct 1, 6:00 PM") so table rows stay on one line; the full date is in the tooltip
 function dateLabel(value: string | null) {
     return value
         ? new Date(
             value.endsWith("Z")
                 ? value
                 : `${value}Z`
-        ).toLocaleString()
+        ).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
         : "—";
+}
+
+function fullDate(value: string | null) {
+    return value
+        ? new Date(value.endsWith("Z") ? value : `${value}Z`).toLocaleString()
+        : undefined;
 }
 
 
@@ -44,6 +54,14 @@ export function InstructorProgressPage() {
 
     const [onlyAlerts, setOnlyAlerts] =
         useState(false);
+
+    // Opening the grade editor scrolls down to it (it renders under the tables)
+    const editorRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        if (selected !== null) {
+            editorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    }, [selected]);
 
 
     const reload = useCallback(async () => {
@@ -152,14 +170,25 @@ export function InstructorProgressPage() {
     }
 
 
+    const scoreRows = Array.from(studentScores.entries());
+
     return (
         <div className="ui-page">
-            <h1 className="ui-page-title">Student Progress</h1>
-
-            <p className="ui-page-intro">
-                Based on saved SOAP notes and assignment status.
-                Unsaved typing is not recorded as progress.
-            </p>
+            <PageHeader
+                title="Student Progress"
+                description="Based on saved SOAP notes and assignment status. Unsaved typing is not recorded as progress."
+                actions={
+                    <button
+                        type="button"
+                        className="ui-button ui-button--secondary"
+                        onClick={() => {
+                            void reload();
+                        }}
+                    >
+                        Refresh
+                    </button>
+                }
+            />
 
             {error && (
                 <p className="ui-error" role="alert">
@@ -167,15 +196,20 @@ export function InstructorProgressPage() {
                 </p>
             )}
 
+            {report && (report.inactive > 0 || report.overdue > 0) && (
+                <p className="ui-alert ui-alert--warning" role="status">
+                    <strong>Attention needed:</strong>{" "}
+                    {report.inactive} inactive and {report.overdue} overdue assignment
+                    {report.inactive + report.overdue === 1 ? "" : "s"}.
+                </p>
+            )}
+
             {loading && !report ? (
-                <p className="ui-muted">Loading progress...</p>
+                <p className="ui-row-empty">Loading progress…</p>
             ) : (
                 <>
                     {report && (
-                        <div
-                            className="ui-stats"
-                            aria-label="Assignment progress summary"
-                        >
+                        <div className="ui-stats" aria-label="Assignment progress summary">
                             <div className="ui-stat">
                                 <span className="ui-stat-value">{report.total}</span>
                                 <span className="ui-stat-label">Total cases</span>
@@ -187,9 +221,7 @@ export function InstructorProgressPage() {
                             </div>
 
                             <div className="ui-stat ui-stat--success">
-                                <span className="ui-stat-value">
-                                    {report.submitted + report.signed}
-                                </span>
+                                <span className="ui-stat-value">{report.submitted + report.signed}</span>
                                 <span className="ui-stat-label">Submitted or signed</span>
                             </div>
 
@@ -206,9 +238,7 @@ export function InstructorProgressPage() {
                     )}
 
                     {report && report.total > 0 && (
-                        <section className="ui-card">
-                            <h2 className="ui-card-title">Where every case stands</h2>
-                            <p className="ui-muted">Share of assigned cases in each status.</p>
+                        <Panel title="Where every case stands" description="Share of assigned cases in each status.">
                             <StatusBreakdown
                                 counts={{
                                     not_started: report.not_started,
@@ -217,186 +247,129 @@ export function InstructorProgressPage() {
                                     signed: report.signed,
                                 }}
                             />
-                        </section>
+                        </Panel>
                     )}
 
-                    {report &&
-                        (report.inactive > 0 ||
-                            report.overdue > 0) && (
-                            <p
-                                className="progress-alert progress-alert-banner"
-                                role="status"
-                            >
-                                Attention needed:{" "}
-                                {report.inactive} inactive
-                                assignment(s) and{" "}
-                                {report.overdue} overdue
-                                assignment(s).
+                    <Panel
+                        title="Assignments"
+                        description="Grade opens once a student submits."
+                        actions={
+                            <label className="ui-checkbox">
+                                <input
+                                    type="checkbox"
+                                    checked={onlyAlerts}
+                                    onChange={(e) => setOnlyAlerts(e.target.checked)}
+                                />
+                                Show alerts only
+                            </label>
+                        }
+                        flush
+                    >
+                        {report && !shown.length ? (
+                            <p className="ui-row-empty">
+                                {onlyAlerts
+                                    ? "No current inactivity or overdue alerts."
+                                    : "No cases assigned by your account."}
                             </p>
+                        ) : (
+                            <div className="ui-table-wrap">
+                                <table className="ui-table progress-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Student</th>
+                                            <th>Case</th>
+                                            <th>Course</th>
+                                            <th>Status</th>
+                                            <th>Due</th>
+                                            <th>Last saved</th>
+                                            <th>Grade</th>
+                                            <th>Alert</th>
+                                            <th><span className="ui-visually-hidden">Actions</span></th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {shown.map((assignment) => {
+                                            const grade = gradeByAssignment.get(assignment.assignment_id);
+                                            const open = selected === assignment.assignment_id;
+
+                                            return (
+                                                <tr
+                                                    key={assignment.assignment_id}
+                                                    className={open ? "progress-row--open" : undefined}
+                                                >
+                                                    <td className="progress-student">{assignment.student_name}</td>
+                                                    <td>#{assignment.case_id}</td>
+                                                    <td>{assignment.course ?? "—"}</td>
+                                                    <td>
+                                                        <StatusBadge status={assignment.encounter_status} />
+                                                    </td>
+                                                    <td className="progress-date" title={fullDate(assignment.due_date)}>{dateLabel(assignment.due_date)}</td>
+                                                    <td className="progress-date" title={fullDate(assignment.last_saved_at)}>{dateLabel(assignment.last_saved_at)}</td>
+                                                    <td className="progress-grade">
+                                                        {grade ? (
+                                                            <>
+                                                                {grade.final_points.toFixed(2)} / {grade.possible_points.toFixed(2)}
+                                                                {!grade.published_at && (
+                                                                    <span className="ui-badge ui-badge--muted progress-draft">Draft</span>
+                                                                )}
+                                                            </>
+                                                        ) : (
+                                                            <span className="ui-muted">Not graded</span>
+                                                        )}
+                                                    </td>
+                                                    <td>
+                                                        {assignment.alert === "inactive" ? (
+                                                            <span
+                                                                className="ui-badge ui-badge--warning"
+                                                                title={`Threshold ${assignment.inactivity_threshold_hours?.toFixed(1)}h`}
+                                                            >
+                                                                Inactive {assignment.idle_hours.toFixed(1)}h
+                                                            </span>
+                                                        ) : assignment.alert === "overdue" ? (
+                                                            <span className="ui-badge ui-badge--error">Past due</span>
+                                                        ) : (
+                                                            <span className="ui-muted">On track</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="progress-actions">
+                                                        <button
+                                                            type="button"
+                                                            className={`ui-button ui-button--small${open ? "" : " ui-button--secondary"}`}
+                                                            disabled={!["submitted", "signed"].includes(assignment.encounter_status)}
+                                                            aria-expanded={open}
+                                                            onClick={() => setSelected(open ? null : assignment.assignment_id)}
+                                                        >
+                                                            {open ? "Close" : "Grade"}
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
                         )}
+                    </Panel>
 
-                    <div className="ui-toolbar">
-                        <label className="ui-checkbox">
-                            <input
-                                type="checkbox"
-                                checked={onlyAlerts}
-                                onChange={(e) =>
-                                    setOnlyAlerts(e.target.checked)
-                                }
+                    {selectedAssignment && (
+                        <div ref={editorRef} className="progress-editor">
+                            <GradeEditor
+                                key={selectedAssignment.assignment_id}
+                                assignmentId={selectedAssignment.assignment_id}
+                                encounterStatus={selectedAssignment.encounter_status}
                             />
-
-                            Show alerts only
-                        </label>
-
-                        <button
-                            type="button"
-                            className="ui-button ui-button--secondary"
-                            onClick={() => {
-                                void reload();
-                            }}
-                        >
-                            Refresh
-                        </button>
-                    </div>
-
-                    {report && !shown.length && (
-                        <p className="ui-row-empty">
-                            {onlyAlerts
-                                ? "No current inactivity or overdue alerts."
-                                : "No cases assigned by your account."}
-                        </p>
-                    )}
-
-                    {shown.length > 0 && (
-                        <div className="ui-table-card ui-table-wrap">
-                            <table className="ui-table">
-                                <thead>
-                                    <tr>
-                                        <th>Student</th>
-                                        <th>Case</th>
-                                        <th>Course</th>
-                                        <th>Status</th>
-                                        <th>Due</th>
-                                        <th>Last saved</th>
-                                        <th>Grade</th>
-                                        <th>Progress alert</th>
-                                        <th />
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    {shown.map((assignment) => {
-                                        const grade = gradeByAssignment.get(
-                                            assignment.assignment_id
-                                        );
-
-                                        return (
-                                            <tr key={assignment.assignment_id}>
-                                                <td>
-                                                    {assignment.student_name}
-                                                </td>
-
-                                                <td>
-                                                    #{assignment.case_id}
-                                                </td>
-
-                                                <td>
-                                                    {assignment.course ?? "—"}
-                                                </td>
-
-                                                <td>
-                                                    <StatusBadge status={assignment.encounter_status} />
-                                                </td>
-
-                                                <td>
-                                                    {dateLabel(assignment.due_date)}
-                                                </td>
-
-                                                <td>
-                                                    {dateLabel(assignment.last_saved_at)}
-                                                </td>
-
-                                                <td>
-                                                    {grade
-                                                        ? `${grade.final_points.toFixed(2)} / ${grade.possible_points.toFixed(2)}${grade.published_at
-                                                            ? ""
-                                                            : " (draft)"
-                                                        }`
-                                                        : "Not graded"}
-                                                </td>
-
-                                                <td>
-                                                    {assignment.alert === "inactive" ? (
-                                                        <span className="progress-alert">
-                                                            Inactive:{" "}
-                                                            {assignment.idle_hours.toFixed(1)}
-                                                            h without a saved note
-                                                        </span>
-                                                    ) : assignment.alert === "overdue" ? (
-                                                        <span className="progress-alert">
-                                                            Past due
-                                                        </span>
-                                                    ) : (
-                                                        <span className="ui-muted">
-                                                            On track
-                                                        </span>
-                                                    )}
-
-                                                    {assignment.alert === "inactive" && (
-                                                        <div className="ui-muted">
-                                                            Threshold{" "}
-                                                            {assignment.inactivity_threshold_hours?.toFixed(1)}
-                                                            h
-                                                        </div>
-                                                    )}
-                                                </td>
-
-                                                <td>
-                                                    <button
-                                                        type="button"
-                                                        className="ui-button ui-button--secondary ui-button--small"
-                                                        disabled={
-                                                            ![
-                                                                "submitted",
-                                                                "signed",
-                                                            ].includes(
-                                                                assignment.encounter_status
-                                                            )
-                                                        }
-                                                        onClick={() =>
-                                                            setSelected(
-                                                                selected === assignment.assignment_id
-                                                                    ? null
-                                                                    : assignment.assignment_id
-                                                            )
-                                                        }
-                                                    >
-                                                        {selected === assignment.assignment_id
-                                                            ? "Close"
-                                                            : "Grade"}
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
                         </div>
                     )}
 
-                    {studentScores.size > 0 && (
-                        <section className="ui-card">
-                            <h2 className="ui-card-title">Published scores by student</h2>
-
-                            <p className="ui-muted">
-                                Points-based summary across published
-                                graded cases only; not an official
-                                course grade.
-                            </p>
-
+                    {scoreRows.length > 0 && (
+                        <Panel
+                            title="Published scores by student"
+                            description="Points-based summary across published graded cases only; not an official course grade."
+                        >
                             <ScoreBars
                                 label="Published score percentage by student"
-                                items={Array.from(studentScores.entries())
+                                items={scoreRows
                                     .filter(([, score]) => score.possible > 0)
                                     .map(([id, score]) => ({
                                         key: id,
@@ -406,58 +379,36 @@ export function InstructorProgressPage() {
                                     }))}
                             />
 
-                            <div className="ui-table-wrap">
-                            <table className="ui-table">
-                                <thead>
-                                    <tr>
-                                        <th>Student</th>
-                                        <th>Cases graded</th>
-                                        <th>Earned</th>
-                                        <th>Possible</th>
-                                        <th>Percentage</th>
-                                    </tr>
-                                </thead>
+                            <div className="ui-table-wrap progress-scores">
+                                <table className="ui-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Student</th>
+                                            <th className="ui-num">Cases graded</th>
+                                            <th className="ui-num">Earned</th>
+                                            <th className="ui-num">Possible</th>
+                                            <th className="ui-num">Percentage</th>
+                                        </tr>
+                                    </thead>
 
-                                <tbody>
-                                    {Array.from(studentScores.entries()).map(
-                                        ([id, score]) => (
+                                    <tbody>
+                                        {scoreRows.map(([id, score]) => (
                                             <tr key={id}>
-                                                <td>{score.name}</td>
-
-                                                <td>{score.count}</td>
-
-                                                <td>
-                                                    {score.earned.toFixed(2)}
-                                                </td>
-
-                                                <td>
-                                                    {score.possible.toFixed(2)}
-                                                </td>
-
-                                                <td>
+                                                <td className="progress-student">{score.name}</td>
+                                                <td className="ui-num">{score.count}</td>
+                                                <td className="ui-num">{score.earned.toFixed(2)}</td>
+                                                <td className="ui-num">{score.possible.toFixed(2)}</td>
+                                                <td className="ui-num">
                                                     {score.possible
-                                                        ? `${(
-                                                            (score.earned /
-                                                                score.possible) *
-                                                            100
-                                                        ).toFixed(1)}%`
+                                                        ? `${((score.earned / score.possible) * 100).toFixed(1)}%`
                                                         : "—"}
                                                 </td>
                                             </tr>
-                                        )
-                                    )}
-                                </tbody>
-                            </table>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
-                        </section>
-                    )}
-
-                    {selectedAssignment && (
-                        <GradeEditor
-                            key={selectedAssignment.assignment_id}
-                            assignmentId={selectedAssignment.assignment_id}
-                            encounterStatus={selectedAssignment.encounter_status}
-                        />
+                        </Panel>
                     )}
                 </>
             )}

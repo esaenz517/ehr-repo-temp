@@ -23,6 +23,7 @@ interface SidebarProps {
   active: View;
   onNavigate: (view: View) => void;
   username: string;
+  role?: string; // shown under the username (Student, Instructor, Administrator)
   onLogout: () => void;
   allowedViews?: View[];
 
@@ -58,43 +59,47 @@ function saveCollapsed(value: boolean) {
   }
 }
 
-// Navigation entries displayed based on the user's role.
-const NAV_ITEMS: { view: View; label: string }[] = [
-  { view: "home", label: "Dashboard" },
-  { view: "patients", label: "Patients" },
-  { view: "staff", label: "Staff" },
-  { view: "providers", label: "Providers" },
-  { view: "rooms", label: "Rooms" },
-  { view: "courses", label: "Courses" },
-  { view: "createCase", label: "Create Case" },
-  { view: "assignments", label: "My Assignments" },
-  { view: "assignedCases", label: "Assigned Cases" },
-  { view: "clinicalNotes", label: "Clinical Notes" },
+// Navigation entries, grouped under small section labels. A group only
+// shows when the user can see at least one of its pages.
+type NavGroup = "Overview" | "Teaching" | "Records" | "Coursework";
 
-  // Student grading and instructor progress features.
-  { view: "grades", label: "My Grades" },
-  { view: "progress", label: "Student Progress" },
+const NAV_ITEMS: { view: View; label: string; group: NavGroup }[] = [
+  { view: "home", label: "Dashboard", group: "Overview" }, // student or instructor dashboard, picked in Home.tsx
+
+  { view: "createCase", label: "Create Case", group: "Teaching" },
+  { view: "assignedCases", label: "Assigned Cases", group: "Teaching" },
+  { view: "progress", label: "Student Progress", group: "Teaching" },
+
+  { view: "patients", label: "Patients", group: "Records" },
+  { view: "clinicalNotes", label: "Clinical Notes", group: "Records" },
+  { view: "providers", label: "Providers", group: "Records" },
+  { view: "rooms", label: "Rooms", group: "Records" },
+  { view: "staff", label: "Staff", group: "Records" },
+  { view: "courses", label: "Courses", group: "Records" },
+
+  { view: "assignments", label: "My Assignments", group: "Coursework" },
+  { view: "grades", label: "My Grades", group: "Coursework" },
 ];
+
+const GROUP_ORDER: NavGroup[] = ["Overview", "Teaching", "Records", "Coursework"];
 
 export function Sidebar({
   active,
   onNavigate,
   username,
+  role,
   onLogout,
   allowedViews,
   progressAlertCount = 0,
 }: SidebarProps) {
 
   // Students see only their approved pages.
-  // Staff see the management pages and Student Progress.
+  // Staff see everything except My Grades (grades are published to students)
+  // and My Assignments (hidden for now; swap the filter lines below to show it again).
   const items = allowedViews
-    ? NAV_ITEMS.filter(({ view }) =>
-      allowedViews.includes(view)
-    )
-    : NAV_ITEMS.filter(
-      ({ view }) =>
-        view !== "home" && view !== "grades"
-    );
+    ? NAV_ITEMS.filter(({ view }) => allowedViews.includes(view))
+    // : NAV_ITEMS.filter(({ view }) => view !== "grades");
+    : NAV_ITEMS.filter(({ view }) => view !== "grades" && view !== "assignments");
 
   const [collapsed, setCollapsed] = useState(readCollapsed);
 
@@ -107,60 +112,64 @@ export function Sidebar({
 
   return (
     <nav
-      className={`sidebar${collapsed ? " sidebar--collapsed" : ""
-        }`}
+      className={`sidebar${collapsed ? " sidebar--collapsed" : ""}`}
+      aria-label="Main"
     >
       <div className="sidebar-brand">
-        <img
-          className="sidebar-logo"
-          src={logo}
-          alt="UTEP logo"
-        />
-
+        <img className="sidebar-logo" src={logo} alt="UTEP logo" />
         <span className="sidebar-title">
           EMR
+          <span className="sidebar-subtitle">Training system</span>
         </span>
       </div>
 
-      <ul className="sidebar-nav">
-        {items.map(({ view, label }) => (
-          <li key={view}>
-            <button
-              className={`sidebar-link${active === view
-                ? " sidebar-link--active"
-                : ""
-                }`}
-              aria-current={
-                active === view ? "page" : undefined
-              }
-              onClick={() => onNavigate(view)}
-            >
-              <span>{label}</span>
+      <div className="sidebar-nav">
+        {GROUP_ORDER.map((group) => {
+          const groupItems = items.filter((item) => item.group === group);
+          if (groupItems.length === 0) return null;
+          return (
+            <div key={group} className="sidebar-group">
+              {group !== "Overview" && <p className="sidebar-group-label">{group}</p>}
+              <ul className="sidebar-list">
+                {groupItems.map(({ view, label }) => (
+                  <li key={view}>
+                    <button
+                      className={`sidebar-link${active === view ? " sidebar-link--active" : ""}`}
+                      aria-current={active === view ? "page" : undefined}
+                      onClick={() => onNavigate(view)}
+                    >
+                      <span>{label}</span>
 
-              {/* Show alerts on Student Progress. */}
-              {view === "progress" &&
-                progressAlertCount > 0 && (
-                  <span
-                    className="sidebar-progress-count"
-                    aria-label={`${progressAlertCount} assignments need attention`}
-                  >
-                    {progressAlertCount}
-                  </span>
-                )}
-            </button>
-          </li>
-        ))}
-      </ul>
+                      {/* Show alerts on Student Progress. */}
+                      {view === "progress" && progressAlertCount > 0 && (
+                        <span
+                          className="sidebar-progress-count"
+                          aria-label={`${progressAlertCount} assignments need attention`}
+                        >
+                          {progressAlertCount}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
 
       <div className="sidebar-footer">
-        <span className="sidebar-user">
-          {username}
-        </span>
+        <div className="sidebar-user">
+          <span className="sidebar-avatar" aria-hidden="true">
+            {username.charAt(0).toUpperCase()}
+          </span>
+          <span className="sidebar-user-text">
+            <span className="sidebar-user-name">{username}</span>
+            {role && <span className="sidebar-user-role">{role}</span>}
+          </span>
+        </div>
 
-        <button
-          className="sidebar-logout"
-          onClick={onLogout}
-        >
+        <button className="sidebar-logout" onClick={onLogout}>
           Log out
         </button>
       </div>
@@ -169,27 +178,13 @@ export function Sidebar({
         className="sidebar-toggle"
         onClick={toggleCollapsed}
         aria-expanded={!collapsed}
-        aria-label={
-          collapsed
-            ? "Expand sidebar"
-            : "Collapse sidebar"
-        }
-        title={
-          collapsed
-            ? "Expand sidebar"
-            : "Collapse sidebar"
-        }
+        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
-        <span
-          className="sidebar-toggle-icon"
-          aria-hidden="true"
-        >
+        <span className="sidebar-toggle-icon" aria-hidden="true">
           {collapsed ? "»" : "«"}
         </span>
-
-        <span className="sidebar-toggle-label">
-          Collapse
-        </span>
+        <span className="sidebar-toggle-label">Collapse</span>
       </button>
     </nav>
   );

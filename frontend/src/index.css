@@ -3,6 +3,9 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-family);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 *,
@@ -14,20 +17,22 @@ body {
 input,
 select,
 button {
-  font-size: 14px;
+  font-family: inherit;
+  font-size: var(--text-base);
   padding: 6px 10px;
   min-width: 0;
 }
 
 button {
   cursor: pointer;
-  font-family: inherit;
 }
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
   color: var(--color-primary);
+  line-height: 1.3;
 }
 
 /* Base look for fields and buttons that don't have their own class.
@@ -37,6 +42,11 @@ h3 {
   border-radius: var(--radius);
   background: var(--color-surface);
   color: var(--color-text);
+}
+
+/* Same height for text, date and select fields so rows of them line up */
+:where(input:not([type="checkbox"], [type="radio"], [type="file"]), select) {
+  height: var(--control-height);
 }
 
 :where(input, select, textarea):where(:focus) {
@@ -56,7 +66,9 @@ h3 {
 
 /* Unclassed buttons look like .ui-button--secondary */
 :where(button:not([class])) {
-  border: 1px solid var(--color-primary);
+  height: var(--control-height);
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background: var(--color-surface);
   color: var(--color-primary);
@@ -64,7 +76,8 @@ h3 {
 }
 
 :where(button:not([class])):where(:hover:not(:disabled)) {
-  background: var(--color-bg);
+  border-color: var(--color-primary);
+  background: var(--color-bg-subtle);
 }
 
 :where(button:not([class])):where(:focus-visible) {
@@ -77,6 +90,16 @@ h3 {
   cursor: default;
 }
 
+textarea {
+  font: inherit;
+  font-size: var(--text-base);
+  padding: var(--space-2) 10px;
+  width: 100%;
+  resize: vertical;
+}
+
+/* ---------- App shell: sidebar + scrolling content ---------- */
+
 .app-layout {
   display: flex;
   min-height: 100vh;
@@ -85,34 +108,41 @@ h3 {
 .app-main {
   flex: 1;
   min-width: 0;
-  max-width: 1100px;
-  padding: 24px 32px;
+  padding: var(--space-8) 40px 48px;
   overflow-wrap: anywhere;
 }
 
-/* Page forms are single flex rows; let their fields wrap instead of overflowing */
-.app-main form {
-  flex-wrap: wrap;
-}
+/* ---------- Labeled form fields ---------- */
 
 /* Labeled inputs laid out as a table: 3 columns, label above each input */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px 16px;
+  gap: var(--space-4);
+}
+
+/* Four columns for short fields (names, dates) */
+.form-grid--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
 }
 
-.form-field label {
-  font-size: 13px;
+/* Field that spans the whole grid width */
+.form-field--full {
+  grid-column: 1 / -1;
+}
+
+.form-field > label,
+.form-label {
+  font-size: var(--text-sm);
   font-weight: 600;
-  color: var(--color-text-muted);
+  color: var(--color-text);
 }
 
 .form-field .required {
@@ -120,21 +150,28 @@ h3 {
   margin-left: 2px;
 }
 
+/* Inputs fill their grid cell */
+.form-field > :is(input, select, textarea),
+.form-field > .ui-input {
+  flex: none;
+  width: 100%;
+}
+
 /* Checkbox labels inside a field read as normal text, not field labels */
 .form-field .ui-checkbox {
-  font-size: 14px;
+  font-size: var(--text-base);
   font-weight: 400;
   color: var(--color-text);
 }
 
 /* Small grey helper text and red validation text under an input */
 .field-hint {
-  font-size: 12px;
+  font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
 
 .field-error {
-  font-size: 12px;
+  font-size: var(--text-xs);
   color: var(--color-error);
 }
 
@@ -142,39 +179,46 @@ h3 {
 .form-stack {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--space-4);
 }
 
-textarea {
-  font: inherit;
-  font-size: 14px;
-  padding: 6px 10px;
-  width: 100%;
-  resize: vertical;
-}
-
-/* Banner shown after saving a form */
+/* Banner shown after saving a form (same look as .ui-alert) */
 .form-message {
-  padding: 8px 12px;
+  margin: 0;
+  padding: 10px var(--space-3);
   border-radius: var(--radius);
   border: 1px solid;
+  border-left-width: 4px;
 }
 
 .form-message.success {
   color: var(--color-success);
   background: var(--color-success-bg);
   border-color: var(--color-success-border);
+  border-left-color: var(--color-success);
 }
 
 .form-message.error {
   color: var(--color-error);
   background: var(--color-error-bg);
   border-color: var(--color-error-border);
+  border-left-color: var(--color-error);
+}
+
+@media (max-width: 1100px) {
+  .form-grid--4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 900px) {
-  .form-grid {
+  .form-grid,
+  .form-grid--4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .app-main {
+    padding: var(--space-6);
   }
 }
 
@@ -184,22 +228,11 @@ textarea {
   }
 
   .app-main {
-    padding: 16px;
+    padding: var(--space-4);
   }
 
-  .form-grid {
+  .form-grid,
+  .form-grid--4 {
     grid-template-columns: minmax(0, 1fr);
   }
-}
-
-/* Student creation form */
-.student-create-form .form-field .ui-input {
-  flex: 0 0 auto;
-  width: 100%;
-  height: 38px;
-}
-
-/* Keep form labels close to their fields */
-.student-create-form .form-field {
-  gap: 5px;
 }
