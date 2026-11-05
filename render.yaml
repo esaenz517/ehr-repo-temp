@@ -8,8 +8,13 @@
 
 services:
   # FastAPI backend, built from backend/Dockerfile.
+  # Runs in Ohio, Render's closest region to the Azure SQL server (Canada Central),
+  # because each request makes several database round trips one after another.
+  # Render can't move a service between regions, so this is a new service
+  # ("ehr-backend-ohio"); the old Oregon "ehr-backend" must be deleted by hand.
   - type: web
-    name: ehr-backend
+    name: ehr-backend-ohio
+    region: ohio
     runtime: docker
     plan: free
     dockerContext: ./backend
@@ -48,7 +53,9 @@ services:
       - key: VITE_API_URL
         value: /api
     routes:
-      # If Render gives the backend a different URL, update this destination.
+      # Must point at the Ohio backend's URL (Render dashboard -> ehr-backend-ohio).
+      # Still the old Oregon backend until the Ohio service is created and set up;
+      # then replace it with the new URL and delete the Oregon service.
       - type: rewrite
         source: /api/*
         destination: https://ehr-backend-k63q.onrender.com/*
