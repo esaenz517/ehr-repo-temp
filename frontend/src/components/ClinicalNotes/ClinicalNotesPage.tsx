@@ -26,6 +26,7 @@ import { confirmDelete } from "../confirmDelete";
 import { SoapEditor } from "./SoapEditor";
 import { NOTE_TEMPLATES } from "./templates";
 
+import { PageHeader } from "../PageHeader";
 import "./clinicalNotes.css";
 
 interface ClinicalNotesPageProps {
@@ -397,132 +398,140 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
 
     return (
         <div className="ui-page clinical-notes">
-            <h1 className="ui-page-title">Clinical Notes</h1>
+            <PageHeader
+                title="Clinical Notes"
+                description="Write a SOAP draft for an encounter. Patient chart information is shown alongside manual entry."
+            />
 
-            <p className="ui-page-intro">
-                Write a SOAP draft for an
-                encounter. Patient chart
-                information is shown alongside
-                manual entry.
-            </p>
-
-            <div className="note-controls">
-                <label>
-                    Patient
-
-                    <select
-                        value={patientId ?? ""}
-                        onChange={(e) => {
-                            if (
-                                dirty &&
-                                !window.confirm(
-                                    "Discard unsaved changes?"
-                                )
-                            ) {
-                                return;
-                            }
-
-                            setPatientId(
-                                e.target.value
-                                    ? Number(e.target.value)
-                                    : null
-                            );
-                        }}
-                    >
-                        <option value="">
-                            Select a patient
-                        </option>
-
-                        {patients.map((p) => (
-                            <option
-                                key={p.patient_id}
-                                value={p.patient_id}
-                            >
-                                {p.first_name}{" "}
-                                {p.last_name}{" "}
-                                {p.mrn
-                                    ? `· ${p.mrn}`
-                                    : ""}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-
-                {patient && (
-                    <>
+            <section className="ui-panel" aria-label="Patient and encounter">
+                <header className="ui-panel-header">
+                    <div className="ui-panel-heading">
+                        <h2 className="ui-panel-title">Patient and encounter</h2>
+                        <p className="ui-panel-description">
+                            Pick a patient, then an encounter to write the note against.
+                        </p>
+                    </div>
+                </header>
+                <div className="ui-panel-body">
+                    <div className="note-controls">
                         <label>
-                            Encounter
+                            Patient
 
                             <select
-                                value={
-                                    encounterId ?? ""
-                                }
-                                disabled={!!note}
-                                onChange={(e) =>
-                                    setEncounterId(
-                                        Number(
-                                            e.target.value
+                                value={patientId ?? ""}
+                                onChange={(e) => {
+                                    if (
+                                        dirty &&
+                                        !window.confirm(
+                                            "Discard unsaved changes?"
                                         )
-                                    )
-                                }
-                            >
-                                {encounters.length ===
-                                    0 && (
-                                        <option value="">
-                                            Start an encounter
-                                            first
-                                        </option>
-                                    )}
+                                    ) {
+                                        return;
+                                    }
 
-                                {encounters.map(
-                                    (v) => (
-                                        <option
-                                            key={
-                                                v.encounter_id
-                                            }
-                                            value={
-                                                v.encounter_id
-                                            }
-                                        >
-                                            #
-                                            {
-                                                v.encounter_id
-                                            }{" "}
-                                            ·{" "}
-                                            {formatUtc(
-                                                v.started_at
-                                            )}
-                                        </option>
-                                    )
-                                )}
+                                    setPatientId(
+                                        e.target.value
+                                            ? Number(e.target.value)
+                                            : null
+                                    );
+                                }}
+                            >
+                                <option value="">
+                                    Select a patient
+                                </option>
+
+                                {patients.map((p) => (
+                                    <option
+                                        key={p.patient_id}
+                                        value={p.patient_id}
+                                    >
+                                        {p.first_name}{" "}
+                                        {p.last_name}{" "}
+                                        {p.mrn
+                                            ? `· ${p.mrn}`
+                                            : ""}
+                                    </option>
+                                ))}
                             </select>
                         </label>
 
-                        <button
-                            type="button"
-                            className="ui-button"
-                            onClick={startEncounter}
-                        >
-                            Start encounter
-                        </button>
-                    </>
-                )}
-            </div>
+                        {patient && (
+                            <>
+                                <label>
+                                    Encounter
 
-            {patient && (
-                <p className="note-muted">
-                    {patient.first_name}{" "}
-                    {patient.last_name} ·{" "}
-                    {patient.mrn || "No MRN"} ·
-                    Provider:{" "}
-                    {patient.provider
-                        ? `${patient.provider.first_name} ${patient.provider.last_name}`
-                        : "Not assigned"}
-                </p>
-            )}
+                                    <select
+                                        value={
+                                            encounterId ?? ""
+                                        }
+                                        disabled={!!note}
+                                        onChange={(e) =>
+                                            setEncounterId(
+                                                Number(
+                                                    e.target.value
+                                                )
+                                            )
+                                        }
+                                    >
+                                        {encounters.length ===
+                                            0 && (
+                                                <option value="">
+                                                    Start an encounter
+                                                    first
+                                                </option>
+                                            )}
+
+                                        {encounters.map(
+                                            (v) => (
+                                                <option
+                                                    key={
+                                                        v.encounter_id
+                                                    }
+                                                    value={
+                                                        v.encounter_id
+                                                    }
+                                                >
+                                                    #
+                                                    {
+                                                        v.encounter_id
+                                                    }{" "}
+                                                    ·{" "}
+                                                    {formatUtc(
+                                                        v.started_at
+                                                    )}
+                                                </option>
+                                            )
+                                        )}
+                                    </select>
+                                </label>
+
+                                <button
+                                    type="button"
+                                    className="ui-button"
+                                    onClick={startEncounter}
+                                >
+                                    Start encounter
+                                </button>
+                            </>
+                        )}
+                    </div>
+
+                    {patient && (
+                        <p className="note-muted">
+                            {patient.first_name}{" "}
+                            {patient.last_name} ·{" "}
+                            {patient.mrn || "No MRN"} ·
+                            Provider:{" "}
+                            {patient.provider
+                                ? `${patient.provider.first_name} ${patient.provider.last_name}`
+                                : "Not assigned"}
+                        </p>
+                    )}
+                </div>
+            </section>
 
             {loading && (
-                <p role="status">
+                <p role="status" className="ui-muted">
                     Loading chart…
                 </p>
             )}
@@ -530,7 +539,7 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
             {error && (
                 <p
                     role="alert"
-                    className="note-error"
+                    className="ui-error"
                 >
                     {error}
                 </p>
@@ -539,7 +548,7 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
             {message && (
                 <p
                     role="status"
-                    className="note-success"
+                    className="ui-alert ui-alert--success"
                 >
                     {message}
                 </p>

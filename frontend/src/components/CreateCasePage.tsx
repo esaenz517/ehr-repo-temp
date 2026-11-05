@@ -7,6 +7,7 @@ import { CasePatientSelector } from "./Patients/CasePatientSelector";
 import { AssignmentSection } from "./Assignment/AssignmentSection";
 import { RubricEditor } from "./Cases/RubricEditor";
 import { CaseStep } from "./Cases/CaseStep";
+import { PageHeader } from "./PageHeader";
 import "./Cases/cases.css";
 
 interface CreateCasePageProps {
@@ -35,7 +36,10 @@ export function CreateCasePage({ staffId }: CreateCasePageProps) {
   return (
     // noValidate: we show our own error messages instead of the browser's pop-ups.
     <form className="ui-page case-page" onSubmit={handleSubmit} noValidate>
-      <h1 className="ui-page-title">Create Case</h1>
+      <PageHeader
+        title="Create Case"
+        description="Build a patient case in six steps, then assign it to students. Fields marked * are required."
+      />
 
       {/* Success and error messages from the last save */}
       <div ref={bannerRef} className="case-banners" aria-live="polite">
@@ -102,6 +106,7 @@ export function CreateCasePage({ staffId }: CreateCasePageProps) {
       </div>
 
       <div className="case-actions">
+        <span className="ui-muted">Students see the case as soon as it's created.</span>
         <button type="submit" className="ui-button case-submit" disabled={createCase.submitting}>
           {createCase.submitting ? "Creating…" : "Create case"}
         </button>

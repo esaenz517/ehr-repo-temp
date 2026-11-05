@@ -1,92 +1,78 @@
 /* Rooms page: every class is prefixed with "rooms-".
-   Title, buttons, inputs and errors come from the shared ui- classes. */
+   Header, form, buttons, inputs and badges come from the shared ui- classes. */
 
-/* "New room" form, rendered inside the first card of the grid.
-   .rooms-page prefix outranks the global ".app-main form" wrap rule. */
-.rooms-page .rooms-form {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  flex: 1;
-  gap: 12px;
-}
-
-/* Card grid: as many 240px+ columns as fit */
+/* Card grid: as many 260px+ columns as fit */
 .rooms-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* Each room is a small panel: header, then controls pinned to the bottom */
 .rooms-card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-top: 4px solid var(--color-accent);
+  border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
 }
 
 .rooms-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-4) var(--space-3);
 }
 
 .rooms-card-number {
   margin: 0;
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--text-md);
+  font-weight: 600;
   color: var(--color-primary);
 }
 
 .rooms-card-unit {
   margin: 2px 0 0;
-  font-size: 14px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
 
 .rooms-badge {
   flex-shrink: 0;
-  padding: 2px 10px;
-  border-radius: var(--radius-pill);
-  font-size: 12px;
-  font-weight: 600;
   text-transform: capitalize;
-}
-
-.rooms-badge--available {
-  background: var(--color-success-bg);
-  color: var(--color-success);
-}
-
-.rooms-badge--occupied {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
 }
 
 /* Controls pinned to the bottom so cards in a row line up */
 .rooms-card-actions {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
   margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-bg);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-bg-subtle);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
 .rooms-card-assign {
   display: flex;
-  gap: 8px;
+  flex: 1 1 100%;
+  gap: var(--space-2);
 }
 
-.rooms-card-assign select {
+.rooms-card-assign .ui-input {
   flex: 1;
+  height: var(--control-height-sm);
+  font-size: var(--text-sm);
+}
+
+/* Delete sits at the right end of the controls */
+.rooms-delete {
+  margin-left: auto;
 }

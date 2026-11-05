@@ -198,11 +198,11 @@ export function RubricScoring({ assignment, onSignOffBlocked }: RubricScoringPro
                 </label>
                 {editable && (
                   <>
-                    <button type="button" className="ui-button ui-button--secondary"
+                    <button type="button" className="ui-button ui-button--secondary ui-button--small"
                       onClick={() => setDraft(item.rubric_item_id, "points", String(item.points))}>
                       Full
                     </button>
-                    <button type="button" className="ui-button ui-button--secondary"
+                    <button type="button" className="ui-button ui-button--secondary ui-button--small"
                       onClick={() => setDraft(item.rubric_item_id, "points", "0")}>
                       None
                     </button>

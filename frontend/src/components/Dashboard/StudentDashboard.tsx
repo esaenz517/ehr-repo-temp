@@ -1,6 +1,8 @@
-import type { ReactNode } from "react";
 import { useAssignments } from "../../hooks/useAssignments";
 import type { Assignment, EncounterStatus } from "../../types";
+import { PageHeader } from "../PageHeader";
+import { Panel } from "../Panel";
+import { StatusBadge } from "../StatusBadge";
 import "./dashboard.css";
 
 interface StudentDashboardProps {
@@ -11,13 +13,6 @@ interface StudentDashboardProps {
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-const STATUS_LABELS: Record<EncounterStatus, string> = {
-  not_started: "Not started",
-  in_progress: "In progress",
-  submitted: "Submitted",
-  signed: "Signed",
-};
 
 const isOpen = (a: Assignment) =>
   a.encounter_status === "not_started" || a.encounter_status === "in_progress";
@@ -71,7 +66,6 @@ export function StudentDashboard({ username, studentId, onOpen, onViewAll }: Stu
     const due = dueTime(a);
     return isOpen(a) && due !== null && due >= now && due - now <= 7 * DAY_MS;
   }).length;
-  const percent = total === 0 ? 0 : Math.round((done / total) * 100);
 
   // Open cases, soonest due first; cases without a due date go last
   const upNext = assignments
@@ -87,164 +81,105 @@ export function StudentDashboard({ username, studentId, onOpen, onViewAll }: Stu
 
   return (
     <div className="ui-page dash">
-      <section className="dash-hero">
-        <div className="dash-hero-text">
-          <p className="dash-hero-date">
+      <PageHeader
+        title={<>{greeting(nowDate)}, <span className="dash-name">{username}</span></>}
+        description={
+          <>
             {nowDate.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
-          </p>
-          <h1 className="dash-hero-title">
-            {greeting(nowDate)}, <span className="dash-hero-name">{username}</span>
-          </h1>
-          <p className="dash-hero-subtitle">
-            {loading ? "Loading your cases..." : encouragement(open, overdue, total)}
-          </p>
-          <button className="dash-hero-cta" onClick={onViewAll}>
-            View my assignments →
-          </button>
-        </div>
-        <ProgressRing percent={percent} done={done} total={total} />
-      </section>
+            {" · "}
+            {loading ? "Loading your cases…" : encouragement(open, overdue, total)}
+          </>
+        }
+        actions={<button className="ui-button" onClick={onViewAll}>View my assignments</button>}
+      />
 
       {error && <p className="ui-error">{error}</p>}
 
-      <section className="dash-stats" aria-label="Assignment summary">
-        <StatCard tone="todo" label="To do" value={notStarted} icon={<IconClipboard />} loading={loading} />
-        <StatCard tone="progress" label="In progress" value={inProgress} icon={<IconPencil />} loading={loading} />
-        <StatCard tone="done" label="Completed" value={done} icon={<IconCheck />} loading={loading} />
-        <StatCard
-          tone={overdue > 0 ? "late" : "week"}
+      <section className="ui-stats" aria-label="Assignment summary">
+        <Stat tone="error" label="To do" value={notStarted} loading={loading} />
+        <Stat tone="accent" label="In progress" value={inProgress} loading={loading} />
+        <Stat tone="success" label="Completed" value={done} meta={`of ${total} assigned`} loading={loading} />
+        <Stat
+          tone={overdue > 0 ? "error" : "info"}
           label={overdue > 0 ? "Overdue" : "Due this week"}
           value={overdue > 0 ? overdue : dueThisWeek}
-          icon={<IconClock />}
           loading={loading}
         />
       </section>
 
-      <section className="dash-panel">
-        <div className="dash-panel-header">
-          <h2 className="dash-panel-title">Up next</h2>
-          {upNext.length > 0 && (
-            <button className="dash-link" onClick={onViewAll}>See all</button>
-          )}
-        </div>
-
+      <Panel
+        title="Up next"
+        description="Open cases, soonest due first."
+        actions={
+          upNext.length > 0 && (
+            <button className="ui-button ui-button--ghost ui-button--small" onClick={onViewAll}>See all</button>
+          )
+        }
+        flush
+      >
         {loading ? (
-          <ul className="dash-list">
-            {[0, 1, 2].map((i) => <li key={i} className="dash-item dash-skeleton" />)}
-          </ul>
+          <p className="ui-row-empty">Loading your cases…</p>
         ) : upNext.length === 0 ? (
-          <div className="dash-empty">
-            <div className="dash-empty-badge"><IconStar /></div>
-            <p className="dash-empty-title">{total === 0 ? "Nothing assigned yet" : "All caught up!"}</p>
-            <p className="ui-muted">
+          <div className="ui-row-empty">
+            <p className="dash-empty-title">{total === 0 ? "Nothing assigned yet" : "All caught up"}</p>
+            <p className="ui-flush">
               {total === 0
                 ? "When your instructor assigns a case, it will show up here."
                 : "Every case you've been given has been submitted."}
             </p>
           </div>
         ) : (
-          <ul className="dash-list">
-            {upNext.map((a, i) => {
+          <ul className="ui-row-list">
+            {upNext.map((a) => {
               const due = dueLabel(dueTime(a), now);
               const started = a.encounter_status === "in_progress";
               return (
-                <li key={a.assignment_id} className={`dash-item dash-item--${due.tone}`} style={{ animationDelay: `${i * 60}ms` }}>
-                  <div className="dash-item-avatar" aria-hidden="true">
-                    {(a.patient_name ?? "?").trim().charAt(0).toUpperCase()}
-                  </div>
-                  <div className="dash-item-main">
-                    <div className="dash-item-title">
+                <li key={a.assignment_id} className="ui-row">
+                  <div className="ui-row-main">
+                    <div className="ui-row-title">
                       Case #{a.case_id}
-                      {a.patient_name && <span className="dash-item-patient"> · {a.patient_name}</span>}
+                      {a.patient_name && <> · {a.patient_name}</>}
                     </div>
-                    {a.chief_complaint && <div className="dash-item-complaint">{a.chief_complaint}</div>}
-                    <div className="dash-item-meta">
-                      <span className={`dash-chip dash-chip--${due.tone}`}>{due.text}</span>
-                      <span className={`dash-chip dash-chip--status-${a.encounter_status}`}>
-                        {STATUS_LABELS[a.encounter_status]}
-                      </span>
-                      {a.course && <span className="dash-chip">{a.course}</span>}
-                      {a.assignment_type === "practice" && <span className="dash-chip">Practice</span>}
+                    {a.chief_complaint && <div className="ui-row-subtitle">{a.chief_complaint}</div>}
+                    <div className="dash-meta">
+                      <span className={`ui-badge dash-due dash-due--${due.tone}`}>{due.text}</span>
+                      {a.course && <span className="ui-badge ui-badge--muted">{a.course}</span>}
+                      {a.assignment_type === "practice" && <span className="ui-badge ui-badge--muted">Practice</span>}
                     </div>
                   </div>
-                  <button
-                    className={`dash-item-action${started ? " dash-item-action--continue" : ""}`}
-                    onClick={() => (started ? onOpen(a) : startAndOpen(a))}
-                  >
-                    {started ? "Continue" : "Start"}
-                  </button>
+                  <div className="ui-row-actions">
+                    <StatusBadge status={a.encounter_status} />
+                    <button
+                      className={started ? "ui-button ui-button--small" : "ui-button ui-button--secondary ui-button--small"}
+                      onClick={() => (started ? onOpen(a) : startAndOpen(a))}
+                    >
+                      {started ? "Continue" : "Start"}
+                    </button>
+                  </div>
                 </li>
               );
             })}
           </ul>
         )}
-      </section>
+      </Panel>
     </div>
   );
 }
 
-interface StatCardProps {
-  tone: "todo" | "progress" | "done" | "week" | "late";
+interface StatProps {
+  tone: "error" | "accent" | "success" | "info";
   label: string;
   value: number;
-  icon: ReactNode;
+  meta?: string; // small grey line under the number
   loading: boolean;
 }
 
-function StatCard({ tone, label, value, icon, loading }: StatCardProps) {
+function Stat({ tone, label, value, meta, loading }: StatProps) {
   return (
-    <div className={`dash-stat dash-stat--${tone}`}>
-      <div className="dash-stat-icon" aria-hidden="true">{icon}</div>
-      <div>
-        <div className="dash-stat-value">{loading ? "–" : value}</div>
-        <div className="dash-stat-label">{label}</div>
-      </div>
+    <div className={`ui-stat ui-stat--${tone}`}>
+      <span className="ui-stat-value">{loading ? "–" : value}</span>
+      <span className="ui-stat-label">{label}</span>
+      {meta && !loading && <span className="ui-stat-meta">{meta}</span>}
     </div>
   );
 }
-
-function ProgressRing({ percent, done, total }: { percent: number; done: number; total: number }) {
-  const radius = 52;
-  const circumference = 2 * Math.PI * radius;
-  return (
-    <div className="dash-ring" role="img" aria-label={`${done} of ${total} cases completed`}>
-      <svg viewBox="0 0 120 120" width="132" height="132">
-        <circle className="dash-ring-track" cx="60" cy="60" r={radius} />
-        <circle
-          className="dash-ring-fill"
-          cx="60"
-          cy="60"
-          r={radius}
-          strokeDasharray={circumference}
-          strokeDashoffset={circumference * (1 - percent / 100)}
-        />
-      </svg>
-      <div className="dash-ring-label">
-        <span className="dash-ring-percent">{percent}%</span>
-        <span className="dash-ring-caption">{done}/{total} done</span>
-      </div>
-    </div>
-  );
-}
-
-// Small inline icons so the dashboard needs no icon library
-const iconProps = {
-  width: 22, height: 22, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
-  strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const,
-};
-
-const IconClipboard = () => (
-  <svg {...iconProps}><rect x="6" y="4" width="12" height="17" rx="2" /><path d="M9 4h6v3H9z" /><path d="M9 12h6M9 16h4" /></svg>
-);
-const IconPencil = () => (
-  <svg {...iconProps}><path d="M4 20h4L19 9l-4-4L4 16z" /><path d="M13.5 6.5l4 4" /></svg>
-);
-const IconCheck = () => (
-  <svg {...iconProps}><circle cx="12" cy="12" r="9" /><path d="M8 12.5l2.5 2.5L16 9.5" /></svg>
-);
-const IconClock = () => (
-  <svg {...iconProps}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-);
-const IconStar = () => (
-  <svg {...iconProps} width={32} height={32}><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" /></svg>
-);

@@ -77,69 +77,78 @@ export function PatientForm({ providers, onSubmit, patient, onCancel }: PatientF
   };
 
   return (
-    <form onSubmit={handleSubmit} className={editing ? "patients-form patients-form--edit" : "patients-form"}>
-      <h2 className="patients-form-title">{editing ? "Edit patient" : "New patient"}</h2>
+    <form
+      onSubmit={handleSubmit}
+      className={editing ? "patients-form patients-form--edit" : "ui-panel ui-panel--overflow patients-form"}
+    >
+      <header className={editing ? "patients-form-header" : "ui-panel-header"}>
+        <div className="ui-panel-heading">
+          <h2 className="ui-panel-title">{editing ? "Edit patient" : "New patient"}</h2>
+          {!editing && <p className="ui-panel-description">Fields marked * are required.</p>}
+        </div>
+      </header>
 
-      <div className="patients-form-grid">
-        <div className="patients-field">
-          <label htmlFor={`${idPrefix}-mrn`} className="patients-label">MRN</label>
+      <div className={editing ? undefined : "ui-panel-body"}>
+      <div className="form-grid form-grid--4">
+        <div className="form-field">
+          <label htmlFor={`${idPrefix}-mrn`}>MRN</label>
           <input
             id={`${idPrefix}-mrn`}
             value={mrn}
             onChange={(e) => setMrn(e.target.value)}
-            className="patients-input"
+            className="ui-input"
           />
         </div>
 
-        <div className="patients-field">
-          <label htmlFor={`${idPrefix}-first-name`} className="patients-label">
-            First name<span className="patients-required" aria-hidden="true">*</span>
+        <div className="form-field">
+          <label htmlFor={`${idPrefix}-first-name`}>
+            First name<span className="required" aria-hidden="true">*</span>
           </label>
           <input
             id={`${idPrefix}-first-name`}
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             required
-            className="patients-input"
+            className="ui-input"
           />
         </div>
 
-        <div className="patients-field">
-          <label htmlFor={`${idPrefix}-middle-name`} className="patients-label">Middle name</label>
+        <div className="form-field">
+          <label htmlFor={`${idPrefix}-middle-name`}>Middle name</label>
           <input
             id={`${idPrefix}-middle-name`}
             value={middleName}
             onChange={(e) => setMiddleName(e.target.value)}
-            className="patients-input"
+            className="ui-input"
           />
         </div>
 
-        <div className="patients-field">
-          <label htmlFor={`${idPrefix}-last-name`} className="patients-label">
-            Last name<span className="patients-required" aria-hidden="true">*</span>
+        <div className="form-field">
+          <label htmlFor={`${idPrefix}-last-name`}>
+            Last name<span className="required" aria-hidden="true">*</span>
           </label>
           <input
             id={`${idPrefix}-last-name`}
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             required
-            className="patients-input"
+            className="ui-input"
           />
         </div>
 
-        <div className="patients-field">
-          <label htmlFor={`${idPrefix}-preferred-name`} className="patients-label">Preferred name</label>
+        <div className="form-field">
+          <label htmlFor={`${idPrefix}-preferred-name`}>Preferred name</label>
           <input
             id={`${idPrefix}-preferred-name`}
             value={preferredName}
             onChange={(e) => setPreferredName(e.target.value)}
-            className="patients-input"
+            className="ui-input"
           />
         </div>
 
-        <div className="patients-field">
-          <label htmlFor={`${idPrefix}-dob`} className="patients-label">
-            Date of birth<span className="patients-required" aria-hidden="true">*</span>
+        <div className="form-field">
+          <label htmlFor={`${idPrefix}-dob`}>
+            Date of birth<span className="required" aria-hidden="true">*</span>
           </label>
           <input
             id={`${idPrefix}-dob`}
@@ -147,78 +156,78 @@ export function PatientForm({ providers, onSubmit, patient, onCancel }: PatientF
             value={dateOfBirth}
             onChange={(e) => setDateOfBirth(e.target.value)}
             required
-            className="patients-input"
+            className="ui-input"
           />
         </div>
 
-        <div className="patients-field">
-          <label htmlFor={`${idPrefix}-sex`} className="patients-label">
-            Sex at birth<span className="patients-required" aria-hidden="true">*</span>
+        <div className="form-field">
+          <label htmlFor={`${idPrefix}-sex`}>
+            Sex at birth<span className="required" aria-hidden="true">*</span>
           </label>
           <select
             id={`${idPrefix}-sex`}
             value={genderAtBirth}
             onChange={(e) => setGenderAtBirth(e.target.value)}
             required
-            className="patients-input"
+            className="ui-input"
           >
             <option value="">Select…</option>
             {SEX_OPTIONS.map((o) => <option key={o}>{o}</option>)}
           </select>
         </div>
 
-        <div className="patients-field">
-          <label htmlFor={`${idPrefix}-gender`} className="patients-label">
-            Gender identity<span className="patients-required" aria-hidden="true">*</span>
+        <div className="form-field">
+          <label htmlFor={`${idPrefix}-gender`}>
+            Gender identity<span className="required" aria-hidden="true">*</span>
           </label>
           <select
             id={`${idPrefix}-gender`}
             value={genderIdentity}
             onChange={(e) => setGenderIdentity(e.target.value)}
             required
-            className="patients-input"
+            className="ui-input"
           >
             <option value="">Select…</option>
             {GENDER_IDENTITY_OPTIONS.map((o) => <option key={o}>{o}</option>)}
           </select>
         </div>
 
-        <div className="patients-field">
-          <label htmlFor={`${idPrefix}-pronouns`} className="patients-label">
-            Pronouns<span className="patients-required" aria-hidden="true">*</span>
+        <div className="form-field">
+          <label htmlFor={`${idPrefix}-pronouns`}>
+            Pronouns<span className="required" aria-hidden="true">*</span>
           </label>
           <select
             id={`${idPrefix}-pronouns`}
             value={pronouns}
             onChange={(e) => setPronouns(e.target.value)}
             required
-            className="patients-input"
+            className="ui-input"
           >
             <option value="">Select…</option>
             {PRONOUN_OPTIONS.map((o) => <option key={o}>{o}</option>)}
           </select>
         </div>
 
-        <div className="patients-field">
-          <label htmlFor={`${idPrefix}-status`} className="patients-label">Status</label>
+        <div className="form-field">
+          <label htmlFor={`${idPrefix}-status`}>Status</label>
           <select
             id={`${idPrefix}-status`}
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="patients-input"
+            className="ui-input"
           >
             <option value="outpatient">Outpatient</option>
             <option value="inpatient">Inpatient</option>
           </select>
         </div>
 
-        <div className="patients-field">
-          <label htmlFor={`${idPrefix}-provider`} className="patients-label">Provider</label>
+        <div className="form-field">
+          <label htmlFor={`${idPrefix}-provider`}>Provider</label>
           <select
             id={`${idPrefix}-provider`}
             value={providerId}
             onChange={(e) => setProviderId(e.target.value)}
-            className="patients-input"
+            className="ui-input"
           >
             <option value="">No provider</option>
             {providers.map((provider) => (
@@ -229,13 +238,13 @@ export function PatientForm({ providers, onSubmit, patient, onCancel }: PatientF
           </select>
         </div>
 
-        <div className="patients-field patients-field--full">
-          <label htmlFor={`${idPrefix}-drugs`} className="patients-label">Drugs</label>
+        <div className="form-field form-field--full">
+          <label htmlFor={`${idPrefix}-drugs`}>Drugs</label>
           <div className="patients-drugs">
             {/* Type any medication; the most likely match autofills. Enter or a click adds it as a chip. */}
             <MedicationAutocomplete
               id={`${idPrefix}-drugs`}
-              className="patients-input"
+              className="ui-input"
               placeholder="Add a drug…"
               value={drugQuery}
               onChange={setDrugQuery}
@@ -260,7 +269,9 @@ export function PatientForm({ providers, onSubmit, patient, onCancel }: PatientF
         </div>
       </div>
 
-      <div className="patients-form-actions">
+      </div>
+
+      <div className={editing ? "ui-form-actions patients-form-actions" : "ui-panel-footer"}>
         {onCancel && (
           <button type="button" className="ui-button ui-button--secondary" onClick={onCancel}>
             Cancel

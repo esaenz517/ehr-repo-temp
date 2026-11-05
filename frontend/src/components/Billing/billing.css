@@ -19,16 +19,17 @@
 
 .billing-title {
   margin: 0;
-  font-size: 16px;
+  font-size: var(--text-md);
+  font-weight: 600;
   color: var(--color-primary);
 }
 
 .billing-total-badge {
-  padding: 4px 12px;
+  padding: 2px 10px;
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  font-size: 13px;
+  background: var(--color-primary-tint);
+  color: var(--color-primary);
+  font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -44,6 +45,7 @@
   padding: 14px 16px;
   border: 1px dashed var(--color-border);
   border-radius: var(--radius);
+  background: var(--color-surface);
   color: var(--color-text-muted);
   font-size: 14px;
   text-align: center;
@@ -59,7 +61,7 @@
 
 .billing-table th {
   padding: 8px 12px;
-  border-bottom: 2px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-light);
   color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 600;
@@ -70,7 +72,7 @@
 
 .billing-table td {
   padding: 10px 12px;
-  border-bottom: 1px solid var(--color-bg);
+  border-bottom: 1px solid var(--color-border-light);
   vertical-align: middle;
 }
 
@@ -92,7 +94,7 @@
 }
 
 .billing-table tfoot td {
-  border-top: 2px solid var(--color-border);
+  border-top: 1px solid var(--color-border);
   border-bottom: none;
   font-weight: 700;
   color: var(--color-primary);
@@ -100,7 +102,8 @@
 
 /* Smaller version of the shared danger button for table rows */
 .billing-delete {
-  padding: 4px 10px;
+  height: var(--control-height-sm);
+  padding: 0 10px;
   font-size: 13px;
 }
 

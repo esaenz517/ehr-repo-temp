@@ -1,7 +1,5 @@
 import { useState } from "react";
-import type { CreateRoomInput } from "../../api/rooms";
 import type { Patient, Room } from "../../types";
-import { RoomForm } from "./RoomForm";
 import { confirmDelete } from "../confirmDelete";
 
 interface RoomListProps {
@@ -10,16 +8,19 @@ interface RoomListProps {
   onDelete: (roomId: number) => void;
   onAssign: (roomId: number, patientId: number) => void;
   onUnassign: (roomId: number) => void;
-  onCreate: (input: CreateRoomInput) => void;
 }
 
-// Displays every room as a card, with the "New room" form as the last card.
+// Displays every room as a card.
 // Available rooms get a patient dropdown + "Assign" button; occupied rooms get
 // an "Unassign" button instead.
-export function RoomList({ rooms, availablePatients, onDelete, onAssign, onUnassign, onCreate }: RoomListProps) {
+export function RoomList({ rooms, availablePatients, onDelete, onAssign, onUnassign }: RoomListProps) {
   // Tracks which patient is currently selected in each room's dropdown,
   // keyed by room_id (since every room has its own independent dropdown).
   const [selected, setSelected] = useState<Record<number, string>>({});
+
+  if (rooms.length === 0) {
+    return <p className="ui-row-empty">No rooms yet.</p>;
+  }
 
   return (
     <ul className="rooms-grid">
@@ -31,9 +32,9 @@ export function RoomList({ rooms, availablePatients, onDelete, onAssign, onUnass
             <div className="rooms-card-header">
               <div>
                 <h2 className="rooms-card-number">Room {room.room_number}</h2>
-                <p className="rooms-card-unit">Unit: {room.unit || "—"}</p>
+                <p className="rooms-card-unit">{room.unit ? `${room.unit} unit` : "No unit"}</p>
               </div>
-              <span className={`rooms-badge rooms-badge--${isAvailable ? "available" : "occupied"}`}>
+              <span className={`ui-badge ${isAvailable ? "ui-badge--success" : "ui-badge--solid"} rooms-badge`}>
                 {room.status}
               </span>
             </div>
@@ -43,6 +44,8 @@ export function RoomList({ rooms, availablePatients, onDelete, onAssign, onUnass
               {isAvailable ? (
                 <div className="rooms-card-assign">
                   <select
+                    className="ui-input"
+                    aria-label={`Patient for room ${room.room_number}`}
                     value={selected[room.room_id] ?? ""}
                     onChange={(e) =>
                       setSelected((prev) => ({ ...prev, [room.room_id]: e.target.value }))
@@ -56,7 +59,7 @@ export function RoomList({ rooms, availablePatients, onDelete, onAssign, onUnass
                     ))}
                   </select>
                   <button
-                    className="ui-button"
+                    className="ui-button ui-button--small"
                     disabled={!selected[room.room_id]} // can't assign until a patient is picked
                     onClick={() => onAssign(room.room_id, Number(selected[room.room_id]))}
                   >
@@ -66,14 +69,14 @@ export function RoomList({ rooms, availablePatients, onDelete, onAssign, onUnass
               ) : (
                 // Room is occupied - only option is to discharge the current patient
                 <button
-                  className="ui-button ui-button--secondary"
+                  className="ui-button ui-button--secondary ui-button--small"
                   onClick={() => onUnassign(room.room_id)}
                 >
                   Unassign
                 </button>
               )}
               <button
-                className="ui-button ui-button--danger"
+                className="ui-button ui-button--danger ui-button--small rooms-delete"
                 onClick={() => {
                   if (confirmDelete(`room ${room.room_number}`, `/rooms/${room.room_id}`)) {
                     onDelete(room.room_id);
@@ -87,9 +90,6 @@ export function RoomList({ rooms, availablePatients, onDelete, onAssign, onUnass
         );
       })}
 
-      <li className="rooms-card">
-        <RoomForm onSubmit={onCreate} />
-      </li>
     </ul>
   );
 }

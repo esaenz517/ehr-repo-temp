@@ -3,9 +3,19 @@ import type { CreateProviderInput } from "../../api/providers";
 
 interface ProviderFormProps {
   onSubmit: (input: CreateProviderInput) => void;
+  onCancel?: () => void; // shows a Cancel button that closes the form
 }
 
-export function ProviderForm({ onSubmit }: ProviderFormProps) {
+// Labeled text inputs for the provider form, in display order
+const FIELDS = [
+  { key: "firstName", label: "First name", required: true, type: "text" },
+  { key: "lastName", label: "Last name", required: true, type: "text" },
+  { key: "specialty", label: "Specialty", required: false, type: "text" },
+  { key: "phone", label: "Phone", required: false, type: "tel" },
+  { key: "email", label: "Email", required: false, type: "email" },
+] as const;
+
+export function ProviderForm({ onSubmit, onCancel }: ProviderFormProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [specialty, setSpecialty] = useState("");
@@ -29,39 +39,47 @@ export function ProviderForm({ onSubmit }: ProviderFormProps) {
     setEmail("");
   };
 
+  const values = { firstName, lastName, specialty, phone, email };
+  const setters = { firstName: setFirstName, lastName: setLastName, specialty: setSpecialty, phone: setPhone, email: setEmail };
+
   return (
-    <form onSubmit={handleSubmit} className="ui-form-bar">
-      <input
-        value={firstName}
-        onChange={(e) => setFirstName(e.target.value)}
-        placeholder="First Name"
-        className="ui-input"
-      />
-      <input
-        value={lastName}
-        onChange={(e) => setLastName(e.target.value)}
-        placeholder="Last Name"
-        className="ui-input"
-      />
-      <input
-        value={specialty}
-        onChange={(e) => setSpecialty(e.target.value)}
-        placeholder="Specialty"
-        className="ui-input"
-      />
-      <input
-        value={phone}
-        onChange={(e) => setPhone(e.target.value)}
-        placeholder="Phone"
-        className="ui-input"
-      />
-      <input
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-        className="ui-input"
-      />
-      <button type="submit" className="ui-button">Add</button>
+    <form onSubmit={handleSubmit} className="ui-panel" aria-label="New provider">
+      <header className="ui-panel-header">
+        <div className="ui-panel-heading">
+          <h2 className="ui-panel-title">New provider</h2>
+          <p className="ui-panel-description">Fields marked * are required.</p>
+        </div>
+      </header>
+
+      <div className="ui-panel-body">
+        <div className="form-grid">
+          {FIELDS.map((f) => (
+            <div key={f.key} className="form-field">
+              <label htmlFor={`provider-${f.key}`}>
+                {f.label}
+                {f.required && <span className="required" aria-hidden="true">*</span>}
+              </label>
+              <input
+                id={`provider-${f.key}`}
+                type={f.type}
+                value={values[f.key]}
+                onChange={(e) => setters[f.key](e.target.value)}
+                required={f.required}
+                className="ui-input"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="ui-panel-footer">
+        {onCancel && (
+          <button type="button" className="ui-button ui-button--secondary" onClick={onCancel}>
+            Cancel
+          </button>
+        )}
+        <button type="submit" className="ui-button">Add provider</button>
+      </div>
     </form>
   );
 }

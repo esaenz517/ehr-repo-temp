@@ -28,9 +28,8 @@
   flex-direction: column;
   gap: 12px;
   padding: 14px 16px;
-  border: 1px solid var(--color-border);
-  border-top: 3px solid var(--color-primary);
-  border-radius: var(--radius);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
   background: var(--color-surface);
 }
 
@@ -43,7 +42,8 @@
 
 .history-section-title {
   margin: 0;
-  font-size: 16px;
+  font-size: var(--text-md);
+  font-weight: 600;
   color: var(--color-primary);
 }
 
@@ -51,10 +51,10 @@
   min-width: 24px;
   padding: 2px 8px;
   border-radius: var(--radius-pill);
-  background: var(--color-bg);
-  color: var(--color-text-muted);
+  background: var(--color-primary-tint);
+  color: var(--color-primary);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   text-align: center;
 }
 
@@ -82,7 +82,7 @@
   align-items: flex-start;
   gap: 12px;
   padding: 10px 8px;
-  border-bottom: 1px solid var(--color-bg);
+  border-bottom: 1px solid var(--color-border-light);
   border-radius: var(--radius);
 }
 
@@ -91,7 +91,7 @@
 }
 
 .history-entry:hover {
-  background: var(--color-bg);
+  background: var(--color-bg-subtle);
 }
 
 .history-entry-main {
@@ -121,8 +121,8 @@
   margin-right: 8px;
   padding: 1px 8px;
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--color-primary-tint);
+  color: var(--color-primary);
   font-size: 12px;
   font-weight: 600;
   vertical-align: 1px;
@@ -131,7 +131,8 @@
 /* Smaller version of the shared danger button for list rows */
 .history-delete {
   flex-shrink: 0;
-  padding: 4px 10px;
+  height: var(--control-height-sm);
+  padding: 0 10px;
   font-size: 13px;
 }
 
@@ -142,7 +143,7 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px 12px;
   padding-top: 12px;
-  border-top: 1px solid var(--color-bg);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .history-field {

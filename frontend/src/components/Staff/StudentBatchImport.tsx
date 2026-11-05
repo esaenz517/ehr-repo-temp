@@ -197,22 +197,17 @@ export function StudentBatchImport({ onImported }: Props) {
 
 
     return (
-        <section
-            className="ui-form-panel"
-            aria-label="Batch student import"
-        >
-            <h2 className="ui-form-panel-title">
-                Batch Import Students
-            </h2>
+        <section className="ui-panel" aria-label="Batch student import">
+            <header className="ui-panel-header">
+                <div className="ui-panel-heading">
+                    <h2 className="ui-panel-title">Import students</h2>
+                    <p className="ui-panel-description">
+                        Upload a CSV with FirstName, LastName, Specialization, and Email (or UserPrincipalName). MiddleName and Username are optional. Students receive the STUDENT role automatically.
+                    </p>
+                </div>
+            </header>
 
-            <p
-                className="ui-muted ui-flush"
-            >
-                Upload a CSV with FirstName, LastName,
-                Specialization, and Email (or UserPrincipalName).
-                MiddleName and Username are optional.
-                Students receive the STUDENT role automatically.
-            </p>
+            <div className="ui-panel-body form-stack">
 
             <div className="ui-form-row">
 
@@ -332,6 +327,7 @@ export function StudentBatchImport({ onImported }: Props) {
                     </div>
                 </>
             )}
+            </div>
         </section>
     );
 }
