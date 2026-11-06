@@ -14,7 +14,9 @@ BEGIN
         Pronouns            NVARCHAR(20)  NOT NULL,
         Status              NVARCHAR(20)  NOT NULL DEFAULT 'outpatient'
                             CHECK (Status IN ('outpatient', 'inpatient')),
-        ProviderId          INT           NULL REFERENCES dbo.Providers(ProviderId) -- patient's medical provider
+        ProviderId          INT           NULL REFERENCES dbo.Providers(ProviderId), -- patient's medical provider
+        UserId              INT           NULL
+            CONSTRAINT FK_Patients_Users REFERENCES dbo.Users(UserId) -- patient portal account (NULL = no portal access)
     );
 END
 GO
@@ -99,6 +101,22 @@ IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_Patients_Provider
 BEGIN
     ALTER TABLE dbo.Patients
         ADD CONSTRAINT FK_Patients_Providers FOREIGN KEY (ProviderId) REFERENCES dbo.Providers(ProviderId);
+END
+GO
+
+-- Add UserId (the patient portal account) to a Patients table created before the portal existed.
+IF COL_LENGTH('dbo.Patients', 'UserId') IS NULL
+BEGIN
+    ALTER TABLE dbo.Patients
+        ADD UserId INT NULL CONSTRAINT FK_Patients_Users REFERENCES dbo.Users(UserId);
+END
+GO
+
+-- One patient per portal account. Filtered, because a plain UNIQUE in SQL Server
+-- allows only a single NULL and most patients have no account.
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'UX_Patients_UserId' AND object_id = OBJECT_ID('dbo.Patients'))
+BEGIN
+    CREATE UNIQUE INDEX UX_Patients_UserId ON dbo.Patients (UserId) WHERE UserId IS NOT NULL;
 END
 GO
 

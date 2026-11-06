@@ -12,8 +12,12 @@ const STATUS_FILTERS = [
   { value: "inpatient", label: "Inpatient" },
 ];
 
+interface PatientsPageProps {
+  permissions: string[]; // the signed-in person's permission codes (Portal access tab needs user.read)
+}
+
 // Create, list, filter, edit, and delete patients.
-export function PatientsPage() {
+export function PatientsPage({ permissions }: PatientsPageProps) {
   const { patients, loading, error, create, update, remove } = usePatients();
   const { providers } = useProviders();
   const [search, setSearch] = useState(""); // matches the name, preferred name, or MRN
@@ -123,6 +127,7 @@ export function PatientsPage() {
             providers={providers}
             onUpdate={update}
             onDelete={remove}
+            permissions={permissions}
           />
         )}
       </Panel>

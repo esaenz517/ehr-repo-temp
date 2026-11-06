@@ -12,6 +12,7 @@
 --   admin      / admin123        Administrator
 --   student    / student123      Nursing student
 --   emmanuel, daniel, jacob, kinley, zachary, ana, luis: password is the username
+--   james      / james           Patient portal (James Carter, MRN000001)
 
 DROP TABLE IF EXISTS pg_temp.people;
 
@@ -71,3 +72,37 @@ ORDER BY p.Seq
 ON CONFLICT (username) DO NOTHING;
 
 DROP TABLE people;
+
+-- PATIENT PORTAL ACCOUNTS
+-- A patient signs in with the same login page. Their account is linked from
+-- dbo.Patients.UserId instead of dbo.Staff, so they get no staff role or permissions
+-- and only see their own record through the /portal API.
+DROP TABLE IF EXISTS pg_temp.portal_patients;
+
+CREATE TEMP TABLE portal_patients (
+    Username     VARCHAR(254),
+    PasswordHash VARCHAR(100),
+    Email        VARCHAR(320),
+    Mrn          VARCHAR(20)
+);
+
+INSERT INTO portal_patients VALUES
+    ('james', '$2b$12$ej9r2Jxg6UFAoHLTc.PCDueZ02d4elvPh3I0vqGekNkZYZg8AUstK', 'james.carter@example.local', 'MRN000001');
+
+INSERT INTO dbo.Users (Email, PasswordHash, AccountStatus)
+SELECT pp.Email, NULL, 'active'
+FROM portal_patients pp
+ON CONFLICT (Email) DO NOTHING;
+
+UPDATE dbo.Patients p SET UserId = u.UserId
+FROM portal_patients pp
+JOIN dbo.Users u ON u.Email = pp.Email
+WHERE pp.Mrn = p.Mrn AND p.UserId IS NULL;
+
+INSERT INTO dbo.T_Login (username, password_hash, userid)
+SELECT pp.Username, pp.PasswordHash, u.UserId
+FROM portal_patients pp
+JOIN dbo.Users u ON u.Email = pp.Email
+ON CONFLICT (username) DO NOTHING;
+
+DROP TABLE portal_patients;

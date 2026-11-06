@@ -1,6 +1,7 @@
 // Who can see which page. Kept free of React so it can be unit-tested.
 //
-// Students see their own pages only. Everyone else sees a page when their role
+// Patients (portal accounts) see only the patient portal pages. Students see
+// their own pages only. Everyone else sees a page when their role
 // has the permission the page needs (the backend checks the same permissions on
 // every request, so hiding a page is for convenience, not security).
 import type { LoginResponse, RoleName } from "./types";
@@ -19,10 +20,28 @@ export type View =
   | "clinicalNotes"
   | "grades"
   | "progress"
-  | "about";
+  | "about"
+  // Patient portal
+  | "portalHome"
+  | "portalAppointments"
+  | "portalHistory"
+  | "portalHealth"
+  | "portalResults"
+  | "portalBilling";
 
 // Students can access their dashboard, assignments, and published grades.
 export const STUDENT_VIEWS: View[] = ["home", "assignments", "grades"];
+
+// Patients see their own record and nothing else. The backend enforces this too:
+// patient accounts can only call /portal, which always returns their own data.
+export const PATIENT_VIEWS: View[] = [
+  "portalHome",
+  "portalAppointments",
+  "portalHistory",
+  "portalHealth",
+  "portalResults",
+  "portalBilling",
+];
 
 // The permission each staff page needs.
 export const VIEW_PERMISSIONS: Partial<Record<View, string>> = {
@@ -41,6 +60,7 @@ export const ROLE_LABELS: Record<RoleName, string> = {
   ADMIN: "Administrator",
   FACULTY_INSTRUCTOR: "Instructor",
   STUDENT: "Student",
+  PATIENT: "Patient",
 };
 
 // Label for a role name, e.g. "Instructor" for FACULTY_INSTRUCTOR.
@@ -59,8 +79,13 @@ export function isStudent(user: Who): boolean {
   return user.role === "STUDENT";
 }
 
+export function isPatient(user: Pick<LoginResponse, "role">): boolean {
+  return user.role === "PATIENT";
+}
+
 // The pages a person may open, in sidebar order.
 export function viewsFor(user: Who): View[] {
+  if (isPatient(user)) return [...PATIENT_VIEWS];
   if (isStudent(user)) return [...STUDENT_VIEWS];
 
   const views: View[] = ["home"];

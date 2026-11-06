@@ -32,7 +32,7 @@ Backend tests (pytest + FastAPI TestClient against a throwaway database rebuilt 
 docker compose --profile test run --rm backend-tests      # SQL Server, database AppDbTest
 docker compose --profile test run --rm backend-tests-pg   # Postgres, temporary postgres:16 container
 ```
-Signed-in clients per role (`admin`, `instructor`, `pharmacy`, `student`, `ana`) are fixtures in `backend/tests/conftest.py`. No linter is configured.
+Signed-in clients per role (`admin`, `instructor`, `pharmacy`, `student`, `ana`, plus the patient portal account `james`) are fixtures in `backend/tests/conftest.py`. No linter is configured.
 
 **Frontend, without Docker:**
 ```bash
@@ -46,6 +46,8 @@ npm test        # vitest unit tests (src/access.test.ts: which pages each role s
 No linter is configured beyond the TypeScript compiler run as part of `build`.
 
 **Access model:** `Users` is the account (email, password, `AccountStatus`); `Staff` is the person (name, `RoleId`, `DisciplineId`, `DepartmentId`, `UserId` → account, NULL for people without a login); `T_Login` is a username for an account (`userid`). Each person has exactly one role — `ADMIN`, `FACULTY_INSTRUCTOR`, or `STUDENT` — and RBAC (`crud/rbac.py`) joins `Staff.RoleId` → `RolePermissions`. `login.staffid` / `login.staff` (models/login.py) give the signed-in person. `CourseEnrollments` links people to course offerings; assignments with a `CourseId` only accept enrolled students. Frontend page visibility comes from the role's permission codes in `/auth/me` (`frontend/src/access.ts`).
+
+**Patient portal:** patients sign in on the same login page. A portal account is a `Users` row linked from `Patients.UserId` (not `Staff`), so it has no role and no RBAC permissions; `/auth/me` reports `role: "PATIENT"` and `patientid`, and the frontend renders `components/Portal/PatientPortal.tsx` instead of the staff app. Patients use only the read-only `/portal/*` API (`routers/portal.py`), which takes the patient from the session via `get_current_patient` and never accepts a patient id. Every staff router is registered in `main.py` with `dependencies=STAFF_ONLY` (`reject_patient_accounts`), which returns 403 to patient accounts even on endpoints that only check sign-in; register new staff routers the same way. Staff create a portal account from a patient's "Portal access" tab (`POST /patients/{id}/portal-account`, needs `user.create`); disabling it uses `PATCH /users/{id}/status`. Demo login: `james` / `james` (James Carter, MRN000001).
 
 **Schema changes:** there are no migration scripts. The table scripts create what's missing but don't reshape existing tables, so after a schema change rebuild the database from scratch (locally: `docker compose down -v` then `docker compose up --build`; Supabase: reset the database, then run `db/postgres/init.sql`).
 

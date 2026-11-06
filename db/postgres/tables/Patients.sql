@@ -13,9 +13,14 @@ CREATE TABLE IF NOT EXISTS dbo.Patients (
     Status              VARCHAR(20)  NOT NULL DEFAULT 'outpatient'
                         CHECK (Status IN ('outpatient', 'inpatient')),
     ProviderId          INT          NULL, -- patient's medical provider
+    UserId              INT          NULL, -- patient portal account (NULL = no portal access)
 
     CONSTRAINT FK_Patients_Providers
-        FOREIGN KEY (ProviderId) REFERENCES dbo.Providers(ProviderId)
+        FOREIGN KEY (ProviderId) REFERENCES dbo.Providers(ProviderId),
+    CONSTRAINT FK_Patients_Users
+        FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId),
+    -- One patient per portal account (Postgres UNIQUE allows many NULLs)
+    CONSTRAINT UQ_Patients_UserId UNIQUE (UserId)
 );
 
 -- MRN must be unique when present, but many patients may have none.

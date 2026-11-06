@@ -16,9 +16,11 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
     username: str
     staffid: int | None = None
+    # Set for a patient portal account (role is then PATIENT)
+    patientid: int | None = None
     first_name: str | None = None
     last_name: str | None = None
-    # ADMIN, FACULTY_INSTRUCTOR, or STUDENT
+    # ADMIN, FACULTY_INSTRUCTOR, or STUDENT; PATIENT for a portal account
     role: str | None = None
     role_display_name: str | None = None
     department_id: int | None = None

@@ -11,6 +11,7 @@
 --   admin      / admin123        Administrator
 --   student    / student123      Nursing student
 --   emmanuel, daniel, jacob, kinley, zachary, ana, luis: password is the username
+--   james      / james           Patient portal (James Carter, MRN000001)
 
 IF OBJECT_ID('tempdb..#People') IS NOT NULL DROP TABLE #People;
 
@@ -66,4 +67,40 @@ JOIN dbo.Users u ON u.Email = p.Email
 WHERE NOT EXISTS (SELECT 1 FROM dbo.T_Login l WHERE l.username = p.Username);
 
 DROP TABLE #People;
+GO
+
+-- PATIENT PORTAL ACCOUNTS
+-- A patient signs in with the same login page. Their account is linked from
+-- dbo.Patients.UserId instead of dbo.Staff, so they get no staff role or permissions
+-- and only see their own record through the /portal API.
+IF OBJECT_ID('tempdb..#PortalPatients') IS NOT NULL DROP TABLE #PortalPatients;
+
+CREATE TABLE #PortalPatients (
+    Username     NVARCHAR(254),
+    PasswordHash NVARCHAR(100),
+    Email        NVARCHAR(320),
+    Mrn          NVARCHAR(20)
+);
+
+INSERT INTO #PortalPatients VALUES
+    (N'james', N'$2b$12$ej9r2Jxg6UFAoHLTc.PCDueZ02d4elvPh3I0vqGekNkZYZg8AUstK', N'james.carter@example.local', N'MRN000001');
+
+INSERT INTO dbo.Users (Email, PasswordHash, AccountStatus)
+SELECT pp.Email, NULL, 'active'
+FROM #PortalPatients pp
+WHERE NOT EXISTS (SELECT 1 FROM dbo.Users u WHERE u.Email = pp.Email);
+
+UPDATE p SET UserId = u.UserId
+FROM dbo.Patients p
+JOIN #PortalPatients pp ON pp.Mrn = p.Mrn
+JOIN dbo.Users u        ON u.Email = pp.Email
+WHERE p.UserId IS NULL;
+
+INSERT INTO dbo.T_Login (username, password_hash, userid)
+SELECT pp.Username, pp.PasswordHash, u.UserId
+FROM #PortalPatients pp
+JOIN dbo.Users u ON u.Email = pp.Email
+WHERE NOT EXISTS (SELECT 1 FROM dbo.T_Login l WHERE l.username = pp.Username);
+
+DROP TABLE #PortalPatients;
 GO

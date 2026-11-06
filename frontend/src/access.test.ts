@@ -1,6 +1,6 @@
 // Unit tests for the page-access rules in access.ts. Run with: npm test
 import { describe, expect, it } from "vitest";
-import { can, roleLabel, roleName, STUDENT_VIEWS, viewsFor } from "./access";
+import { can, isPatient, PATIENT_VIEWS, roleLabel, roleName, STUDENT_VIEWS, viewsFor } from "./access";
 import type { LoginResponse } from "./types";
 
 type Who = Pick<LoginResponse, "role" | "permissions" | "department_name">;
@@ -28,7 +28,24 @@ const STUDENT: Who = {
   permissions: ["assignment.read", "assignment.update", "case.read", "note.read.general", "patient.read"],
 };
 
+// A patient portal account: no role permissions (see backend routers/login.py)
+const PATIENT: Who = { role: "PATIENT", department_name: null, permissions: [] };
+
 describe("viewsFor", () => {
+  it("gives patients only the patient portal pages", () => {
+    expect(viewsFor(PATIENT)).toEqual(PATIENT_VIEWS);
+    expect(viewsFor(PATIENT)).not.toContain("home");
+    expect(viewsFor(PATIENT)).not.toContain("patients");
+    expect(isPatient(PATIENT)).toBe(true);
+    expect(isPatient(STUDENT)).toBe(false);
+  });
+
+  it("never gives staff or students the portal pages", () => {
+    for (const who of [ADMIN, INSTRUCTOR, STUDENT]) {
+      for (const view of PATIENT_VIEWS) expect(viewsFor(who)).not.toContain(view);
+    }
+  });
+
   it("gives students only their own pages, even with read permissions", () => {
     expect(viewsFor(STUDENT)).toEqual(STUDENT_VIEWS);
     expect(viewsFor(STUDENT)).not.toContain("patients");

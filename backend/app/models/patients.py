@@ -1,6 +1,9 @@
 """
 Patients Model
 SQLAlchemy ORM class mapped to the dbo.Patients table.
+
+user_id links a patient to a portal account (dbo.Users), the same way
+Staff.user_id links staff. See models/login.py for how a login finds it.
 """
 
 from sqlalchemy import Column, Date, ForeignKey, Integer, String, Table
@@ -39,6 +42,8 @@ class Patient(Base):
     provider_id = Column(
         "ProviderId", Integer, ForeignKey("dbo.Providers.ProviderId"), nullable=True
     )
+    # Patient portal account (dbo.Users); NULL when the patient cannot sign in.
+    user_id = Column("UserId", Integer, ForeignKey("dbo.Users.UserId"), nullable=True)
 
     # Many-to-one: the patient's medical provider.
     provider = relationship("Provider")
