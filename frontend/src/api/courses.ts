@@ -37,6 +37,12 @@ export const coursesApi = {
   enrollments: (courseId: number) => apiFetch<Staff[]>(`/courses/${courseId}/enrollments`),
   enroll: (courseId: number, staffId: number) =>
     apiFetch<void>(`/courses/${courseId}/enrollments/${staffId}`, { method: "POST" }),
+  // Adds several people at once; returns how many were newly enrolled
+  enrollMany: (courseId: number, staffIds: number[]) =>
+    apiFetch<{ added: number }>(`/courses/${courseId}/enrollments`, {
+      method: "POST",
+      body: JSON.stringify({ staff_ids: staffIds }),
+    }),
   unenroll: (courseId: number, staffId: number) =>
     apiFetch<void>(`/courses/${courseId}/enrollments/${staffId}`, { method: "DELETE" }),
 };

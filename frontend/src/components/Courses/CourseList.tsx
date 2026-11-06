@@ -13,8 +13,9 @@ interface CourseListProps {
 // Later terms in a year sort first (Fall, then Summer, then Spring)
 const TERM_ORDER: Record<CourseTerm, number> = { Fall: 0, Summer: 1, Spring: 2 };
 
-// Newest semester first, then by subject and course number
-const byNewestSemester = (a: Course, b: Course) =>
+// Active courses first, then newest semester, then by subject and course number
+const byActiveThenNewestSemester = (a: Course, b: Course) =>
+  Number(b.is_active) - Number(a.is_active) ||
   b.term_year - a.term_year ||
   TERM_ORDER[a.term] - TERM_ORDER[b.term] ||
   a.subject_code.localeCompare(b.subject_code) ||
@@ -58,7 +59,7 @@ export function CourseList({ courses, canEnroll, onRename, onSetActive }: Course
           </tr>
         </thead>
         <tbody>
-          {[...courses].sort(byNewestSemester).map((course) => {
+          {[...courses].sort(byActiveThenNewestSemester).map((course) => {
             const editing = editingId === course.course_id;
             const rosterOpen = rosterId === course.course_id;
             return (

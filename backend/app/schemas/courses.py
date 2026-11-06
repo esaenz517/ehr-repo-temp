@@ -40,3 +40,12 @@ class CourseUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
     department_id: int | None = None
     is_active: bool | None = None
+
+
+# Adds several people to a course at once (the roster's multi-select)
+class EnrollmentBatch(BaseModel):
+    staff_ids: list[int] = Field(min_length=1, max_length=500)
+
+
+class EnrollmentBatchResult(BaseModel):
+    added: int  # people newly enrolled; those already in the course aren't counted

@@ -100,6 +100,28 @@ def enroll(db: Session, course_id: int, staffid: int) -> None:
         db.commit()
 
 
+# Adds several people to a course in one commit. People already enrolled are
+# skipped, so sending the same list twice is fine. Returns how many were added.
+def enroll_many(db: Session, course_id: int, staff_ids: list[int]) -> int:
+    already = {
+        staff_id
+        for (staff_id,) in db.query(CourseEnrollment.staff_id).filter(
+            CourseEnrollment.course_id == course_id,
+            CourseEnrollment.staff_id.in_(staff_ids),
+        )
+    }
+    to_add = [staff_id for staff_id in dict.fromkeys(staff_ids) if staff_id not in already]
+    db.add_all(CourseEnrollment(course_id=course_id, staff_id=staff_id) for staff_id in to_add)
+    db.commit()
+    return len(to_add)
+
+
+# The ids in staff_ids that don't belong to anyone.
+def missing_staff_ids(db: Session, staff_ids: list[int]) -> set[int]:
+    found = {staffid for (staffid,) in db.query(Staff.staffid).filter(Staff.staffid.in_(staff_ids))}
+    return set(staff_ids) - found
+
+
 # Removes a person from a course. Returns False if they were not enrolled.
 def unenroll(db: Session, course_id: int, staffid: int) -> bool:
     enrollment = (

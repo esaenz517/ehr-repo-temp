@@ -101,6 +101,33 @@ def test_enrollments(instructor, lookup, admin):
     assert instructor.post(f"/courses/{course_id}/enrollments/999999").status_code == 404
 
 
+def test_enroll_many(instructor, student, lookup):
+    course_id = lookup.course("NURS", "3310")
+    ana = lookup.staff("Ana", "Torres")["staffid"]
+    luis = lookup.staff("Luis", "Herrera")["staffid"]
+    sam = lookup.staff("Sam", "Student")["staffid"]  # already enrolled
+    url = f"/courses/{course_id}/enrollments"
+
+    try:
+        added = instructor.post(url, json={"staff_ids": [ana, luis, sam, ana]})
+        assert added.status_code == 200
+        assert added.json() == {"added": 2}  # Sam was already in; the repeated id counts once
+        enrolled = {p["staffid"] for p in instructor.get(url).json()}
+        assert {ana, luis, sam} <= enrolled
+        assert instructor.post(url, json={"staff_ids": [ana, luis]}).json() == {"added": 0}
+    finally:
+        instructor.delete(f"{url}/{ana}")
+        instructor.delete(f"{url}/{luis}")
+
+    # One unknown id adds nobody
+    assert instructor.post(url, json={"staff_ids": [ana, 999999]}).status_code == 404
+    assert ana not in {p["staffid"] for p in instructor.get(url).json()}
+
+    assert instructor.post(url, json={"staff_ids": []}).status_code == 422
+    assert instructor.post("/courses/999999/enrollments", json={"staff_ids": [ana]}).status_code == 404
+    assert student.post(url, json={"staff_ids": [ana]}).status_code == 403
+
+
 def test_my_courses(ana, pharmacy, admin):
     mine = {c["short_label"] for c in ana.get("/courses/mine").json()}
     assert {"PHAR 5310", "IHS 5100", "PHAR 6150"} <= mine
