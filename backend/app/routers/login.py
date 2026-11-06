@@ -19,9 +19,24 @@ from app.security.session_cookie import SESSION_COOKIE, clear_session_cookie, se
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
+# Role reported for patient portal accounts. It is not a row in dbo.Roles:
+# patients have no RBAC permissions and use only the /portal API.
+PATIENT_ROLE = "PATIENT"
+
+
 def to_response(db: Session, login: Login) -> LoginResponse:
     staff = login.staff
     if staff is None:
+        patient = login.patient
+        if patient is not None:
+            return LoginResponse(
+                username=login.username,
+                patientid=patient.patient_id,
+                first_name=patient.preferred_name or patient.first_name,
+                last_name=patient.last_name,
+                role=PATIENT_ROLE,
+                role_display_name="Patient",
+            )
         return LoginResponse(username=login.username)
 
     return LoginResponse(

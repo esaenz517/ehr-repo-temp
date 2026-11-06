@@ -30,9 +30,12 @@ from app.routers import (
     deletion_audit,
     departments,
     disciplines,
+    portal,
+    portal_accounts,
 )
 from app.security.deletion_audit_middleware import deletion_audit_middleware
 from app.database import get_db, use_unquoted_names_on_postgres
+from app.security.current_user import reject_patient_accounts
 
 # Every model is imported by now (through the routers above).
 use_unquoted_names_on_postgres()
@@ -51,31 +54,39 @@ app.add_middleware(
 # Log every delete request and its outcome to dbo.DeletionAuditLog
 app.middleware("http")(deletion_audit_middleware)
 
-app.include_router(patients.router)
-app.include_router(providers.router)
-app.include_router(drugs.router)
-app.include_router(staff.router)
-app.include_router(batch_students.router)
-app.include_router(grades_progress.router)
+# Patient portal accounts may only use /auth and /portal. Every other router
+# turns them away (403), on top of each endpoint's own permission check.
+STAFF_ONLY = [Depends(reject_patient_accounts)]
+
+app.include_router(patients.router, dependencies=STAFF_ONLY)
+app.include_router(providers.router, dependencies=STAFF_ONLY)
+app.include_router(drugs.router, dependencies=STAFF_ONLY)
+app.include_router(staff.router, dependencies=STAFF_ONLY)
+app.include_router(batch_students.router, dependencies=STAFF_ONLY)
+app.include_router(grades_progress.router, dependencies=STAFF_ONLY)
 app.include_router(login.router)
-app.include_router(medical_history.router)
-app.include_router(rooms.router)
-app.include_router(appointments.router)
-app.include_router(billing.router)
-app.include_router(insurance.router)
-app.include_router(cases.router)
-app.include_router(courses.router)
-app.include_router(departments.router)
-app.include_router(disciplines.router)
+app.include_router(medical_history.router, dependencies=STAFF_ONLY)
+app.include_router(rooms.router, dependencies=STAFF_ONLY)
+app.include_router(appointments.router, dependencies=STAFF_ONLY)
+app.include_router(billing.router, dependencies=STAFF_ONLY)
+app.include_router(insurance.router, dependencies=STAFF_ONLY)
+app.include_router(cases.router, dependencies=STAFF_ONLY)
+app.include_router(courses.router, dependencies=STAFF_ONLY)
+app.include_router(departments.router, dependencies=STAFF_ONLY)
+app.include_router(disciplines.router, dependencies=STAFF_ONLY)
 
-app.include_router(users.router)
-app.include_router(roles.router)
-app.include_router(permissions.router)
-app.include_router(assignment.router)
-app.include_router(rubric.router)
+app.include_router(users.router, dependencies=STAFF_ONLY)
+app.include_router(roles.router, dependencies=STAFF_ONLY)
+app.include_router(permissions.router, dependencies=STAFF_ONLY)
+app.include_router(assignment.router, dependencies=STAFF_ONLY)
+app.include_router(rubric.router, dependencies=STAFF_ONLY)
 
-app.include_router(clinical_notes.router)
-app.include_router(deletion_audit.router)
+app.include_router(clinical_notes.router, dependencies=STAFF_ONLY)
+app.include_router(deletion_audit.router, dependencies=STAFF_ONLY)
+
+# Patient portal: a signed-in patient's own record (read-only)
+app.include_router(portal.router)
+app.include_router(portal_accounts.router, dependencies=STAFF_ONLY)
 
 
 @app.get("/health")

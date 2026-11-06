@@ -1,5 +1,6 @@
-// The three roles. Every person (Staff) has exactly one.
-export type RoleName = "ADMIN" | "FACULTY_INSTRUCTOR" | "STUDENT";
+// The three staff roles. Every person (Staff) has exactly one.
+// PATIENT is reported by /auth/me for a patient portal account; it has no permissions.
+export type RoleName = "ADMIN" | "FACULTY_INSTRUCTOR" | "STUDENT" | "PATIENT";
 
 export interface Role {
   role_id: number;
@@ -109,6 +110,7 @@ export interface StaffInput {
 export interface LoginResponse {
   username: string;
   staffid: number | null;
+  patientid: number | null; // set for a patient portal account (role PATIENT)
   first_name: string | null;
   last_name: string | null;
   role: RoleName | null;
@@ -252,3 +254,118 @@ export interface Course {
   short_label: string; // e.g. "PHAR 5310" (computed by the backend)
   label: string; // e.g. "PHAR 5310 – Pharmacotherapy I (Fall 2026)"
 }
+
+// ---- Patient portal (GET /portal/*): the signed-in patient's own record ----
+
+export interface PortalProvider {
+  first_name: string;
+  last_name: string;
+  specialty: string | null;
+  phone: string | null;
+  email: string | null;
+}
+
+export interface PortalProfile {
+  mrn: string | null;
+  first_name: string;
+  middle_name: string | null;
+  last_name: string;
+  preferred_name: string | null;
+  date_of_birth: string;
+  gender_identity: string;
+  pronouns: string;
+  status: "outpatient" | "inpatient" | string;
+  provider: PortalProvider | null;
+}
+
+export interface PortalAppointment {
+  appointment_id: number;
+  appointment_datetime: string;
+  location: string;
+  status: string; // scheduled, completed, cancelled, ...
+  provider_name: string | null;
+  provider_specialty: string | null;
+}
+
+export interface PortalCharge {
+  charge_id: number;
+  charge_summary: string;
+  charge_amount: string; // decimal as a string, e.g. "145.00"
+}
+
+export interface PortalBilling {
+  charges: PortalCharge[];
+  total: string;
+}
+
+export interface PortalInsurance {
+  insurance_id: number;
+  insurance_company: string;
+  member_id: string;
+  group_number: string | null;
+  policyholder_name: string;
+  insurance_priority: string;
+  coverage_start_date: string | null;
+  coverage_end_date: string | null;
+  verification_status: string;
+}
+
+export interface PortalMedicalHistory {
+  medical_history_id: number;
+  condition: string;
+  diagnosis_date: string | null;
+  notes: string | null;
+}
+
+export interface PortalFamilyHistory {
+  family_history_id: number;
+  relationship: string;
+  condition: string;
+  notes: string | null;
+}
+
+export interface PortalMedication {
+  drug_id: number;
+  name: string;
+  dosage: string | null;
+  route: string | null;
+  frequency: string | null;
+}
+
+export interface PortalAllergy {
+  allergy_id: number;
+  substance: string;
+  reaction: string | null;
+}
+
+export interface PortalVital {
+  vital_id: number;
+  recorded_at: string;
+  blood_pressure: string | null;
+  heart_rate: number | null;
+  respiratory_rate: number | null;
+  temperature_c: string | null;
+  oxygen_saturation: string | null;
+  height_cm: string | null;
+  weight_kg: string | null;
+}
+
+export interface PortalLabResult {
+  lab_result_id: number;
+  test_name: string;
+  result: string;
+  unit: string | null;
+  flag: string | null;
+  collected_at: string;
+}
+
+// A patient's portal account, as staff see it (GET /patients/{id}/portal-account).
+export interface PortalAccount {
+  user_id: number;
+  username: string | null;
+  email: string;
+  account_status: "active" | "disabled" | "locked";
+  created_at: string;
+  temporary_password?: string | null; // only in the create response, when generated
+}
+

@@ -5,6 +5,7 @@ import { MedicalHistoryPanel } from "../MedicalHistory/MedicalHistoryPanel";
 import { AppointmentPanel } from "../Appointments/AppointmentPanel";
 import { BillingChargePanel } from "../Billing/BillingChargePanel";
 import { InsurancePanel } from "../Insurance/InsurancePanel";
+import { PortalAccessPanel } from "./PortalAccessPanel";
 import { confirmDelete } from "../confirmDelete";
 import { PatientForm } from "./PatientForm";
 import "./patients.css";
@@ -15,6 +16,7 @@ interface PatientListProps {
   providers: Provider[]; // options for the edit form
   onUpdate: (patientId: number, changes: UpdatePatientInput) => Promise<boolean>;
   onDelete: (patientId: number) => void;
+  permissions: string[]; // the Portal access tab shows for people with user.read
 }
 
 // Toggle buttons are outlined while closed and solid blue while their panel is open
@@ -22,13 +24,14 @@ const toggleClass = (open: boolean) =>
   open ? "ui-button ui-button--small" : "ui-button ui-button--secondary ui-button--small";
 
 // Tabs inside a patient's Details panel
-type DetailTab = "summary" | "history" | "appointments" | "charges" | "insurance";
+type DetailTab = "summary" | "history" | "appointments" | "charges" | "insurance" | "portal";
 const DETAIL_TABS: { id: DetailTab; label: string }[] = [
   { id: "summary", label: "Summary" },
   { id: "history", label: "Medical history" },
   { id: "appointments", label: "Appointments" },
   { id: "charges", label: "Charges" },
   { id: "insurance", label: "Insurance" },
+  { id: "portal", label: "Portal access" }, // only with user.read (account managers)
 ];
 
 const COLUMN_COUNT = 6; // Patient, MRN, DOB, Status, Provider, actions; the detail row spans them all
@@ -37,7 +40,8 @@ const COLUMN_COUNT = 6; // Patient, MRN, DOB, Status, Provider, actions; the det
 // date of birth, status, and provider. Details opens a panel under the row with
 // tabs for the summary (identity, drugs), history, appointments, charges and
 // insurance; Edit opens the full patient form there instead.
-export function PatientList({ patients, emptyText, providers, onUpdate, onDelete }: PatientListProps) {
+export function PatientList({ patients, emptyText, providers, onUpdate, onDelete, permissions }: PatientListProps) {
+  const tabs = DETAIL_TABS.filter((tab) => tab.id !== "portal" || permissions.includes("user.read"));
   const [editingPatientId, setEditingPatientId] = useState<number | null>(null);
   const [detailsPatientId, setDetailsPatientId] = useState<number | null>(null);
   // Which tab is showing in the open Details panel (only one panel is open at a time)
@@ -148,7 +152,7 @@ export function PatientList({ patients, emptyText, providers, onUpdate, onDelete
                       ) : (
                         <>
                           <div className="ui-tabs" role="tablist" aria-label="Patient details">
-                            {DETAIL_TABS.map((tab) => (
+                            {tabs.map((tab) => (
                               <button
                                 key={tab.id}
                                 type="button"
@@ -179,6 +183,13 @@ export function PatientList({ patients, emptyText, providers, onUpdate, onDelete
                             {detailTab === "appointments" && <AppointmentPanel patientId={patient.patient_id} />}
                             {detailTab === "charges" && <BillingChargePanel patientId={patient.patient_id} />}
                             {detailTab === "insurance" && <InsurancePanel patientId={patient.patient_id} />}
+                            {detailTab === "portal" && (
+                              <PortalAccessPanel
+                                patientId={patient.patient_id}
+                                canCreate={permissions.includes("user.create")}
+                                canChangeStatus={permissions.includes("user.manage_roles")}
+                              />
+                            )}
                           </div>
                         </>
                       )}

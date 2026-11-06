@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.crud.drugs import get_or_create_drug_by_name
 from app.models.drugs import Drug as DrugModel
 from app.models.patients import Patient as PatientModel
+from app.models.users import User
 from app.schemas.patients import PatientCreate, PatientUpdate
 
 # Columns that may be set back to NULL. Every other column is NOT NULL.
@@ -87,10 +88,16 @@ def update_patient(db: Session, patient_id: int, changes: PatientUpdate):
 
 
 # Deletes a patient by id. Returns True if a row was actually deleted.
+# A patient portal account linked to the patient is disabled in the same commit,
+# so its login can't sign in to an account with no record behind it.
 def delete_patient(db: Session, patient_id: int) -> bool:
     db_patient = get_patient(db, patient_id)
     if db_patient is None:
         return False
+    if db_patient.user_id is not None:
+        account = db.query(User).filter(User.user_id == db_patient.user_id).first()
+        if account is not None:
+            account.account_status = "disabled"
     db.delete(db_patient)
     db.commit()
     return True

@@ -15,6 +15,7 @@ interface SidebarProps {
   onNavigate: (view: View) => void;
   username: string;
   role?: string; // shown under the username, e.g. "Student · Nursing"
+  subtitle?: string; // under the brand name; "Patient portal" for patients
   onLogout: () => void;
   allowedViews?: View[];
 
@@ -44,7 +45,7 @@ function saveCollapsed(value: boolean) {
 
 // Navigation entries, grouped under small section labels. A group only
 // shows when the user can see at least one of its pages.
-type NavGroup = "Overview" | "Teaching" | "Records" | "Coursework";
+type NavGroup = "Overview" | "Teaching" | "Records" | "Coursework" | "My Health" | "Account";
 
 const NAV_ITEMS: { view: View; label: string; group: NavGroup }[] = [
   { view: "home", label: "Dashboard", group: "Overview" }, // student or instructor dashboard, picked in Home.tsx
@@ -62,15 +63,24 @@ const NAV_ITEMS: { view: View; label: string; group: NavGroup }[] = [
 
   { view: "assignments", label: "My Assignments", group: "Coursework" },
   { view: "grades", label: "My Grades", group: "Coursework" },
+
+  // Patient portal (patients see only these; see PATIENT_VIEWS in access.ts)
+  { view: "portalHome", label: "Overview", group: "Overview" },
+  { view: "portalAppointments", label: "Appointments", group: "My Health" },
+  { view: "portalHistory", label: "Medical History", group: "My Health" },
+  { view: "portalHealth", label: "Medications & Allergies", group: "My Health" },
+  { view: "portalResults", label: "Test Results", group: "My Health" },
+  { view: "portalBilling", label: "Billing & Insurance", group: "Account" },
 ];
 
-const GROUP_ORDER: NavGroup[] = ["Overview", "Teaching", "Records", "Coursework"];
+const GROUP_ORDER: NavGroup[] = ["Overview", "Teaching", "Records", "Coursework", "My Health", "Account"];
 
 export function Sidebar({
   active,
   onNavigate,
   username,
   role,
+  subtitle = "Training system",
   onLogout,
   allowedViews,
   progressAlertCount = 0,
@@ -82,7 +92,7 @@ export function Sidebar({
   const items = allowedViews
     ? NAV_ITEMS.filter(({ view }) => allowedViews.includes(view))
     // : NAV_ITEMS.filter(({ view }) => view !== "grades");
-    : NAV_ITEMS.filter(({ view }) => view !== "grades" && view !== "assignments");
+    : NAV_ITEMS.filter(({ view }) => view !== "grades" && view !== "assignments" && !view.startsWith("portal"));
 
   const [collapsed, setCollapsed] = useState(readCollapsed);
 
@@ -122,7 +132,7 @@ export function Sidebar({
         <img className="sidebar-logo" src={logo} alt="UTEP logo" />
         <span className="sidebar-title">
           EMR
-          <span className="sidebar-subtitle">Training system</span>
+          <span className="sidebar-subtitle">{subtitle}</span>
         </span>
       </div>
 

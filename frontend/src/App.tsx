@@ -7,7 +7,7 @@ import { ProvidersPage } from "./components/ProvidersPage";
 import { RoomsPage } from "./components/RoomsPage";
 import { CoursesPage } from "./components/CoursesPage";
 import { Sidebar } from "./components/Sidebar/Sidebar";
-import { can, isStudent, roleLabel, viewsFor, type View } from "./access";
+import { can, isPatient, isStudent, roleLabel, viewsFor, type View } from "./access";
 import { LoginPage } from "./components/Login/LoginPage";
 import { loginApi } from "./api/login";
 import type { Assignment, LoginResponse } from "./types";
@@ -19,6 +19,7 @@ import { StudentGradesPage } from "./components/Grades/StudentGradesPage";
 import { InstructorProgressPage } from "./components/Progress/InstructorProgressPage";
 import { gradesApi } from "./api/grades";
 import { AboutPage } from "./components/About/AboutPage";
+import { PatientPortal } from "./components/Portal/PatientPortal";
 
 function App() {
   const [view, setView] = useState<View>("home");
@@ -84,6 +85,23 @@ function App() {
   if (!user) {
     return <LoginPage onLogin={setUser} />;
   }
+
+  const logout = () => {
+    loginApi.logout()
+      .catch(() => { }) // sign out locally even if the server call fails
+      .finally(() => {
+        setUser(null);
+        setView("home");
+      });
+    setUser(null);
+    setOpenAssignment(null);
+    setView("home");
+  };
+
+  // Patients sign in on the same page and get the patient portal instead of the staff app
+  if (isPatient(user)) {
+    return <PatientPortal user={user} onLogout={logout} />;
+  }
   // Every login belongs to a person; without one there is nothing to show.
   if (user.staffid === null) {
     return (
@@ -111,17 +129,7 @@ function App() {
           setView(v);
         }}
         allowedViews={allowedViews}
-        onLogout={() => {
-          loginApi.logout()
-            .catch(() => { }) // sign out locally even if the server call fails
-            .finally(() => {
-              setUser(null);
-              setView("home");
-            });
-          setUser(null);
-          setOpenAssignment(null);
-          setView("home");
-        }}
+        onLogout={logout}
       />
 
       <main className="app-main">
@@ -143,7 +151,7 @@ function App() {
             }}
           />
         )}
-        {view === "patients" && canView("patients") && <PatientsPage />}
+        {view === "patients" && canView("patients") && <PatientsPage permissions={user.permissions} />}
         {view === "staff" && canView("staff") && (
           <StaffPage permissions={user.permissions} />
         )}
