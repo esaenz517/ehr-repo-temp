@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { coursesApi } from "../../api/courses";
 import { staffApi } from "../../api/staff";
-import { roleName } from "../../access";
 import type { Course, Staff } from "../../types";
+import { CourseRosterAdd } from "./CourseRosterAdd";
 
 interface CourseRosterProps {
   course: Course;
@@ -16,8 +16,8 @@ const fullName = (p: Staff) => `${p.last_name}, ${p.first_name}`;
 export function CourseRoster({ course, canEnroll }: CourseRosterProps) {
   const [people, setPeople] = useState<Staff[]>([]);
   const [everyone, setEveryone] = useState<Staff[]>([]); // candidates to add
-  const [adding, setAdding] = useState(""); // staff id picked in the Add select
   const [loading, setLoading] = useState(true);
+  const [pickerOpen, setPickerOpen] = useState(false); // the Add people panel
   const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
@@ -37,14 +37,15 @@ export function CourseRoster({ course, canEnroll }: CourseRosterProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [course.course_id, canEnroll]);
 
-  const enroll = async () => {
-    if (!adding) return;
+  // Adds everyone picked in CourseRosterAdd in one request; returns how many were added
+  const enrollMany = async (staffIds: number[]) => {
     try {
-      await coursesApi.enroll(course.course_id, Number(adding));
-      setAdding("");
+      const { added } = await coursesApi.enrollMany(course.course_id, staffIds);
       await load();
+      return added;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add to the course");
+      return null;
     }
   };
 
@@ -58,14 +59,10 @@ export function CourseRoster({ course, canEnroll }: CourseRosterProps) {
   };
 
   const enrolled = new Set(people.map((p) => p.staffid));
-  // Students of the course's department first, then everyone else
+  // Everyone not yet in the course except admins, sorted by name
   const candidates = everyone
     .filter((p) => !enrolled.has(p.staffid) && !p.admin)
-    .sort(
-      (a, b) =>
-        Number(b.department_id === course.department_id) - Number(a.department_id === course.department_id) ||
-        fullName(a).localeCompare(fullName(b))
-    );
+    .sort((a, b) => fullName(a).localeCompare(fullName(b)));
 
   const instructors = people.filter((p) => !p.student);
   const students = people.filter((p) => p.student);
@@ -113,26 +110,21 @@ export function CourseRoster({ course, canEnroll }: CourseRosterProps) {
         </div>
       )}
 
-      {canEnroll && (
-        <div className="courses-roster-add">
-          <select
-            value={adding}
-            onChange={(e) => setAdding(e.target.value)}
-            aria-label={`Person to add to ${course.short_label}`}
-            className="ui-input"
-          >
-            <option value="">Add a student or instructor…</option>
-            {candidates.map((p) => (
-              <option key={p.staffid} value={p.staffid}>
-                {fullName(p)} ({roleName(p.role_name)}{p.department_name ? `, ${p.department_name}` : ""})
-              </option>
-            ))}
-          </select>
-          <button type="button" className="ui-button ui-button--small" disabled={!adding} onClick={enroll}>
-            Add
-          </button>
-        </div>
-      )}
+      {canEnroll &&
+        (pickerOpen ? (
+          <CourseRosterAdd
+            course={course}
+            candidates={candidates}
+            onAdd={enrollMany}
+            onClose={() => setPickerOpen(false)}
+          />
+        ) : (
+          <div className="courses-roster-toolbar">
+            <button type="button" className="ui-button ui-button--small" onClick={() => setPickerOpen(true)}>
+              + Add people
+            </button>
+          </div>
+        ))}
 
       {error && <p className="ui-error">{error}</p>}
     </section>

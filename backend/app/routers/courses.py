@@ -7,7 +7,7 @@ from app.security.current_user import get_current_login
 from app.crud import courses as crud
 from app.crud import staff as staff_crud
 from app.models.login import Login
-from app.schemas.courses import Course, CourseCreate, CourseUpdate
+from app.schemas.courses import Course, CourseCreate, CourseUpdate, EnrollmentBatch, EnrollmentBatchResult
 from app.schemas.staff import Staff
 from app.database import get_db
 
@@ -73,6 +73,17 @@ def list_enrollments(course_id: int, db: Session = Depends(get_db), current_user
     if crud.get_course(db, course_id) is None:
         raise HTTPException(status_code=404, detail="Course not found")
     return crud.list_enrollments(db, course_id)
+
+
+# Adds several people at once. Every id must exist or nothing is added.
+@router.post("/{course_id}/enrollments", response_model=EnrollmentBatchResult)
+def enroll_many(course_id: int, batch: EnrollmentBatch, db: Session = Depends(get_db), current_user=Depends(require_permission("course", "update"))):
+    if crud.get_course(db, course_id) is None:
+        raise HTTPException(status_code=404, detail="Course not found")
+    missing = crud.missing_staff_ids(db, batch.staff_ids)
+    if missing:
+        raise HTTPException(status_code=404, detail=f"Staff members not found: {sorted(missing)}")
+    return EnrollmentBatchResult(added=crud.enroll_many(db, course_id, batch.staff_ids))
 
 
 @router.post("/{course_id}/enrollments/{staffid}", status_code=204)

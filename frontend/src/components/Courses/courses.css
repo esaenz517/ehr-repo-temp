@@ -145,15 +145,194 @@
   gap: 8px;
 }
 
-.courses-roster-add {
+.courses-roster-toolbar {
   display: flex;
-  gap: 8px;
-  align-items: center;
-  max-width: 520px;
 }
 
-.courses-roster-add .ui-input {
+/* Add people panel (CourseRosterAdd): header, filter bar, then results | selected */
+.courses-add {
+  overflow: hidden;
+}
+
+.courses-add-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+}
+
+.courses-add-title {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-primary);
+}
+
+.courses-add-subtitle {
+  margin: 2px 0 0;
+  font-size: var(--text-sm);
+}
+
+.ui-panel .ui-filter-bar.courses-add-filters {
+  border-top: 1px solid var(--color-border-light);
+}
+
+.courses-add-search {
   flex: 1;
+  min-width: 200px;
+}
+
+.courses-add-body {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(220px, 2fr);
+}
+
+.courses-add-results {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-right: 1px solid var(--color-border-light);
+}
+
+.courses-add-all {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-5);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: var(--color-bg-subtle);
+  border-bottom: 1px solid var(--color-border-light);
+  cursor: pointer;
+}
+
+.courses-add-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.courses-add-list li + li {
+  border-top: 1px solid var(--color-border-light);
+}
+
+/* The whole row is the checkbox's label, so a click anywhere on it picks the person */
+.courses-add-person {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-5);
+  cursor: pointer;
+}
+
+.courses-add-person:hover {
+  background: var(--color-primary-tint-soft);
+}
+
+.courses-add-person--picked,
+.courses-add-person--picked:hover {
+  background: var(--color-primary-tint);
+}
+
+.courses-add-all input,
+.courses-add-person input {
+  margin: 0;
+  accent-color: var(--color-primary);
+}
+
+.courses-add-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.courses-add-meta {
+  font-size: var(--text-sm);
+}
+
+.courses-add-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  color: var(--color-text-muted);
+}
+
+.courses-add-empty p {
+  margin: 0;
+}
+
+.courses-add-picked {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-subtle);
+}
+
+.courses-add-picked-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.courses-add-picked-empty {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.courses-add-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.courses-add-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px 3px 10px;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.courses-add-chip:hover {
+  border-color: var(--color-error-border);
+  color: var(--color-error);
+}
+
+.courses-add-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: auto;
+}
+
+@media (max-width: 800px) {
+  .courses-add-body {
+    grid-template-columns: 1fr;
+  }
+
+  .courses-add-results {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border-light);
+  }
 }
 
 .courses-department {
