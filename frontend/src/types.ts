@@ -123,6 +123,8 @@ export interface LoginResponse {
   permissions: string[]; // e.g. "patient.read", "note.read.general"
   student: boolean;
   admin: boolean;
+  // Set by POST /auth/login when Duo two-factor is still needed: go here, no session yet
+  duo_auth_url?: string | null;
 }
 
 export interface MedicalHistory {

@@ -51,6 +51,15 @@ services:
       DB_USER: "dev"
       DB_PASSWORD: "dev123"
       CORS_ORIGINS: "http://localhost:3000"
+      # Duo two-factor for staff sign-in. The credentials come from the gitignored
+      # .env file next to this one (DUO_CLIENT_ID, DUO_CLIENT_SECRET, DUO_API_HOST).
+      # Set DUO_ENABLED to "false" to sign in with a password only.
+      DUO_ENABLED: "${DUO_ENABLED:-true}"
+      DUO_CLIENT_ID: "${DUO_CLIENT_ID:-}"
+      DUO_CLIENT_SECRET: "${DUO_CLIENT_SECRET:-}"
+      DUO_API_HOST: "${DUO_API_HOST:-}"
+      DUO_REDIRECT_URI: "http://localhost:8000/auth/duo/callback"
+      FRONTEND_URL: "http://localhost:3000"
     ports:
       - "8000:8000"
     depends_on:

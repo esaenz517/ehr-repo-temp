@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { loginApi } from "../../api/login";
 import type { LoginResponse } from "../../types";
 import logo from "../../images/UTEP-Logo.png";
@@ -14,6 +14,17 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // Back from Duo after a denied, expired, or tampered two-factor prompt
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("duo_error")) {
+      setError("Two-factor verification failed. Please sign in again.");
+      params.delete("duo_error");
+      const query = params.toString();
+      window.history.replaceState(null, "", window.location.pathname + (query ? `?${query}` : ""));
+    }
+  }, []);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password) return;
@@ -21,13 +32,21 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     setError(null);
     try {
       const user = await loginApi.login({ username, password });
+      if (user.duo_auth_url) {
+        // Password was right; Duo finishes the sign-in and redirects back to the app
+        window.location.assign(user.duo_auth_url);
+        return; // keep the button disabled while the browser leaves
+      }
       onLogin(user);
-    } catch {
-      setError("Invalid username or password");
+    } catch (err) {
+      setError(
+        err instanceof Error && err.message.includes("503")
+          ? "Two-factor service is unavailable. Please try again later."
+          : "Invalid username or password"
+      );
       setPassword("");
-    } finally {
-      setSubmitting(false);
     }
+    setSubmitting(false);
   };
 
   return (

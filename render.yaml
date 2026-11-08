@@ -53,6 +53,23 @@ services:
       # The frontend's Render URL, e.g. https://ehr-frontend.onrender.com
       - key: CORS_ORIGINS
         sync: false
+      # Duo two-factor. Off until the three Duo secrets below are set in the dashboard.
+      # The browser reaches the backend through the frontend's /api proxy, so the
+      # redirect URI and frontend URL are both on the frontend's domain, e.g.
+      #   DUO_REDIRECT_URI = https://ehr-frontend.onrender.com/api/auth/duo/callback
+      #   FRONTEND_URL     = https://ehr-frontend.onrender.com
+      - key: DUO_ENABLED
+        value: "false"
+      - key: DUO_CLIENT_ID
+        sync: false
+      - key: DUO_CLIENT_SECRET
+        sync: false
+      - key: DUO_API_HOST
+        sync: false
+      - key: DUO_REDIRECT_URI
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
 
   # React frontend, built by Vite and served as a static site.
   - type: web
