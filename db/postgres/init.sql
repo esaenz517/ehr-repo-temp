@@ -37,6 +37,7 @@ CREATE SCHEMA IF NOT EXISTS dbo;
 \ir seed/users.sql
 
 \ir tables/Sessions.sql
+\ir tables/DuoPending.sql
 \ir tables/PatientDrugs.sql
 \ir tables/MedicalHistory.sql
 \ir tables/Rooms.sql

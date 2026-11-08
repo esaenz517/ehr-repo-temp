@@ -53,6 +53,7 @@ GO
 :r /init/seed/users.sql
 
 :r /init/tables/Sessions.sql
+:r /init/tables/DuoPending.sql
 :r /init/tables/PatientDrugs.sql
 :r /init/tables/MedicalHistory.sql
 :r /init/tables/Rooms.sql

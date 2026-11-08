@@ -33,6 +33,9 @@ class LoginResponse(BaseModel):
     # Shortcuts kept for the frontend: role == STUDENT / role == ADMIN
     student: bool = False
     admin: bool = False
+    # Set instead of the fields above when the password was right but Duo two-factor
+    # is still needed: the frontend sends the browser here (no session yet).
+    duo_auth_url: str | None = None
 
     class Config:
         from_attributes = True
