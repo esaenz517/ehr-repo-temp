@@ -15,8 +15,8 @@ from app.schemas.medical_history import (
     FamilyHistoryCreate,
 )
 
-
 # Medical History
+
 
 def list_medical_history(db: Session, patient_id: int):
     return (
@@ -48,11 +48,15 @@ def create_medical_history(
 
 def delete_medical_history(
     db: Session,
+    patient_id: int,
     medical_history_id: int,
 ) -> bool:
     db_history = (
         db.query(MedicalHistoryModel)
-        .filter(MedicalHistoryModel.medical_history_id == medical_history_id)
+        .filter(
+            MedicalHistoryModel.medical_history_id == medical_history_id,
+            MedicalHistoryModel.patient_id == patient_id,
+        )
         .first()
     )
 
@@ -68,6 +72,7 @@ def delete_medical_history(
 # -------------------------
 # Family History
 # -------------------------
+
 
 def list_family_history(db: Session, patient_id: int):
     return (
@@ -99,11 +104,15 @@ def create_family_history(
 
 def delete_family_history(
     db: Session,
+    patient_id: int,
     family_history_id: int,
 ) -> bool:
     db_history = (
         db.query(FamilyHistoryModel)
-        .filter(FamilyHistoryModel.family_history_id == family_history_id)
+        .filter(
+            FamilyHistoryModel.family_history_id == family_history_id,
+            FamilyHistoryModel.patient_id == patient_id,
+        )
         .first()
     )
 

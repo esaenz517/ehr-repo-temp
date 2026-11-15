@@ -18,17 +18,19 @@ from app.schemas.medical_history import (
     MedicalHistoryCreate,
 )
 
-
 router = APIRouter(prefix="/patients", tags=["medical-history"])
 
 
 # Medical History
 
+
 @router.get("/{patient_id}/medical-history", response_model=list[MedicalHistory])
-def list_medical_history(patient_id: int, 
-        db: Session = Depends(get_db), 
-        current_user=Depends(require_permission("history", "read"))):
-    
+def list_medical_history(
+    patient_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("history", "read")),
+):
+
     patient = patient_crud.get_patient(db, patient_id)
 
     if patient is None:
@@ -46,7 +48,8 @@ def create_medical_history(
     patient_id: int,
     history: MedicalHistoryCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("history", "create"))):
+    current_user=Depends(require_permission("history", "create")),
+):
     patient = patient_crud.get_patient(db, patient_id)
 
     if patient is None:
@@ -63,9 +66,13 @@ def delete_medical_history(
     patient_id: int,
     medical_history_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("history", "delete"))):
-    deleted = crud.delete_medical_history(db, medical_history_id)
-
+    current_user=Depends(require_permission("history", "delete")),
+):
+    deleted = crud.delete_medical_history(
+        db,
+        patient_id,
+        medical_history_id,
+    )
     if not deleted:
         raise HTTPException(status_code=404, detail="Medical history not found")
 
@@ -74,11 +81,14 @@ def delete_medical_history(
 # Family History
 # -------------------------
 
+
 @router.get("/{patient_id}/family-history", response_model=list[FamilyHistory])
-def list_family_history(patient_id: int, 
-        db: Session = Depends(get_db), 
-        current_user=Depends(require_permission("history", "read"))):
-    
+def list_family_history(
+    patient_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("history", "read")),
+):
+
     patient = patient_crud.get_patient(db, patient_id)
 
     if patient is None:
@@ -96,8 +106,9 @@ def create_family_history(
     patient_id: int,
     history: FamilyHistoryCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("history", "create"))):
-    
+    current_user=Depends(require_permission("history", "create")),
+):
+
     patient = patient_crud.get_patient(db, patient_id)
 
     if patient is None:
@@ -114,9 +125,13 @@ def delete_family_history(
     patient_id: int,
     family_history_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_permission("history", "delete"))):
-    
-    deleted = crud.delete_family_history(db, family_history_id)
+    current_user=Depends(require_permission("history", "delete")),
+):
 
+    deleted = crud.delete_family_history(
+        db,
+        patient_id,
+        family_history_id,
+    )
     if not deleted:
         raise HTTPException(status_code=404, detail="Family history not found")
