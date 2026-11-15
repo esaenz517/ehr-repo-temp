@@ -15,7 +15,7 @@ from fastapi import Response
 
 SESSION_COOKIE = "ehr_session"
 IDLE_TIMEOUT = timedelta(minutes=30)  # signed out after 30 minutes without a request
-MAX_AGE = timedelta(hours=8)          # absolute cutoff, even while active
+MAX_AGE = timedelta(hours=8)  # absolute cutoff, even while active
 
 # Browsers only send Secure cookies over HTTPS, so keep this off for local http dev.
 COOKIE_SECURE = os.getenv("COOKIE_SECURE", "false").lower() == "true"
@@ -43,4 +43,10 @@ def set_session_cookie(response: Response, token: str):
 
 
 def clear_session_cookie(response: Response):
-    response.delete_cookie(SESSION_COOKIE, path="/")
+    response.delete_cookie(
+        SESSION_COOKIE,
+        path="/",
+        secure=COOKIE_SECURE,
+        httponly=True,
+        samesite="lax",
+    )
