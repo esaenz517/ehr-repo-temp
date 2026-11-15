@@ -48,7 +48,10 @@ def api():
 
 
 def sign_in(api, username: str, password: str | None = None) -> TestClient:
-    client = TestClient(api)
+    client = TestClient(
+        api,
+        headers={"X-EHR-Request": "1"},
+    )
     response = client.post(
         "/auth/login",
         json={"username": username, "password": password or PASSWORDS[username]},
@@ -106,27 +109,46 @@ def lookup(admin):
 
     class Lookup:
         def role(self, name):
-            return next(r["role_id"] for r in admin.get("/roles").json() if r["role_name"] == name)
+            return next(
+                r["role_id"]
+                for r in admin.get("/roles").json()
+                if r["role_name"] == name
+            )
 
         def department(self, code):
-            return next(d["department_id"] for d in admin.get("/departments").json() if d["code"] == code)
+            return next(
+                d["department_id"]
+                for d in admin.get("/departments").json()
+                if d["code"] == code
+            )
 
         def discipline(self, code):
-            return next(d["discipline_id"] for d in admin.get("/disciplines").json() if d["code"] == code)
+            return next(
+                d["discipline_id"]
+                for d in admin.get("/disciplines").json()
+                if d["code"] == code
+            )
 
         def course(self, subject, number, term="Fall", year=2026):
             return next(
                 c["course_id"]
                 for c in admin.get("/courses").json()
-                if (c["subject_code"], c["course_number"], c["term"], c["term_year"]) == (subject, number, term, year)
+                if (c["subject_code"], c["course_number"], c["term"], c["term_year"])
+                == (subject, number, term, year)
             )
 
         def patient(self, mrn):
-            return next(p["patient_id"] for p in admin.get("/patients").json() if p["mrn"] == mrn)
+            return next(
+                p["patient_id"]
+                for p in admin.get("/patients").json()
+                if p["mrn"] == mrn
+            )
 
         def staff(self, first, last):
             return next(
-                s for s in admin.get("/staff").json() if (s["first_name"], s["last_name"]) == (first, last)
+                s
+                for s in admin.get("/staff").json()
+                if (s["first_name"], s["last_name"]) == (first, last)
             )
 
     return Lookup()
