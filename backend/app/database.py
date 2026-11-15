@@ -15,7 +15,12 @@ DB_SERVER = os.getenv("DB_SERVER", "db")
 DB_PORT = os.getenv("DB_PORT", "5432" if IS_POSTGRES else "1433")
 DB_NAME = os.getenv("DB_NAME", "postgres" if IS_POSTGRES else "AppDb")
 DB_USER = os.getenv("DB_USER", "postgres" if IS_POSTGRES else "sa")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "YourStrong!Passw0rd")
+
+# Prevent automatic use of a publicly known database password when environment variable is missing.
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+
+if not DB_PASSWORD:
+    raise RuntimeError("DB_PASSWORD must be set in the environment")
 
 # SQL Server only. The local container uses a self-signed certificate, so skip the
 # check by default. Azure SQL has a real certificate, so Render sets DB_TRUST_CERT=no.

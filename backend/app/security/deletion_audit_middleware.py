@@ -13,7 +13,8 @@ from starlette.concurrency import run_in_threadpool
 from app.crud import deletion_audit as crud
 from app.security.session_cookie import SESSION_COOKIE
 
-# AI was used to assist in building this module 
+# AI was used to assist in building this module
+
 
 async def deletion_audit_middleware(request: Request, call_next):
     if request.method != "DELETE":
@@ -39,7 +40,7 @@ async def deletion_audit_middleware(request: Request, call_next):
             **fields,
             outcome="error",
             status_code=500,
-            details=f"{type(exc).__name__}: {exc}",
+            details=type(exc).__name__,
         )
         raise
 
