@@ -1,13 +1,13 @@
-'''
+"""
 Login Router
 This file defines API endpoints for signing in with username and password,
 finishing Duo two-factor (when DUO_ENABLED), checking the current session,
 and signing out.
-'''
+"""
 
 import logging
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from app.models.login import Login
@@ -18,9 +18,13 @@ from app.crud import login as crud
 from app.crud import sessions as sessions_crud
 from app.database import get_db
 from app.schemas.login import LoginRequest, LoginResponse
-from app.security import duo
-from app.security.current_user import get_current_login
-from app.security.session_cookie import SESSION_COOKIE, clear_session_cookie, set_session_cookie
+from app.security import duo, login_throttle
+from app.security.current_user import get_current_login, load_active_user
+from app.security.session_cookie import (
+    SESSION_COOKIE,
+    clear_session_cookie,
+    set_session_cookie,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 logger = logging.getLogger(__name__)
@@ -65,10 +69,32 @@ def to_response(db: Session, login: Login) -> LoginResponse:
 
 
 @router.post("/login", response_model=LoginResponse)
-def login(request: LoginRequest, response: Response, db: Session = Depends(get_db)):
+def login(
+    request: LoginRequest,
+    response: Response,
+    http_request: Request,
+    db: Session = Depends(get_db),
+):
+    ip = http_request.client.host if http_request.client else "unknown"
+
+    if login_throttle.is_blocked(ip, request.username):
+        raise HTTPException(
+            status_code=429,
+            detail="Too many login attempts; try again later",
+        )
+
     user = crud.check_login(db, request.username, request.password)
+
     if user is None:
-        raise HTTPException(status_code=401, detail="Invalid username or password")
+        login_throttle.record_failure(ip, request.username)
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid username or password",
+        )
+
+    # Do not create sessions for disabled or unlinked users.
+    load_active_user(db, user)
+    login_throttle.clear_failures(ip, request.username)
 
     # Two-factor: no session yet. Send the browser to Duo; /auth/duo/callback
     # creates the session once Duo confirms the second factor.
@@ -81,7 +107,9 @@ def login(request: LoginRequest, response: Response, db: Session = Depends(get_d
         except duo.DuoException:
             # Fail closed: never fall back to password-only sign-in
             logger.exception("Duo is unreachable or misconfigured")
-            raise HTTPException(status_code=503, detail="Two-factor service unavailable")
+            raise HTTPException(
+                status_code=503, detail="Two-factor service unavailable"
+            )
         duo_pending_crud.create_pending(db, user.username, state)
         duo.set_state_cookie(response, state)
         return LoginResponse(username=user.username, duo_auth_url=auth_url)
@@ -117,6 +145,17 @@ def duo_callback(
         duo.get_client().exchange_authorization_code_for_2fa_result(duo_code, username)
     except duo.DuoException:
         logger.warning("Duo rejected the two-factor result for %s", username)
+        return failed
+
+    # Account status may have changed during Duo authentication.
+    current_login = db.query(Login).filter(Login.username == username).first()
+
+    if current_login is None:
+        return failed
+
+    try:
+        load_active_user(db, current_login)
+    except HTTPException:
         return failed
 
     done = RedirectResponse(duo.FRONTEND_URL, status_code=303)

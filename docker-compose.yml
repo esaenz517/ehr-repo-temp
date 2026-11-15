@@ -9,7 +9,7 @@ services:
       MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
       MSSQL_PID: "Developer"
     ports:
-      - "1433:1433"
+      - "127.0.0.1:1433:1433"
     volumes:
       - mssql-data:/var/opt/mssql
       - ./db/init:/docker-entrypoint-initdb.d
@@ -59,7 +59,7 @@ services:
       DUO_REDIRECT_URI: "http://localhost:8000/auth/duo/callback"
       FRONTEND_URL: "http://localhost:3000"
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -78,7 +78,7 @@ services:
     environment:
       VITE_API_URL: "http://localhost:8000"
     ports:
-      - "3000:80"
+      - "127.0.0.1:3000:80"
     depends_on:
       - backend
     networks:
@@ -91,7 +91,7 @@ services:
     image: dbeaver/cloudbeaver:latest
     container_name: app-cloudbeaver
     ports:
-      - "8081:8978"
+      - "127.0.0.1:8081:8978"
     volumes:
       - cloudbeaver-data:/opt/cloudbeaver/workspace
     depends_on:

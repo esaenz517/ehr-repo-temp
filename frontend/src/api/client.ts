@@ -7,12 +7,20 @@ export async function apiFetch<T>(
 ): Promise<T> {
   const headers = new Headers(options?.headers);
 
-  headers.set("Content-Type", "application/json");
+  if (options?.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  const method = (options?.method || "GET").toUpperCase();
+
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+    headers.set("X-EHR-Request", "1");
+  }
 
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers,
-    credentials: "include", // send the session cookie to the backend on another port
+    credentials: "include",
   });
 
   if (!res.ok) {

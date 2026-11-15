@@ -9,7 +9,7 @@ get_current_patient() returns the Patients row of a signed-in patient (portal).
 reject_patient_accounts() keeps patient portal accounts out of the staff API.
 """
 
-from fastapi import Cookie, Depends, HTTPException
+from fastapi import Cookie, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.crud import sessions as sessions_crud
@@ -21,6 +21,7 @@ from app.security.session_cookie import SESSION_COOKIE
 
 
 def get_current_login(
+    request: Request,
     session_token: str | None = Cookie(None, alias=SESSION_COOKIE),
     db: Session = Depends(get_db),
 ):
@@ -46,6 +47,7 @@ def get_current_login(
             detail="Unknown login",
         )
 
+    request.state.current_user = load_active_user(db, login)
     return login
 
 
@@ -73,51 +75,31 @@ def load_active_user(db: Session, login: Login):
 
     return user
 
+
 def get_current_user(
+    request: Request,
     login: Login = Depends(get_current_login),
-    db: Session = Depends(get_db),
 ):
-    return load_active_user(db, login)
+    return request.state.current_user
 
 
 def get_current_patient(
     login: Login = Depends(get_current_login),
-    db: Session = Depends(get_db),
 ) -> Patient:
-    """The patient behind a portal account. Portal endpoints take the patient
-    from here, never from the URL, so a patient can only ever see their own record."""
     if not login.is_patient_account:
         raise HTTPException(
             status_code=403,
             detail="Not a patient portal account",
         )
 
-    # Disabled or locked portal accounts are refused like any other account
-    load_active_user(db, login)
-
     return login.patient
 
 
 def reject_patient_accounts(
-    session_token: str | None = Cookie(None, alias=SESSION_COOKIE),
-    db: Session = Depends(get_db),
+    login: Login = Depends(get_current_login),
 ):
-    """Router-level guard for the staff API (see main.py).
-
-    RBAC already refuses patients (they have no Staff row, so no role), but a
-    few staff endpoints only check that someone is signed in. This turns every
-    patient portal account away from all of them. Requests without a valid
-    session pass through, so each endpoint still answers 401 the usual way.
-    """
-    if not session_token:
-        return
-
-    session = sessions_crud.get_active_session(db, session_token)
-    if session is None:
-        return
-
-    login = db.query(Login).filter(Login.username == session.username).first()
-    if login is not None and login.is_patient_account:
+    """Require an active staff session for every staff API route."""
+    if login.is_patient_account:
         raise HTTPException(
             status_code=403,
             detail="Patient portal accounts can only use the patient portal",

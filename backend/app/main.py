@@ -34,15 +34,31 @@ from app.routers import (
     portal_accounts,
 )
 from app.security.deletion_audit_middleware import deletion_audit_middleware
+from app.security.request_protection import (
+    request_protection_middleware,
+    validate_production_settings,
+)
 from app.database import get_db, use_unquoted_names_on_postgres
 from app.security.current_user import reject_patient_accounts
 
 # Every model is imported by now (through the routers above).
 use_unquoted_names_on_postgres()
+validate_production_settings()
 
-app = FastAPI(title="EHR API")
+production = os.getenv("APP_ENV", "development").lower() == "production"
 
-origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+app = FastAPI(
+    title="EHR API",
+    docs_url=None if production else "/docs",
+    redoc_url=None if production else "/redoc",
+    openapi_url=None if production else "/openapi.json",
+)
+
+origins = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+    if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -51,7 +67,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Log every delete request and its outcome to dbo.DeletionAuditLog
+# Validate authenticated writes and protect API responses.
+app.middleware("http")(request_protection_middleware)
+
+# Log delete requests, including requests denied by request protection.
 app.middleware("http")(deletion_audit_middleware)
 
 # Patient portal accounts may only use /auth and /portal. Every other router
