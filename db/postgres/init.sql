@@ -65,6 +65,7 @@ CREATE SCHEMA IF NOT EXISTS dbo;
 \ir tables/BillingCharges.sql
 \ir tables/PatientInsurance.sql
 \ir tables/DeletionAuditLog.sql
+\ir tables/NoteAccessLog.sql
 
 -- DEMO DATA: needs every table above and the logins from seed/users.sql
 \ir seed/chart.sql

@@ -412,3 +412,9 @@
     bottom: auto;
   }
 }
+
+/* Red flags on the note access log (admins) */
+.sidebar-flag-count {
+  background-color: var(--color-error);
+  color: var(--color-on-primary);
+}

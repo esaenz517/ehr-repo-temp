@@ -20,6 +20,7 @@ export type View =
   | "clinicalNotes"
   | "grades"
   | "progress"
+  | "noteAccessLog"
   | "about"
   // Patient portal
   | "portalHome"
@@ -54,6 +55,8 @@ export const VIEW_PERMISSIONS: Partial<Record<View, string>> = {
   rooms: "room.read",
   staff: "staff.read",
   courses: "course.read",
+  // Admin only: audit.read is granted to the ADMIN role alone
+  noteAccessLog: "audit.read",
 };
 
 export const ROLE_LABELS: Record<RoleName, string> = {

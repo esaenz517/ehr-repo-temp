@@ -79,7 +79,10 @@ INSERT INTO dbo.Permissions (PermissionCode, ResourceType, Action) VALUES
     ('permission.read', 'permission', 'read'),
 
     ('department.manage', 'department', 'manage'),
-    ('discipline.manage', 'discipline', 'manage')
+    ('discipline.manage', 'discipline', 'manage'),
+
+    -- Read the note access log (GET /audit/note-access). Admin only.
+    ('audit.read', 'audit', 'read')
 ON CONFLICT (PermissionCode) DO NOTHING;
 
 -- Contextual note permissions: general grants do not cover restricted notes.

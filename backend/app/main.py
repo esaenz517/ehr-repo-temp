@@ -33,8 +33,10 @@ from app.routers import (
     portal,
     portal_accounts,
     note_templates,
+    note_access_log,
 )
 from app.security.deletion_audit_middleware import deletion_audit_middleware
+from app.security.note_access_middleware import note_access_middleware
 from app.security.request_protection import (
     request_protection_middleware,
     validate_production_settings,
@@ -74,6 +76,10 @@ app.middleware("http")(request_protection_middleware)
 # Log delete requests, including requests denied by request protection.
 app.middleware("http")(deletion_audit_middleware)
 
+# Log every request on a clinical note (views, changes and refused attempts) to
+# dbo.NoteAccessLog; admins read it at GET /audit/note-access
+app.middleware("http")(note_access_middleware)
+
 # Patient portal accounts may only use /auth and /portal. Every other router
 # turns them away (403), on top of each endpoint's own permission check.
 STAFF_ONLY = [Depends(reject_patient_accounts)]
@@ -104,6 +110,7 @@ app.include_router(rubric.router, dependencies=STAFF_ONLY)
 app.include_router(clinical_notes.router, dependencies=STAFF_ONLY)
 app.include_router(deletion_audit.router, dependencies=STAFF_ONLY)
 app.include_router(note_templates.router, dependencies=STAFF_ONLY)
+app.include_router(note_access_log.router, dependencies=STAFF_ONLY)
 
 # Patient portal: a signed-in patient's own record (read-only)
 app.include_router(portal.router)
