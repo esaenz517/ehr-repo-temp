@@ -5,6 +5,7 @@ from app.crud import cases as crud
 from app.database import get_db
 from app.schemas.cases import Case, CaseCreate
 from app.security.authorization import require_permission
+from app.note_templates import get_template
 
 router = APIRouter(prefix="/cases", tags=["cases"])
 
@@ -37,6 +38,12 @@ def create_case(
     db: Session = Depends(get_db),
     current_user=Depends(require_permission("case", "create")),
 ):
+    template = get_template(case.note_type)
+    if template is None or not template.enabled:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Note type {case.note_type} is not available",
+        )
     return crud.create_case(db, case)
 
 

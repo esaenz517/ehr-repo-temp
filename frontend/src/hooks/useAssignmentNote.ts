@@ -1,16 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { assignmentApi } from "../api/assignment";
 import { blankSoap, clinicalNotesApi } from "../api/clinicalNotes";
-import type { ClinicalNote, SoapContent } from "../api/clinicalNotes";
+import type { ClinicalNote, NoteContent } from "../api/clinicalNotes";
+import type { NoteTemplate } from "../api/noteTemplates";
 import type { Assignment } from "../types";
 import { useAutosave } from "./useAutosave";
 import type { SaveReason } from "./useAutosave";
+import { useNoteTemplates } from "./useNoteTemplates";
 
-// The student's SOAP note for one assignment: load it, save drafts, and submit the case.
+// The student's note for one assignment: load it, save drafts, and submit the case.
+// The case decides the note type (SOAP, progress note, ...).
 export function useAssignmentNote(initial: Assignment, patientId: number, chiefComplaint: string) {
   const [assignment, setAssignment] = useState(initial);
+  const noteType = assignment.note_type ?? "SOAP";
+  const { templates } = useNoteTemplates();
+  const template = templates.find((t) => t.id === noteType) as NoteTemplate | undefined;
   const [note, setNote] = useState<ClinicalNote | null>(null);
-  const [content, setContent] = useState<SoapContent>(() => ({ ...blankSoap(), chief_complaint: chiefComplaint }));
+  // SOAP starts with the case's chief complaint; other types start empty
+  const [content, setContent] = useState<NoteContent>(() =>
+    noteType === "SOAP" ? { ...blankSoap(), chief_complaint: chiefComplaint } : {}
+  );
   const [dirty, setDirty] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -41,7 +50,7 @@ export function useAssignmentNote(initial: Assignment, patientId: number, chiefC
     };
   }, [assignment.assignment_id, assignment.encounter_id]);
 
-  const edit = (next: SoapContent) => {
+  const edit = (next: NoteContent) => {
     setContent(next);
     setDirty(true);
     setMessage(null);
@@ -68,7 +77,7 @@ export function useAssignmentNote(initial: Assignment, patientId: number, chiefC
     try {
       const saved = note
         ? await clinicalNotesApi.save(note.note_id, note.current_version, content, reason === "auto" ? "Autosave" : "")
-        : await clinicalNotesApi.create(patientId, assignment.encounter_id, content, "general");
+        : await clinicalNotesApi.create(patientId, assignment.encounter_id, content, "general", noteType);
       setNote(saved);
       if (editRevision.current === revision) setDirty(false);
       setError(null);
@@ -102,5 +111,5 @@ export function useAssignmentNote(initial: Assignment, patientId: number, chiefC
     }
   };
 
-  return { assignment, note, content, dirty, loading, saving, error, message, locked, autosaveStatus: autosave.status, edit, start, saveDraft: autosave.saveNow, submit };
+  return { assignment, noteType, template, note, content, dirty, loading, saving, error, message, locked, autosaveStatus: autosave.status, edit, start, saveDraft: autosave.saveNow, submit };
 }

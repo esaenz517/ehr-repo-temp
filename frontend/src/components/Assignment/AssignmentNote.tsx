@@ -5,7 +5,7 @@ import type { ChartContext } from "../../api/clinicalNotes";
 import { useAssignmentNote } from "../../hooks/useAssignmentNote";
 import { autosaveLabel } from "../../hooks/useAutosave";
 import type { Assignment } from "../../types";
-import { SoapEditor } from "../ClinicalNotes/SoapEditor";
+import { NoteBody } from "../ClinicalNotes/NoteBody";
 import { GradeBreakdown } from "./GradeBreakdown";
 import "../ClinicalNotes/clinicalNotes.css";
 import "./assignmentNote.css";
@@ -91,7 +91,7 @@ export function AssignmentNote({ assignment, patientId, chiefComplaint, chart }:
       <p className="ui-muted">No note was saved for this case.</p>
     ) : (
       <div className="assignment-note-start">
-        <p className="ui-muted">Start the case to open the SOAP note template.</p>
+        <p className="ui-muted">Start the case to open the note template.</p>
         <button type="button" className="ui-button" onClick={n.start}>
           Start case
         </button>
@@ -132,14 +132,22 @@ export function AssignmentNote({ assignment, patientId, chiefComplaint, chart }:
       {n.message && <p className="assignment-note-message">{n.message}</p>}
 
       <div className="clinical-notes">
-      <SoapEditor content={n.content} context={chart} disabled={n.locked} onChange={n.edit} />
+      {/* The case's note type decides the form (SOAP, progress note, ...) */}
+      <NoteBody
+        noteType={n.noteType}
+        template={n.template}
+        content={n.content}
+        context={chart}
+        disabled={n.locked}
+        onChange={n.edit}
+      />
       </div>
 
       {n.assignment.encounter_status === "signed" && n.note && (
         <section className="assignment-note-corrections">
           <h3>Student Corrections</h3>
           <p className="ui-muted">
-            Add a correction to your approved SOAP note.
+            Add a correction to your approved note.
             The original note will remain unchanged.
           </p>
 

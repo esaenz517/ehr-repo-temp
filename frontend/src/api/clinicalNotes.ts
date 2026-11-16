@@ -1,6 +1,11 @@
 import { apiFetch } from "./client";
 
-export interface SoapContent {
+// A note's fields, keyed by the field keys of its template (GET /note-templates).
+// Every value is text; dates and times are ISO strings.
+export type NoteContent = Record<string, string>;
+
+// SOAP's fields (SoapEditor). A type, not an interface, so it also fits NoteContent.
+export type SoapContent = {
     chief_complaint: string;
     hpi: string;
     past_medical_history: string;
@@ -10,7 +15,7 @@ export interface SoapContent {
     physical_exam: string;
     assessment: string;
     plan: string;
-}
+};
 
 export const blankSoap = (): SoapContent => ({
     chief_complaint: "",
@@ -42,7 +47,7 @@ export interface ClinicalNote {
     responsible_provider_id: number | null;
     created_at: string;
     last_modified_at: string;
-    content: SoapContent;
+    content: NoteContent;
     sensitivity_classification: "general" | "restricted";
     current_version: number;
     is_archived: boolean;
@@ -59,7 +64,7 @@ export interface NoteVersion {
     version_id: number;
     note_id: number;
     version_number: number;
-    content_snapshot: SoapContent;
+    content_snapshot: NoteContent;
     author_user_id: number;
     created_at: string;
     change_summary: string | null;
@@ -150,8 +155,9 @@ export const clinicalNotesApi = {
     create: (
         patientId: number,
         encounterId: number,
-        content: SoapContent,
-        sensitivity: "general" | "restricted"
+        content: NoteContent,
+        sensitivity: "general" | "restricted",
+        noteType = "SOAP"
     ) =>
         apiFetch<ClinicalNote>(
             "/clinical-notes",
@@ -160,7 +166,7 @@ export const clinicalNotesApi = {
                 body: JSON.stringify({
                     patient_id: patientId,
                     encounter_id: encounterId,
-                    note_type: "SOAP",
+                    note_type: noteType,
                     sensitivity_classification: sensitivity,
                     content,
                 }),
@@ -170,7 +176,7 @@ export const clinicalNotesApi = {
     save: (
         noteId: number,
         version: number,
-        content: SoapContent,
+        content: NoteContent,
         summary: string
     ) =>
         apiFetch<ClinicalNote>(

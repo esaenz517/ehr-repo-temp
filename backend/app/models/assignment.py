@@ -71,6 +71,11 @@ class Assignment(Base):
             return f"{patient.last_name}, {patient.first_name}"
         else:
             return None
+    
+    @property
+    def note_type(self):
+        # The note template the student writes.
+        return self.case.note_type if self.case else "SOAP"
 
     @property
     def chief_complaint(self):

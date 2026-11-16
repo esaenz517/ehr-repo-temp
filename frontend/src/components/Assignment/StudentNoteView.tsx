@@ -4,7 +4,9 @@ import { casesApi } from "../../api/cases";
 import { clinicalNotesApi, formatUtc } from "../../api/clinicalNotes";
 import type { ChartContext, ClinicalNote } from "../../api/clinicalNotes";
 import type { Assignment } from "../../types";
-import { SoapEditor } from "../ClinicalNotes/SoapEditor";
+import { NoteBody } from "../ClinicalNotes/NoteBody";
+import { useNoteTemplates } from "../../hooks/useNoteTemplates";
+import type { NoteTemplate } from "../../api/noteTemplates";
 import "../ClinicalNotes/clinicalNotes.css";
 import { PageHeader } from "../PageHeader";
 import { StatusBadge } from "../StatusBadge";
@@ -22,6 +24,8 @@ interface StudentNoteViewProps {
 // Instructor view of a student's SOAP note: the latest saved draft, read-only.
 // Unsaved typing on the student's side isn't visible until they save.
 export function StudentNoteView({ assignment, studentName, actions, review, onRefresh, onBack }: StudentNoteViewProps) {
+  // Note types, for drawing non-SOAP notes from their template
+  const { templates } = useNoteTemplates();
   const [note, setNote] = useState<ClinicalNote | null>(null);
   const [chart, setChart] = useState<ChartContext | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,7 +86,14 @@ export function StudentNoteView({ assignment, studentName, actions, review, onRe
         <>
           <p className="assignment-note-banner">Read-only: this is the student's latest saved draft.</p>
           <div className="clinical-notes">
-            <SoapEditor content={note.content} context={chart} disabled onChange={() => {}} />
+          <NoteBody
+              noteType={note.note_type}
+              template={templates.find((t) => t.id === note.note_type) as NoteTemplate | undefined}
+              content={note.content}
+              context={chart}
+              disabled
+              onChange={() => {}}
+            />
           </div>
         </>
       )}

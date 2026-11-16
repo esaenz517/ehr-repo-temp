@@ -17,11 +17,11 @@ from app.models.clinical_notes import (
 from app.models.drugs import Drug
 from app.models.medical_history import FamilyHistory, MedicalHistory
 from app.models.patients import patient_drugs
-from app.schemas.clinical_notes import SoapContent
 
 
-def snapshot(content: SoapContent) -> str:
-    return content.model_dump_json()
+def snapshot(content: dict) -> str:
+    """Note content as stored in the Content / ContentSnapshot columns."""
+    return json.dumps(content, ensure_ascii = False, separators = (",", ":")) 
 
 
 def note_data(note: ClinicalNote) -> dict:
@@ -171,14 +171,15 @@ def create_note(
     author_id: int,
     discipline: str | None,
     sensitivity: str,
-    content: SoapContent,
+    content: dict,
+    note_type: str = "SOAP" # Default note type is SOAP
 ) -> ClinicalNote:
     now = datetime.now(timezone.utc).replace(tzinfo=None)
 
     note = ClinicalNote(
         patient_id=patient_id,
         encounter_id=encounter_id,
-        note_type="SOAP",
+        note_type=note_type,
         responsible_provider_id=provider_id,
         author_user_id=author_id,
         discipline=discipline,
@@ -215,7 +216,7 @@ def update_note(
     note: ClinicalNote,
     *,
     expected_version: int,
-    content: SoapContent,
+    content: dict,
     author_id: int,
     summary: str | None,
 ) -> ClinicalNote | None:

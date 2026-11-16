@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { coursesApi, CreateCourseInput, UpdateCourseInput } from "../api/courses";
+import { ApiError } from "../api/client";
 import type { Course } from "../types";
 
 export type CourseFilter = "all" | "active" | "inactive";
@@ -11,13 +12,14 @@ const FILTER_PARAM: Record<CourseFilter, boolean | undefined> = {
   inactive: false,
 };
 
-// apiFetch only reports the status code, so translate the ones the courses API
-// uses on purpose into messages a user can act on.
+// Translate the status codes the courses API uses on purpose into messages a
+// user can act on.
 function errorMessage(err: unknown, fallback: string) {
   const message = err instanceof Error ? err.message : "";
-  if (message.includes("409")) return "That course already exists for that term.";
-  if (message.includes("422")) return "Some course fields are invalid. Check the values and try again.";
-  if (message.includes("404")) return "That course no longer exists.";
+  const status = err instanceof ApiError ? err.status : null;
+  if (status === 409) return "That course already exists for that term.";
+  if (status === 422) return "Some course fields are invalid. Check the values and try again.";
+  if (status === 404) return "That course no longer exists.";
   return message || fallback;
 }
 

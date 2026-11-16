@@ -8,6 +8,7 @@ import { AssignmentNote } from "./AssignmentNote";
 import { MedicalHistoryPanel } from "../MedicalHistory/MedicalHistoryPanel";
 import { Section } from "../Section";
 import { PageHeader } from "../PageHeader";
+import { useNoteTemplates } from "../../hooks/useNoteTemplates";
 
 function Detail({ label, value }: { label: string; value: ReactNode }) {
   return (
@@ -48,6 +49,9 @@ interface CaseWorkspacePageProps {
 
 export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignments" }: CaseWorkspacePageProps) {
     const [caseInfo, setCaseInfo] = useState<Case | null>(null);
+    // The case's note type names the note section (e.g. "Progress Note")
+    const { templates } = useNoteTemplates();
+    const noteTitle = templates.find((t) => t.id === (assignment.note_type ?? "SOAP"))?.label ?? "Clinical note";
     const [chart, setChart] = useState<ChartContext | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -208,7 +212,7 @@ export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignme
             </WorkSection>
 
             {chart && (
-              <Section title="SOAP note" overflow>
+              <Section title={noteTitle} overflow>
                 <AssignmentNote
                   assignment={assignment}
                   patientId={caseInfo.patient_id}

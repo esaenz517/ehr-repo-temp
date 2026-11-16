@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { ApiError } from "../../api/client";
 
 import {
     batchStudentsApi,
@@ -101,15 +102,17 @@ export function StudentCreateForm({
                     ? err.message
                     : "Failed to create student account";
 
-            if (message.includes("409")) {
+            const status = err instanceof ApiError ? err.status : null;
+
+            if (status === 409) {
                 setError(
                     "A student with this email or username already exists."
                 );
-            } else if (message.includes("422")) {
+            } else if (status === 422) {
                 setError(
                     "Student information is invalid. Check the fields."
                 );
-            } else if (message.includes("403")) {
+            } else if (status === 403) {
                 setError(
                     "Your account does not have permission to create students."
                 );

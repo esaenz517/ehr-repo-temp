@@ -14,6 +14,8 @@ from app.models.courses import Course
 from app.models.staff import Staff
 from app.models.clinical_notes import ClinicalNote, Encounter
 from app.models.rubric import AssignmentRubricScore
+from app.models.cases import Case as CaseModel
+from app.note_templates import ANY_DISCIPLINE, get_template, may_author
 from app.schemas.assignment import AssignmentRequest, EncounterStatus
 
 # Used to get assignments by parts that need it
@@ -47,6 +49,24 @@ def check_assignees(db: Session, request: AssignmentRequest) -> str | None:
         }
         if enrolled != student_ids:
             return "Every student must be enrolled in the chosen course"
+    
+    # Note types limited by discipline (e.g. nursing shift notes) can only go to
+    # students allowed to write them
+    case = db.get(CaseModel, request.case_id)
+    template = get_template(case.note_type) if case is not None else None
+    if template is not None and template.author_disciplines:
+        outside = sorted(
+            f"{p.first_name} {p.last_name}"
+            for p in people
+            if not may_author(template, p.discipline.code if p.discipline else None)
+        )
+        if outside:
+            reason = (
+                "needs a student with a discipline"
+                if ANY_DISCIPLINE in template.author_disciplines
+                else "is limited to another discipline"
+            )
+            return f"This case uses a {template.label}, which {reason}: {', '.join(outside)}"
 
     return None
 

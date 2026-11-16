@@ -32,6 +32,7 @@ from app.routers import (
     disciplines,
     portal,
     portal_accounts,
+    note_templates,
 )
 from app.security.deletion_audit_middleware import deletion_audit_middleware
 from app.security.request_protection import (
@@ -102,6 +103,7 @@ app.include_router(rubric.router, dependencies=STAFF_ONLY)
 
 app.include_router(clinical_notes.router, dependencies=STAFF_ONLY)
 app.include_router(deletion_audit.router, dependencies=STAFF_ONLY)
+app.include_router(note_templates.router, dependencies=STAFF_ONLY)
 
 # Patient portal: a signed-in patient's own record (read-only)
 app.include_router(portal.router)

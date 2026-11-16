@@ -43,7 +43,8 @@ class Assignment(BaseModel):
     assigned_by: int
     encounter_id: int | None = None  # the encounter the student's SOAP note belongs to
     patient_name: str | None = None  # Last name, First name format
-    chief_complaint: str | None = None 
+    chief_complaint: str | None = None
+    note_type: str = "SOAP"  # the case's note template 
     feedback: str | None = None # Instructor feedback
     feedback_updated_at: datetime | None = None # feedback change-logging
 

@@ -62,6 +62,7 @@ def to_response(db: Session, login: Login) -> LoginResponse:
         department_name=staff.department_name,
         discipline_id=staff.discipline_id,
         discipline_name=staff.discipline_name,
+        discipline_code=staff.discipline.code if staff.discipline else None,
         permissions=get_role_permission_codes(db, staff.role_id),
         student=staff.is_student,
         admin=staff.is_admin,
