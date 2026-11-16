@@ -85,7 +85,10 @@ USING (
         ('permission.read', 'permission', 'read'),
 
         ('department.manage', 'department', 'manage'),
-        ('discipline.manage', 'discipline', 'manage')
+        ('discipline.manage', 'discipline', 'manage'),
+
+        -- Read the note access log (GET /audit/note-access). Admin only.
+        ('audit.read', 'audit', 'read')
 ) AS source (
     PermissionCode,
     ResourceType,

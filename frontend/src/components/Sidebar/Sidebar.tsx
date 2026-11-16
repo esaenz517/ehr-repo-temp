@@ -21,6 +21,9 @@ interface SidebarProps {
 
   // Number of inactive or overdue assignments.
   progressAlertCount?: number;
+
+  // Red flags in the note access log this week (admins only).
+  redFlagCount?: number;
 }
 
 const COLLAPSED_KEY = "sidebar-collapsed";
@@ -45,7 +48,7 @@ function saveCollapsed(value: boolean) {
 
 // Navigation entries, grouped under small section labels. A group only
 // shows when the user can see at least one of its pages.
-type NavGroup = "Overview" | "Teaching" | "Records" | "Coursework" | "My Health" | "Account";
+type NavGroup = "Overview" | "Teaching" | "Records" | "Coursework" | "Admin" | "My Health" | "Account";
 
 const NAV_ITEMS: { view: View; label: string; group: NavGroup }[] = [
   { view: "home", label: "Dashboard", group: "Overview" }, // student or instructor dashboard, picked in Home.tsx
@@ -61,6 +64,8 @@ const NAV_ITEMS: { view: View; label: string; group: NavGroup }[] = [
   { view: "staff", label: "Staff", group: "Records" },
   { view: "courses", label: "Courses", group: "Records" },
 
+  { view: "noteAccessLog", label: "Note Access Log", group: "Admin" },
+
   { view: "assignments", label: "My Assignments", group: "Coursework" },
   { view: "grades", label: "My Grades", group: "Coursework" },
 
@@ -73,7 +78,7 @@ const NAV_ITEMS: { view: View; label: string; group: NavGroup }[] = [
   { view: "portalBilling", label: "Billing & Insurance", group: "Account" },
 ];
 
-const GROUP_ORDER: NavGroup[] = ["Overview", "Teaching", "Records", "Coursework", "My Health", "Account"];
+const GROUP_ORDER: NavGroup[] = ["Overview", "Teaching", "Records", "Coursework", "Admin", "My Health", "Account"];
 
 export function Sidebar({
   active,
@@ -84,6 +89,7 @@ export function Sidebar({
   onLogout,
   allowedViews,
   progressAlertCount = 0,
+  redFlagCount = 0,
 }: SidebarProps) {
 
   // Students see only their approved pages.
@@ -160,6 +166,16 @@ export function Sidebar({
                           aria-label={`${progressAlertCount} assignments need attention`}
                         >
                           {progressAlertCount}
+                        </span>
+                      )}
+                      
+                      {/* Red flags on the note access log */}
+                      {view === "noteAccessLog" && redFlagCount > 0 && (
+                        <span
+                          className="sidebar-progress-count sidebar-flag-count"
+                          aria-label={`${redFlagCount} red flags this week`}
+                        >
+                          ⚑ {redFlagCount}
                         </span>
                       )}
                     </button>

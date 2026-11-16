@@ -81,6 +81,7 @@ GO
 :r /init/tables/BillingCharges.sql
 :r /init/tables/PatientInsurance.sql
 :r /init/tables/DeletionAuditLog.sql
+:r /init/tables/NoteAccessLog.sql
 
 -- DEMO DATA: needs every table above and the logins from seed/users.sql
 :r /init/seed/chart.sql

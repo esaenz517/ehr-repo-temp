@@ -18,6 +18,8 @@ import { CaseWorkspacePage } from "./components/Assignment/CaseWorkspacePage";
 import { StudentGradesPage } from "./components/Grades/StudentGradesPage";
 import { InstructorProgressPage } from "./components/Progress/InstructorProgressPage";
 import { gradesApi } from "./api/grades";
+import { noteAccessLogApi } from "./api/noteAccessLog";
+import { NoteAccessLogPage } from "./components/Audit/NoteAccessLogPage";
 import { AboutPage } from "./components/About/AboutPage";
 import { PatientPortal } from "./components/Portal/PatientPortal";
 
@@ -78,6 +80,30 @@ function App() {
     };
   }, [user]);
 
+  // Admins: red flags in the note access log this week, for the sidebar badge
+  const [redFlagCount, setRedFlagCount] = useState(0);
+
+  useEffect(() => {
+    if (!user || !can(user, "audit.read")) {
+      setRedFlagCount(0);
+      return;
+    }
+
+    let active = true;
+    const checkFlags = () =>
+      noteAccessLogApi
+        .redFlags()
+        .then((r) => active && setRedFlagCount(r.count))
+        .catch(() => active && setRedFlagCount(0));
+
+    void checkFlags();
+    const timer = window.setInterval(checkFlags, 60000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [user]);
+
   if (checkingSession) {
     return null;
   }
@@ -123,6 +149,7 @@ function App() {
       <Sidebar active={view} username={user.username}
         role={roleLabel(user)}
         progressAlertCount={progressAlertCount}
+        redFlagCount={redFlagCount}
         onNavigate={(v) => {
           setOpenAssignment(null); // Clicking out of a case closes it
           setReviewId(null);
@@ -190,6 +217,7 @@ function App() {
           canView("progress") && (
             <InstructorProgressPage />
           )}
+        {view === "noteAccessLog" && canView("noteAccessLog") && <NoteAccessLogPage />}
         {view === "about" && <AboutPage />}
       </main>
     </div>

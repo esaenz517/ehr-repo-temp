@@ -7,13 +7,14 @@ Instructors write feedback on submitted work, then sign it off or send it back.
 """
 
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from app.security.authorization import require_permission
 from app.crud import assignment as crud
 from app.crud import rubric as rubric_crud
 from app.crud.clinical_notes import note_data
+from app.crud.note_access_log import annotate, annotate_note
 from app.routers.clinical_notes import can_access
 from app.note_templates import get_template, missing_required
 from app.crud import grades as grades_crud
@@ -172,6 +173,7 @@ def start_assignment(
 # reviews and grades it), but their role must still grant note reading.
 @router.get("/{assignment_id}/note", response_model=NoteOut | None)
 def get_note(
+    request: Request,
     assignment_id: int,
     db: Session = Depends(get_db),
     current_user=Depends(require_permission("assignment", "read")),
@@ -187,8 +189,10 @@ def get_note(
 
     note = crud.get_note(db, row)
     if note is None:
+        annotate(request, details=f"Assignment {assignment_id}: no note saved yet")
         return None
 
+    annotate_note(request, note, details=f"Assignment {assignment_id}")
     if not can_access(db, current_user, "read", note.sensitivity_classification, note.note_type):
         raise HTTPException(status_code=403, detail="Insufficient note permission")
 
@@ -198,6 +202,7 @@ def get_note(
 # Student: turn the case in. Needs a saved note; the note is locked afterwards.
 @router.post("/{assignment_id}/submit", response_model=Assignment)
 def submit_assignment(
+    request: Request,
     assignment_id: int,
     db: Session = Depends(get_db),
     current_user=Depends(require_permission("assignment", "update")),
@@ -215,6 +220,7 @@ def submit_assignment(
             status_code=409,
             detail="Save your note before submitting",
         )
+    annotate_note(request, note, details=f"Assignment {assignment_id}")
 
     # The note's template lists fields that must be complete before it's turned in
     template = get_template(note.note_type)
@@ -255,6 +261,7 @@ def save_feedback(
     response_model=Assignment,
 )
 def update_status(
+    request: Request,
     assignment_id: int,
     body: AssignmentStatus,
     db: Session = Depends(get_db),
@@ -267,6 +274,14 @@ def update_status(
         login,
         instructor=True,
     )
+
+    reviewed = crud.get_note(db, row)
+    if reviewed is not None:
+        annotate_note(
+            request,
+            reviewed,
+            details=f"Assignment {assignment_id}: {'signed off' if body.encounter_status == 'signed' else 'sent back'}",
+        )
 
     if body.encounter_status not in ("in_progress", "signed"):
         raise HTTPException(

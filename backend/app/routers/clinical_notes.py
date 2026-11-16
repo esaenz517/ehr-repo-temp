@@ -3,12 +3,13 @@ record; each note type's fields and policy come from app/note_templates.py."""
 
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.crud import clinical_notes as crud
 from app.crud import note_addenda as addenda_crud
 from app.crud.assignment import is_locked
+from app.crud.note_access_log import annotate, annotate_note
 from app.models.disciplines import Discipline
 from app.crud.patients import get_patient
 from app.crud.staff import get_staff_for_user
@@ -41,6 +42,9 @@ from app.security.current_user import get_current_user
 
 router = APIRouter(tags=["clinical-notes"])
 
+# Every request below is written to the note access log by
+# app.security.note_access_middleware. Handlers call annotate()/annotate_note()
+# before their permission checks, so refused attempts are logged with the note.
 
 def can_access(
     db: Session,
@@ -276,6 +280,7 @@ def start_encounter(
     response_model=list[NoteOut],
 )
 def list_notes(
+    request: Request,
     patient_id: int,
     include_archived: bool = False,
     db: Session = Depends(get_db),
@@ -289,9 +294,21 @@ def list_notes(
         query = query.filter_by(is_archived=False)
 
     notes = query.order_by(ClinicalNote.created_at.desc()).all()
+    shown = [n for n in notes if may_open(db, user, "read", n)]
 
-    # Filter each note independently: role, and discipline for mental health notes.
-    return [crud.note_data(n) for n in notes if may_open(db, user, "read", n)]
+    # The list returns each note's content, so the log names every note shown
+    ids = ", ".join(str(n.note_id) for n in shown)
+    annotate(
+        request,
+        patient_id=patient_id,
+        details=(
+            f"Returned {len(shown)} note(s)"
+            + (f": {ids}" if ids else "")
+            + (f"; {len(notes) - len(shown)} withheld by access rules" if len(notes) > len(shown) else "")
+        ),
+    )
+
+    return [crud.note_data(n) for n in shown]
 
 
 @router.post(
@@ -300,10 +317,13 @@ def list_notes(
     status_code=201,
 )
 def create_note(
+    request: Request,
     payload: NoteCreate,
     db: Session = Depends(get_db),
     user=Depends(get_current_user),
 ):
+    annotate(request, patient_id=payload.patient_id, note_type=payload.note_type)
+
     permitted(
         db,
         user,
@@ -373,6 +393,8 @@ def create_note(
         note_type = template.id,
     )
 
+    annotate_note(request, note)
+
     return crud.note_data(note)
 
 
@@ -381,6 +403,7 @@ def create_note(
     response_model=NoteOut,
 )
 def get_note(
+    request: Request,
     note_id: int,
     db: Session = Depends(get_db),
     user=Depends(get_current_user),
@@ -391,6 +414,7 @@ def get_note(
         include_archived=True,
     )
 
+    annotate_note(request, note)
     permitted_note(db, user, "read", note)
 
     return crud.note_data(note)
@@ -401,6 +425,7 @@ def get_note(
     response_model=NoteOut,
 )
 def save_note(
+    request: Request,
     note_id: int,
     payload: NoteUpdate,
     db: Session = Depends(get_db),
@@ -408,6 +433,7 @@ def save_note(
 ):
     note = note_or_404(db, note_id)
 
+    annotate_note(request, note)
     permitted_note(db, user, "update", note)
 
     if note.author_user_id != user.user_id:
@@ -453,6 +479,7 @@ def save_note(
     response_model=list[VersionOut],
 )
 def list_versions(
+    request: Request,
     note_id: int,
     db: Session = Depends(get_db),
     user=Depends(get_current_user),
@@ -463,6 +490,7 @@ def list_versions(
         include_archived=True,
     )
 
+    annotate_note(request, note)
     permitted_note(db, user, "read", note)
 
     versions = (
@@ -480,12 +508,14 @@ def list_versions(
     status_code=204,
 )
 def archive_note(
+    request: Request,
     note_id: int,
     db: Session = Depends(get_db),
     user=Depends(get_current_user),
 ):
     note = note_or_404(db, note_id)
 
+    annotate_note(request, note)
     permitted_note(db, user, "archive", note)
 
     if note.author_user_id != user.user_id:
@@ -511,6 +541,7 @@ def archive_note(
     status_code=201,
 )
 def create_note_addendum(
+    request: Request,
     note_id: int,
     payload: NoteAddendumCreate,
     db: Session = Depends(get_db),
@@ -518,6 +549,7 @@ def create_note_addendum(
 ):
     note = note_or_404(db, note_id)
 
+    annotate_note(request, note)
     permitted_note(db, user, "update", note)
 
     if note.author_user_id != user.user_id:
@@ -553,12 +585,14 @@ def create_note_addendum(
     response_model=list[NoteAddendumOut],
 )
 def list_note_addenda(
+    request: Request,
     note_id: int,
     db: Session = Depends(get_db),
     user=Depends(get_current_user),
 ):
     note = note_or_404(db, note_id)
 
+    annotate_note(request, note)
     permitted_note(db, user, "read", note)
 
     return (
