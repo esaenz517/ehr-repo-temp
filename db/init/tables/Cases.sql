@@ -6,6 +6,8 @@ BEGIN
         PatientId         INT NOT NULL REFERENCES dbo.Patients(PatientId),  -- the case's original patient
         ChiefComplaint    NVARCHAR(500)  NOT NULL,
         Narrative         NVARCHAR(4000) NULL,       -- "Case narrative / HPI seed"
+        -- The note template students write for this case (app/note_templates.py)
+        NoteType          NVARCHAR(100)  NOT NULL DEFAULT 'SOAP',
         --SourceCaseId      INT NULL REFERENCES dbo.Cases(CaseId),  -- set when "Start from: Existing case"
         CreatedByStaffId  INT NOT NULL REFERENCES dbo.Staff(StaffId),
         CreatedAt         DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()

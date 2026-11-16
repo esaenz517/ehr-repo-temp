@@ -30,6 +30,7 @@ def create_case(db: Session, case: CaseCreate):
         patient_id=case.patient_id,
         chief_complaint=case.chief_complaint,
         narrative=case.narrative,
+        note_type=case.note_type,
         created_by_staff_id=case.created_by_staff_id
     )
     

@@ -120,6 +120,7 @@ export interface LoginResponse {
   department_name: string | null;
   discipline_id: number | null;
   discipline_name: string | null;
+  discipline_code?: string | null; // e.g. "NURSE"; decides which note types they may write
   permissions: string[]; // e.g. "patient.read", "note.read.general"
   student: boolean;
   admin: boolean;
@@ -203,6 +204,7 @@ export interface Assignment {
   encounter_id: number | null; // set once the student starts the case
   patient_name: string | null; // "Last name, First name"
   chief_complaint: string | null;
+  note_type?: string; // The case's note template, e.g. "SOAP", "PROGRESS"
   feedback: string | null; // instructor feedback; visible to student only after submitting
   feedback_updated_at: string | null; // instructor feedback logging
 }
@@ -236,6 +238,7 @@ export interface Case {
   patient_id: number;
   chief_complaint: string;
   narrative: string | null;
+  note_type?: string; // the note template students write for this case
   created_by_staff_id: number;
   created_at: string;
   patient: Patient | null;

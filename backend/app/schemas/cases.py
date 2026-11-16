@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 #from app.schemas.drugs import Drug
 #from app.schemas.providers import Provider
@@ -40,6 +40,8 @@ class CaseBase(BaseModel):
     patient_id: int
     chief_complaint: str
     narrative: str | None = None
+    # An enabled type from GET /note-templates; checked when the case is created
+    note_type: str = Field(default="SOAP", max_length=100)
     created_by_staff_id: int
     
 class CaseCreate(CaseBase):
@@ -54,4 +56,4 @@ class Case(CaseBase):
     patient: Patient | None = None
 
     class Config:
-        from_attributes = True
+        from_attributes = True

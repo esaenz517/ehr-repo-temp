@@ -28,6 +28,8 @@ class LoginResponse(BaseModel):
     department_name: str | None = None
     discipline_id: int | None = None
     discipline_name: str | None = None
+    # e.g. "NURSE"; decides which note types this person may write
+    discipline_code: str | None = None
     # Permission codes of the role, e.g. "patient.read", "note.read.general"
     permissions: list[str] = []
     # Shortcuts kept for the frontend: role == STUDENT / role == ADMIN

@@ -290,6 +290,7 @@ export function useCreateCase() {
         patient_id: patientId,
         chief_complaint: caseContent.chiefComplaint.trim(),
         narrative: caseContent.narrative.trim() || null,
+        note_type: caseContent.noteType,
         created_by_staff_id: staffId,
 
         // The current backend saves these rows into patient chart tables.

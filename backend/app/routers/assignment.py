@@ -14,6 +14,8 @@ from app.security.authorization import require_permission
 from app.crud import assignment as crud
 from app.crud import rubric as rubric_crud
 from app.crud.clinical_notes import note_data
+from app.routers.clinical_notes import can_access
+from app.note_templates import get_template, missing_required
 from app.crud import grades as grades_crud
 from app.database import get_db
 from app.models.login import Login
@@ -164,8 +166,10 @@ def start_assignment(
     return student_view(crud.start_assignment(db, row))
 
 
-# Student or instructor: the SOAP note written for this assignment
-# Returns null until the first save.
+# Student or instructor: the note written for this assignment
+# Returns null until the first save. The student and the assigning instructor
+# may read it whatever its type (mental health notes included: the instructor
+# reviews and grades it), but their role must still grant note reading.
 @router.get("/{assignment_id}/note", response_model=NoteOut | None)
 def get_note(
     assignment_id: int,
@@ -182,7 +186,13 @@ def get_note(
     )
 
     note = crud.get_note(db, row)
-    return note_data(note) if note else None
+    if note is None:
+        return None
+
+    if not can_access(db, current_user, "read", note.sensitivity_classification, note.note_type):
+        raise HTTPException(status_code=403, detail="Insufficient note permission")
+
+    return note_data(note)
 
 
 # Student: turn the case in. Needs a saved note; the note is locked afterwards.
@@ -199,11 +209,23 @@ def submit_assignment(
             status_code=409,
             detail="Only an in-progress assignment can be submitted",
         )
-    if crud.get_note(db, row) is None:
+    note = crud.get_note(db, row)
+    if note is None:
         raise HTTPException(
             status_code=409,
-            detail="Save a SOAP note before submitting",
+            detail="Save your note before submitting",
         )
+
+    # The note's template lists fields that must be complete before it's turned in
+    template = get_template(note.note_type)
+    if template is not None:
+        missing = missing_required(template, note_data(note)["content"])
+        if missing:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Complete these fields before submitting: {', '.join(missing)}",
+            )
+
     return student_view(crud.update_status(db, assignment_id, "submitted"))
 
 

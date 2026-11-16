@@ -36,7 +36,7 @@ export function MyAssignmentsPage({ studentId, onOpen }: MyAssignmentsPageProps)
     <div className="ui-page">
       <PageHeader
         title="My Assignments"
-        description="Open a case to review the chart and write your SOAP note."
+        description="Open a case to review the chart and write your clinical note."
         actions={<button className="ui-button ui-button--secondary" onClick={reload}>Refresh</button>}
       />
 

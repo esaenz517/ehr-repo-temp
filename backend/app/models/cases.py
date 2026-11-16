@@ -11,6 +11,8 @@ class Case(Base):
     patient_id = Column("PatientId", Integer, ForeignKey("dbo.Patients.PatientId"), nullable=False)
     chief_complaint = Column("ChiefComplaint", String(500), nullable=False)
     narrative = Column("Narrative", String(4000), nullable=True)
+    # The note template students write for this case.
+    note_type = Column("NoteType", String(100), nullable=False, default="SOAP")
     created_by_staff_id = Column("CreatedByStaffId", Integer, ForeignKey("dbo.Staff.StaffId"), nullable=False)
     # Filled in by the database's own default (SQL Server and Postgres each have one).
     created_at = Column("CreatedAt", DateTime, nullable=False, server_default=func.sysutcdatetime())

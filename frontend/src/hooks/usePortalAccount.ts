@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
+import { ApiError } from "../api/client";
 import { portalAccountsApi, type PortalAccountInput } from "../api/portalAccounts";
 import { usersApi } from "../api/users";
 import type { PortalAccount } from "../types";
 
-// apiFetch errors read "Request failed: <status>"; turn the known ones into plain words.
+// Turn the known apiFetch error statuses into plain words.
 function createErrorMessage(err: unknown) {
-  const message = err instanceof Error ? err.message : "";
-  if (message.endsWith("409")) return "That email or username is already in use.";
-  if (message.endsWith("400")) return "Check the email and username (letters, numbers, and . _ @ + - only).";
-  if (message.endsWith("403")) return "You don't have permission to create portal accounts.";
+  const status = err instanceof ApiError ? err.status : null;
+  if (status === 409) return "That email or username is already in use.";
+  if (status === 400) return "Check the email and username (letters, numbers, and . _ @ + - only).";
+  if (status === 403) return "You don't have permission to create portal accounts.";
   return "Could not create the portal account.";
 }
 

@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { loginApi } from "../../api/login";
+import { ApiError } from "../../api/client";
 import type { LoginResponse } from "../../types";
 import logo from "../../images/UTEP-Logo.png";
 import "./login.css";
@@ -40,7 +41,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       onLogin(user);
     } catch (err) {
       setError(
-        err instanceof Error && err.message.includes("503")
+        err instanceof ApiError && err.status === 503
           ? "Two-factor service is unavailable. Please try again later."
           : "Invalid username or password"
       );

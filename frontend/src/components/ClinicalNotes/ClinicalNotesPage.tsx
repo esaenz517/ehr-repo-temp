@@ -11,7 +11,7 @@ import type {
     ClinicalNote,
     Encounter,
     NoteVersion,
-    SoapContent,
+    NoteContent,
 } from "../../api/clinicalNotes";
 
 import { patientsApi } from "../../api/patients";
@@ -23,17 +23,36 @@ import type { SaveReason } from "../../hooks/useAutosave";
 import type { Patient } from "../../types";
 
 import { confirmDelete } from "../confirmDelete";
-import { SoapEditor } from "./SoapEditor";
-import { NOTE_TEMPLATES } from "./templates";
+import { NoteBody } from "./NoteBody";
+import { ANY_DISCIPLINE, blankContent, canAuthor, type NoteTemplate } from "../../api/noteTemplates";
+import type { LoginResponse } from "../../types";
+import { useNoteTemplates } from "../../hooks/useNoteTemplates";
 
 import { PageHeader } from "../PageHeader";
 import "./clinicalNotes.css";
 
 interface ClinicalNotesPageProps {
     initialPatientId?: number;
+    user?: LoginResponse;
 }
 
-export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps = {}) {
+export function ClinicalNotesPage({ initialPatientId, user }: ClinicalNotesPageProps = {}) {
+    // Note types and their policies, from GET /note-templates
+    const { templates } = useNoteTemplates();
+
+    // The template chosen for a new draft; an open note keeps its own type
+    const [draftType, setDraftType] = useState("SOAP");
+
+    const templateFor = (type: string) =>
+        templates.find((t) => t.id === type) as NoteTemplate | undefined;
+
+    // Empty content for a type: SOAP's fields, or every field of its template
+    const blankFor = (type: string): NoteContent => {
+        if (type === "SOAP") return blankSoap();
+        const template = templateFor(type);
+        return template?.sections ? blankContent(template) : {};
+    };
+
     const [patients, setPatients] =
         useState<Patient[]>([]);
 
@@ -56,7 +75,7 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
         useState<ClinicalNote | null>(null);
 
     const [content, setContent] =
-        useState<SoapContent>(blankSoap);
+        useState<NoteContent>(blankSoap);
 
     const [sensitivity, setSensitivity] =
         useState<"general" | "restricted">(
@@ -113,7 +132,7 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
         setEncounters([]);
         setEncounterId(null);
         setNote(null);
-        setContent(blankSoap());
+        setContent(blankFor(draftType));
         setVersions([]);
         setReviewVersion(null);
         setDirty(false);
@@ -224,7 +243,7 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
         docToken.current += 1;
         autosave.cancel();
         setNote(null);
-        setContent(blankSoap());
+        setContent(blankFor(draftType));
         setSensitivity("general");
         setVersions([]);
         setReviewVersion(null);
@@ -297,7 +316,8 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
                     patientId,
                     encounterId,
                     content,
-                    sensitivity
+                    sensitivity,
+                    draftType
                 );
 
             // The user switched notes/patients while this was saving.
@@ -352,6 +372,29 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
         enabled: !note?.is_archived,
     });
 
+    // Pick the template for a new draft (an open note keeps its type)
+    const changeDraftType = (type: string) => {
+        if (
+            dirty &&
+            !window.confirm(
+                "Switching templates discards this draft. Continue?"
+            )
+        ) {
+            return;
+        }
+
+        docToken.current += 1;
+        autosave.cancel();
+        setDraftType(type);
+        setContent(blankFor(type));
+        setDirty(false);
+        setError(null);
+        setMessage(null);
+    };
+
+    const noteType = note?.note_type ?? draftType;
+    const template = templateFor(noteType);
+
     const archive = async () => {
         if (
             !note ||
@@ -384,7 +427,7 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
             autosave.cancel();
             setNote(null);
             setVersions([]);
-            setContent(blankSoap());
+            setContent(blankFor(draftType));
             setDirty(false);
             setMessage("Note archived.");
         } catch (e) {
@@ -400,7 +443,7 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
         <div className="ui-page clinical-notes">
             <PageHeader
                 title="Clinical Notes"
-                description="Write a SOAP draft for an encounter. Patient chart information is shown alongside manual entry."
+                description="Write a clinical note for an encounter. Choose its template; patient chart information is shown alongside manual entry."
             />
 
             <section className="ui-panel" aria-label="Patient and encounter">
@@ -611,7 +654,7 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
                                             selectNote(n)
                                         }
                                     >
-                                        SOAP #{n.note_id} · v
+                                        {templateFor(n.note_type)?.label ?? n.note_type} #{n.note_id} · v
                                         {n.current_version}
                                         {n.is_archived
                                             ? " · archived"
@@ -638,26 +681,33 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
                                 Template
 
                                 <select
-                                    value="SOAP"
-                                    onChange={() => { }}
-                                    disabled={!!note}
+                                    value={noteType}
+                                    onChange={(e) => changeDraftType(e.target.value)}
+                                    disabled={!!note || !!reviewVersion}
                                 >
-                                    {NOTE_TEMPLATES.map(
-                                        (t) => (
+                                    {templates.map((t) => {
+                                        // Types limited to other disciplines can't be chosen
+                                        const allowed = canAuthor(
+                                            { author_disciplines: (t as NoteTemplate).author_disciplines ?? [] },
+                                            user?.discipline_code
+                                        );
+                                        return (
                                             <option
                                                 key={t.id}
                                                 value={t.id}
-                                                disabled={
-                                                    !t.enabled
-                                                }
+                                                disabled={!t.enabled || !allowed}
                                             >
                                                 {t.label}
-                                                {t.enabled
-                                                    ? ""
-                                                    : " (coming later)"}
+                                                {!t.enabled
+                                                    ? " (coming later)"
+                                                    : !allowed
+                                                        ? ((t as NoteTemplate).author_disciplines ?? []).includes(ANY_DISCIPLINE)
+                                                            ? " (needs a discipline)"
+                                                            : " (other disciplines)"
+                                                        : ""}
                                             </option>
-                                        )
-                                    )}
+                                        );
+                                    })}
                                 </select>
                             </label>
 
@@ -745,7 +795,9 @@ export function ClinicalNotesPage({ initialPatientId }: ClinicalNotesPageProps =
                             </div>
                         )}
 
-                        <SoapEditor
+                        <NoteBody
+                            noteType={noteType}
+                            template={template}
                             content={
                                 reviewVersion
                                     ?.content_snapshot ??

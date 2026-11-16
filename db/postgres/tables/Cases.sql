@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS dbo.Cases (
     PatientId         INT NOT NULL REFERENCES dbo.Patients(PatientId),  -- the case's original patient
     ChiefComplaint    VARCHAR(500)  NOT NULL,
     Narrative         VARCHAR(4000) NULL,       -- "Case narrative / HPI seed"
+    -- The note template students write for this case (app/note_templates.py)
+    NoteType          VARCHAR(100)  NOT NULL DEFAULT 'SOAP',
     CreatedByStaffId  INT NOT NULL REFERENCES dbo.Staff(StaffId),
     CreatedAt         TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc')
 );

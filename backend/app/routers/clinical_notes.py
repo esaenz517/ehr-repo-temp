@@ -1,4 +1,5 @@
-"""SOAP drafts and version history. Authorization is enforced on each record."""
+"""Clinical note drafts and version history. Authorization is enforced on each
+record; each note type's fields and policy come from app/note_templates.py."""
 
 from datetime import datetime, timezone
 
@@ -8,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.crud import clinical_notes as crud
 from app.crud import note_addenda as addenda_crud
 from app.crud.assignment import is_locked
+from app.models.disciplines import Discipline
 from app.crud.patients import get_patient
 from app.crud.staff import get_staff_for_user
 from app.crud.rbac import (
@@ -18,6 +20,14 @@ from app.database import get_db
 from app.models.clinical_notes import ClinicalNote, Encounter, NoteVersion
 from app.models.providers import Provider
 from app.models.note_addenda import NoteAddendum
+from app.note_templates import (
+    ContentError,
+    NoteTemplate,
+    ANY_DISCIPLINE,
+    clean_content,
+    get_template,
+    may_author,
+)
 from app.schemas.note_addenda import NoteAddendumCreate, NoteAddendumOut
 from app.schemas.clinical_notes import (
     ChartContext,
@@ -32,6 +42,66 @@ from app.security.current_user import get_current_user
 router = APIRouter(tags=["clinical-notes"])
 
 
+def can_access(
+    db: Session,
+    user,
+    action: str,
+    sensitivity: str,
+    note_type: str = "SOAP",
+) -> bool:
+    """Role check for one note action (note.<action>.<sensitivity>); unknown
+    types are refused. Restricted types also need may_open (by discipline)."""
+    if get_template(note_type) is None:
+        return False
+
+    return user_has_contextual_permission(
+        db,
+        user.user_id,
+        "note",
+        action,
+        sensitivity_level=sensitivity,
+    )
+
+def discipline_code(db: Session, user) -> str | None:
+    """The signed-in person's discipline code (e.g. "PSYCHIATRY"), or None."""
+    staff = get_staff_for_user(db, user.user_id)
+    return staff.discipline.code if staff and staff.discipline else None
+
+
+def restricted_access(db: Session, user, note: ClinicalNote) -> bool:
+    """Mental health notes (templates with a restriction) are opened only by
+    their author or, unless the type is author-only (psychotherapy notes), by
+    people with the type's discipline. Role doesn't matter: an admin without
+    the Psychiatry discipline is refused like anyone else. The assigning
+    instructor reads them through GET /assignments/{id}/note instead."""
+    template = get_template(note.note_type)
+
+    if template is None:
+        return False
+
+    if template.restriction is None or note.author_user_id == user.user_id:
+        return True
+
+    if template.access == "author_only":
+        return False
+
+    return may_author(template, discipline_code(db, user))
+
+
+def may_open(db: Session, user, action: str, note: ClinicalNote) -> bool:
+    return can_access(
+        db, user, action, note.sensitivity_classification, note.note_type
+    ) and restricted_access(db, user, note)
+
+
+def permitted_note(db: Session, user, action: str, note: ClinicalNote) -> None:
+    """403 unless the user's role and (for mental health notes) discipline allow it."""
+    if not may_open(db, user, action, note):
+        raise HTTPException(
+            status_code=403,
+            detail="Insufficient note permission",
+        )
+
 def permitted(
     db: Session,
     user,
@@ -39,20 +109,18 @@ def permitted(
     sensitivity: str,
     note_type: str = "SOAP",
 ) -> None:
-    restriction = "PSYCHIATRY" if note_type == "PSYCHIATRY" else None
-
-    if not user_has_contextual_permission(
-        db,
-        user.user_id,
-        "note",
-        action,
-        sensitivity_level=sensitivity,
-        note_type_restriction=restriction,
-    ):
+    if not can_access(db, user, action, sensitivity, note_type):
         raise HTTPException(
             status_code=403,
             detail="Insufficient note permission",
         )
+
+def checked_content(template: NoteTemplate, content) -> dict:
+    """The note's content checked against its template (422 when it doesn't fit)."""
+    try:
+        return clean_content(template, content)
+    except ContentError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
 
 
 # The author's discipline name (e.g. "Nursing") from their person row, or None.
@@ -60,6 +128,32 @@ def author_discipline(db: Session, user_id: int) -> str | None:
     staff = get_staff_for_user(db, user_id)
     return staff.discipline_name if staff else None
 
+def check_author_discipline(db: Session, user, template: NoteTemplate) -> None:
+    """Some types are written only by certain disciplines (the Staff tab's list):
+    nursing shift notes by Nursing, PT assessments by Physical Therapy, mental
+    health notes by Psychiatry, and progress notes and discharge summaries by
+    anyone with a discipline (not "No discipline")."""
+    staff = get_staff_for_user(db, user.user_id)
+    code = staff.discipline.code if staff and staff.discipline else None
+
+    if may_author(template, code):
+        return
+
+    if ANY_DISCIPLINE in template.author_disciplines:
+        who = "people with a discipline"
+    else:
+        names = [
+            d.name
+            for d in db.query(Discipline)
+            .filter(Discipline.code.in_(template.author_disciplines))
+            .order_by(Discipline.name)
+        ]
+        who = f"{' or '.join(names) or 'its discipline'} staff and students"
+
+    raise HTTPException(
+        status_code=403,
+        detail=f"A {template.label} can only be written by {who}",
+    )
 
 def patient_or_404(db: Session, patient_id: int):
     patient = get_patient(db, patient_id)
@@ -196,22 +290,8 @@ def list_notes(
 
     notes = query.order_by(ClinicalNote.created_at.desc()).all()
 
-    # Filter each note independently; patients are never
-    # classified as psychiatry patients.
-    return [
-        crud.note_data(n)
-        for n in notes
-        if user_has_contextual_permission(
-            db,
-            user.user_id,
-            "note",
-            "read",
-            sensitivity_level=n.sensitivity_classification,
-            note_type_restriction=(
-                "PSYCHIATRY" if n.note_type == "PSYCHIATRY" else None
-            ),
-        )
-    ]
+    # Filter each note independently: role, and discipline for mental health notes.
+    return [crud.note_data(n) for n in notes if may_open(db, user, "read", n)]
 
 
 @router.post(
@@ -231,6 +311,18 @@ def create_note(
         payload.sensitivity_classification,
         payload.note_type,
     )
+
+    template = get_template(payload.note_type)
+
+    if template is None or not template.enabled:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Note type {payload.note_type} is not available",
+        )
+
+    check_author_discipline(db, user, template)
+
+    content = checked_content(template, payload.content)
 
     patient = patient_or_404(db, payload.patient_id)
 
@@ -277,7 +369,8 @@ def create_note(
         author_id=user.user_id,
         discipline=author_discipline(db, user.user_id),
         sensitivity=payload.sensitivity_classification,
-        content=payload.content,
+        content=content,
+        note_type = template.id,
     )
 
     return crud.note_data(note)
@@ -298,13 +391,7 @@ def get_note(
         include_archived=True,
     )
 
-    permitted(
-        db,
-        user,
-        "read",
-        note.sensitivity_classification,
-        note.note_type,
-    )
+    permitted_note(db, user, "read", note)
 
     return crud.note_data(note)
 
@@ -321,13 +408,7 @@ def save_note(
 ):
     note = note_or_404(db, note_id)
 
-    permitted(
-        db,
-        user,
-        "update",
-        note.sensitivity_classification,
-        note.note_type,
-    )
+    permitted_note(db, user, "update", note)
 
     if note.author_user_id != user.user_id:
         raise HTTPException(
@@ -340,12 +421,20 @@ def save_note(
             status_code=409,
             detail="This assignment was submitted; its note can no longer change",
         )
+    
+    template = get_template(note.note_type)
+
+    if template is None:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Note type {note.note_type} is not available",
+        )
 
     result = crud.update_note(
         db,
         note,
         expected_version=payload.expected_version,
-        content=payload.content,
+        content=checked_content(template, payload.content),
         author_id=user.user_id,
         summary=payload.change_summary,
     )
@@ -374,13 +463,7 @@ def list_versions(
         include_archived=True,
     )
 
-    permitted(
-        db,
-        user,
-        "read",
-        note.sensitivity_classification,
-        note.note_type,
-    )
+    permitted_note(db, user, "read", note)
 
     versions = (
         db.query(NoteVersion)
@@ -403,13 +486,7 @@ def archive_note(
 ):
     note = note_or_404(db, note_id)
 
-    permitted(
-        db,
-        user,
-        "archive",
-        note.sensitivity_classification,
-        note.note_type,
-    )
+    permitted_note(db, user, "archive", note)
 
     if note.author_user_id != user.user_id:
         raise HTTPException(
@@ -441,13 +518,7 @@ def create_note_addendum(
 ):
     note = note_or_404(db, note_id)
 
-    permitted(
-        db,
-        user,
-        "update",
-        note.sensitivity_classification,
-        note.note_type,
-    )
+    permitted_note(db, user, "update", note)
 
     if note.author_user_id != user.user_id:
         raise HTTPException(
@@ -488,13 +559,7 @@ def list_note_addenda(
 ):
     note = note_or_404(db, note_id)
 
-    permitted(
-        db,
-        user,
-        "read",
-        note.sensitivity_classification,
-        note.note_type,
-    )
+    permitted_note(db, user, "read", note)
 
     return (
         db.query(NoteAddendum)

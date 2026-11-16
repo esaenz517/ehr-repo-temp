@@ -39,6 +39,7 @@ export interface CreateCaseInput {
   patient_id: number;
   chief_complaint: string;
   narrative: string | null;
+  note_type: string; // an enabled template id, e.g. "SOAP", "PROGRESS"
   created_by_staff_id: number;
   medications: MedicationInput[];
   allergies: AllergyInput[];

@@ -180,7 +180,7 @@ function App() {
             />
           ))}
         {view === "assignedCases" && canView("assignedCases") && <AssignedCasesPage staffId={staffId} initialViewingId={reviewId} />}
-        {view === "clinicalNotes" && canView("clinicalNotes") && <ClinicalNotesPage />}
+        {view === "clinicalNotes" && canView("clinicalNotes") && <ClinicalNotesPage user={user} />}
         {view === "grades" &&
           canView("grades") && (
             <StudentGradesPage />
