@@ -12,17 +12,19 @@ CREATE TABLE IF NOT EXISTS dbo.Disciplines (
     IsActive     BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+-- Seq keeps the ids in list order, matching the SQL Server database.
 INSERT INTO dbo.Disciplines (Code, Name, DepartmentId)
 SELECT s.Code, s.Name, d.DepartmentId
 FROM (
     VALUES
-        ('PHARMACY',             'Pharmacy',             'PHAR'),
-        ('NURSE',                'Nursing',              'NURS'),
-        ('PHYSICAL_THERAPY',     'Physical Therapy',     'PT'),
-        ('OCCUPATIONAL_THERAPY', 'Occupational Therapy', 'OT'),
-        ('PHYSICIAN',            'Physician',            NULL),
-        ('PSYCHIATRY',           'Psychiatry',           NULL),
-        ('ALLIED_HEALTH',        'Allied Health',        NULL)
-) AS s (Code, Name, DepartmentCode)
+        (1, 'PHARMACY',             'Pharmacy',             'PHAR'),
+        (2, 'NURSE',                'Nursing',              'NURS'),
+        (3, 'PHYSICAL_THERAPY',     'Physical Therapy',     'PT'),
+        (4, 'OCCUPATIONAL_THERAPY', 'Occupational Therapy', 'OT'),
+        (5, 'PHYSICIAN',            'Physician',            NULL),
+        (6, 'PSYCHIATRY',           'Psychiatry',           NULL),
+        (7, 'ALLIED_HEALTH',        'Allied Health',        NULL)
+) AS s (Seq, Code, Name, DepartmentCode)
 LEFT JOIN dbo.Departments d ON d.Code = s.DepartmentCode
+ORDER BY s.Seq
 ON CONFLICT (Code) DO NOTHING;

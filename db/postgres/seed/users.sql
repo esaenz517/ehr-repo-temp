@@ -18,7 +18,8 @@
 DROP TABLE IF EXISTS pg_temp.people;
 
 CREATE TEMP TABLE people (
-    Seq            INT,
+    Seq            INT, -- order of the Users rows (UserId)
+    StaffSeq       INT, -- order of the Staff rows (StaffId), as SQL Server assigns them
     Username       VARCHAR(254),
     PasswordHash   VARCHAR(100),
     Email          VARCHAR(320),
@@ -31,22 +32,22 @@ CREATE TEMP TABLE people (
 
 INSERT INTO people VALUES
     -- Instructors
-    (1,  'instructor', '$2b$12$IEeerdd1YbKnoui2WeZLHOoZgh7shNXg/6wA2Z4Z7uTzwCK5BGaSG', 'instructor@example.local',          'Daniel',   'Mejia',    'FACULTY_INSTRUCTOR', 'NURSE',            'NURS'),
-    (2,  'pharmacy',   '$2b$12$PatfTvI0ezc6sY5O14S8BOE8QKn7OOyXoqsUEmiP7.5YkQGgCLcoG', 'pharmacy.instructor@example.local', 'Maria',    'Alvarez',  'FACULTY_INSTRUCTOR', 'PHARMACY',         'PHAR'),
-    (3,  'therapy',    '$2b$12$AVrcPD8oAWz3jsXnzLTR8.7gF8/qipfrVdMoY4Arru6l0xnQsyAIi', 'therapy.instructor@example.local',  'Robert',   'Chen',     'FACULTY_INSTRUCTOR', 'PHYSICAL_THERAPY', 'PT'),
+    (1,   8, 'instructor', '$2b$12$IEeerdd1YbKnoui2WeZLHOoZgh7shNXg/6wA2Z4Z7uTzwCK5BGaSG', 'instructor@example.local',          'Daniel',   'Mejia',    'FACULTY_INSTRUCTOR', 'NURSE',            'NURS'),
+    (2,   9, 'pharmacy',   '$2b$12$PatfTvI0ezc6sY5O14S8BOE8QKn7OOyXoqsUEmiP7.5YkQGgCLcoG', 'pharmacy.instructor@example.local', 'Maria',    'Alvarez',  'FACULTY_INSTRUCTOR', 'PHARMACY',         'PHAR'),
+    (3,  12, 'therapy',    '$2b$12$AVrcPD8oAWz3jsXnzLTR8.7gF8/qipfrVdMoY4Arru6l0xnQsyAIi', 'therapy.instructor@example.local',  'Robert',   'Chen',     'FACULTY_INSTRUCTOR', 'PHYSICAL_THERAPY', 'PT'),
     -- Administrator (no discipline or department: sees all departments)
-    (4,  'admin',      '$2b$12$A9vbFqkRvQ0LQ72dVNyure12xBdeAJEvobNYQEDUXmWImFX0MPMPu', 'admin@example.local',               'Jordan',   'Reyes',    'ADMIN',              NULL,               NULL),
+    (4,   1, 'admin',      '$2b$12$A9vbFqkRvQ0LQ72dVNyure12xBdeAJEvobNYQEDUXmWImFX0MPMPu', 'admin@example.local',               'Jordan',   'Reyes',    'ADMIN',              NULL,               NULL),
     -- Students
-    (5,  'student',    '$2b$12$i.woXWQz6qB2m17SC2fYneRExFaPefSJ1hEfL6spySNCFDlrovVky', 'student@example.local',             'Sam',      'Student',  'STUDENT',            'NURSE',            'NURS'),
-    (6,  'emmanuel',   '$2b$12$5OCsrcn4pEVdHYP8xHkGRODzNM.XhR.2uI6XMPI8F3OPqtwuV4Vca', 'esaenz16@miners.utep.edu',          'Emmanuel', 'Saenz',    'STUDENT',            'NURSE',            'NURS'),
-    (7,  'daniel',     '$2b$12$b6FN9us0SmgbUhj./CY9W.kt9QPxc/GrPoGuao4rZfBFdYO901h1a', 'djmarin1@miners.utep.edu',          'Daniel',   'Marin',    'STUDENT',            'PHYSICIAN',        'IHS'),
-    (8,  'jacob',      '$2b$12$9ViNyGrsjoMQUuJfs4Uzhul9WWdJIYA24dpwh8lOeOhbTTt/UTr7q', 'jasilva6@miners.utep.edu',          'Jacob',    'Silva',    'STUDENT',            'PHYSICAL_THERAPY', 'PT'),
-    (9,  'kinley',     '$2b$12$2IuPgPE7VvZF7tpa0vGgfuOSPxuOfnAtdgPEsy7HPgY84qeaEKc.a', 'ktwangyel@miners.utep.edu',         'Kinley',   'Wangyel',  'STUDENT',            'PSYCHIATRY',       'IHS'),
-    (10, 'zachary',    '$2b$12$Ie/ipuMHu4WiPnO9T8Mnxud/AxGNKMwjdKS3B1IZGVpEkAa9uCGfq', 'zawittmann@miners.utep.edu',        'Zachary',  'Wittmann', 'STUDENT',            'NURSE',            'NURS'),
-    (11, 'ana',        '$2b$12$rZpJGhONrwWM67Dp5u5VC.eh.yBMpP2aZjjYYWr2bzwAL3/RuByXe', 'ana.torres@example.local',          'Ana',      'Torres',   'STUDENT',            'PHARMACY',         'PHAR'),
-    (12, 'luis',       '$2b$12$kgokr/bw6xqHzVoxCOaGueUXnJD8jC8m87MkiZFumsovdAI5BKI.u', 'luis.herrera@example.local',        'Luis',     'Herrera',  'STUDENT',            'PHARMACY',         'PHAR'),
+    (5,   6, 'student',    '$2b$12$i.woXWQz6qB2m17SC2fYneRExFaPefSJ1hEfL6spySNCFDlrovVky', 'student@example.local',             'Sam',      'Student',  'STUDENT',            'NURSE',            'NURS'),
+    (6,   7, 'emmanuel',   '$2b$12$5OCsrcn4pEVdHYP8xHkGRODzNM.XhR.2uI6XMPI8F3OPqtwuV4Vca', 'esaenz16@miners.utep.edu',          'Emmanuel', 'Saenz',    'STUDENT',            'NURSE',            'NURS'),
+    (7,   3, 'daniel',     '$2b$12$b6FN9us0SmgbUhj./CY9W.kt9QPxc/GrPoGuao4rZfBFdYO901h1a', 'djmarin1@miners.utep.edu',          'Daniel',   'Marin',    'STUDENT',            'PHYSICIAN',        'IHS'),
+    (8,  13, 'jacob',      '$2b$12$9ViNyGrsjoMQUuJfs4Uzhul9WWdJIYA24dpwh8lOeOhbTTt/UTr7q', 'jasilva6@miners.utep.edu',          'Jacob',    'Silva',    'STUDENT',            'PHYSICAL_THERAPY', 'PT'),
+    (9,   4, 'kinley',     '$2b$12$2IuPgPE7VvZF7tpa0vGgfuOSPxuOfnAtdgPEsy7HPgY84qeaEKc.a', 'ktwangyel@miners.utep.edu',         'Kinley',   'Wangyel',  'STUDENT',            'PSYCHIATRY',       'IHS'),
+    (10,  5, 'zachary',    '$2b$12$Ie/ipuMHu4WiPnO9T8Mnxud/AxGNKMwjdKS3B1IZGVpEkAa9uCGfq', 'zawittmann@miners.utep.edu',        'Zachary',  'Wittmann', 'STUDENT',            'NURSE',            'NURS'),
+    (11, 10, 'ana',        '$2b$12$rZpJGhONrwWM67Dp5u5VC.eh.yBMpP2aZjjYYWr2bzwAL3/RuByXe', 'ana.torres@example.local',          'Ana',      'Torres',   'STUDENT',            'PHARMACY',         'PHAR'),
+    (12, 11, 'luis',       '$2b$12$kgokr/bw6xqHzVoxCOaGueUXnJD8jC8m87MkiZFumsovdAI5BKI.u', 'luis.herrera@example.local',        'Luis',     'Herrera',  'STUDENT',            'PHARMACY',         'PHAR'),
     -- Front desk (no discipline or department)
-    (13, 'frontdesk',  '$2b$12$hwl1bgaflTCDiLzJ5XiSUu5rp7ls9bDQS4x8sRkQG80wtj1pvdXNG', 'frontdesk@example.local',           'Rosa',     'Martinez', 'FRONT_DESK',         NULL,               NULL);
+    (13,  2, 'frontdesk',  '$2b$12$hwl1bgaflTCDiLzJ5XiSUu5rp7ls9bDQS4x8sRkQG80wtj1pvdXNG', 'frontdesk@example.local',           'Rosa',     'Martinez', 'FRONT_DESK',         NULL,               NULL);
 
 -- ACCOUNTS
 INSERT INTO dbo.Users (Email, PasswordHash, AccountStatus)
@@ -64,7 +65,7 @@ JOIN dbo.Roles r              ON r.RoleName = p.RoleName
 LEFT JOIN dbo.Disciplines d   ON d.Code = p.DisciplineCode
 LEFT JOIN dbo.Departments dep ON dep.Code = p.DepartmentCode
 WHERE NOT EXISTS (SELECT 1 FROM dbo.Staff s WHERE s.UserId = u.UserId)
-ORDER BY p.Seq;
+ORDER BY p.StaffSeq;
 
 -- LOGINS
 INSERT INTO dbo.T_Login (username, password_hash, userid)

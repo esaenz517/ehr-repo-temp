@@ -254,9 +254,9 @@ FROM (
         (3, 'MRN000002', 'mark.feldman@clinic.example', TIMESTAMP '2026-11-10 14:00:00', 'Internal Medicine Clinic',     'scheduled'),
         (4, 'MRN000003', 'mark.feldman@clinic.example', TIMESTAMP '2026-10-20 10:30:00', 'Internal Medicine Clinic',     'cancelled'),
         (5, 'MRN000003', 'mark.feldman@clinic.example', TIMESTAMP '2026-11-17 10:30:00', 'Rehabilitation Center, Gym B', 'scheduled'),
-        (6, 'MRN000004', 'priya.rao@clinic.example',    TIMESTAMP '2026-11-18 10:15:00', 'Pulmonary Function Lab',       'scheduled'),
-        (7, 'MRN000005', 'mark.feldman@clinic.example', TIMESTAMP '2026-11-07 08:00:00', 'Wound Care Center',            'scheduled'),
-        (8, 'MRN000006', 'priya.rao@clinic.example',    TIMESTAMP '2026-10-28 15:00:00', 'Behavioral Health Clinic',     'completed')
+        (6, 'MRN000005', 'mark.feldman@clinic.example', TIMESTAMP '2026-11-07 08:00:00', 'Wound Care Center',            'scheduled'),
+        (7, 'MRN000006', 'priya.rao@clinic.example',    TIMESTAMP '2026-10-28 15:00:00', 'Behavioral Health Clinic',     'completed'),
+        (8, 'MRN000004', 'priya.rao@clinic.example',    TIMESTAMP '2026-11-18 10:15:00', 'Pulmonary Function Lab',       'scheduled')
 ) AS a (Seq, Mrn, ProviderEmail, AppointmentDateTime, Location, Status)
 JOIN dbo.Patients p   ON p.Mrn = a.Mrn
 JOIN dbo.Providers pr ON pr.Email = a.ProviderEmail

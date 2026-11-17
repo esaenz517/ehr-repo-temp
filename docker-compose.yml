@@ -56,6 +56,8 @@ services:
       DUO_CLIENT_ID: "${DUO_CLIENT_ID:-}"
       DUO_CLIENT_SECRET: "${DUO_CLIENT_SECRET:-}"
       DUO_API_HOST: "${DUO_API_HOST:-}"
+      # Comma-separated usernames; when set, only these accounts go through Duo
+      DUO_ONLY_USERS: "${DUO_ONLY_USERS:-}"
       DUO_REDIRECT_URI: "http://localhost:8000/auth/duo/callback"
       FRONTEND_URL: "http://localhost:3000"
     ports:
