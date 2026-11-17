@@ -17,3 +17,6 @@ tsconfig.tsbuildinfo
 # Local secrets (e.g. .env.supabase with the Supabase DB password)
 .env
 .env.*
+
+# Claude Code project instructions (local only)
+CLAUDE.md

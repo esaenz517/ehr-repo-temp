@@ -132,6 +132,23 @@ def test_wrong_password_never_reaches_duo(api, duo_on):
     assert response.status_code == 401
 
 
+def test_only_listed_users_go_through_duo(api, duo_on, monkeypatch):
+    monkeypatch.setattr(duo, "DUO_ONLY_USERS", {"emmanuel"})
+
+    # Not on the list: signed in with the password alone
+    other = TestClient(api)
+    response = other.post("/auth/login", json={"username": "luis", "password": "luis"})
+    assert response.status_code == 200
+    assert response.json()["duo_auth_url"] is None
+    assert other.get("/auth/me").status_code == 200
+
+    # On the list: sent to Duo, no session until the callback
+    client, state = start_login(api, username="emmanuel")
+    assert SESSION_COOKIE not in client.cookies
+    assert callback(client, state).status_code == 303
+    assert client.get("/auth/me").json()["username"] == "emmanuel"
+
+
 def test_patient_portal_skips_duo_by_default(api, duo_on):
     client = TestClient(api)
     response = client.post("/auth/login", json={"username": "james", "password": "james"})

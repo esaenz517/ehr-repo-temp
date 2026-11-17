@@ -25,6 +25,11 @@ from fastapi import Response
 DUO_ENABLED = os.getenv("DUO_ENABLED", "false").lower() == "true"
 # Patient portal accounts skip Duo unless this is on (each enrolled Duo user uses a license)
 DUO_INCLUDE_PATIENTS = os.getenv("DUO_INCLUDE_PATIENTS", "false").lower() == "true"
+# Limits Duo to these usernames (comma-separated), e.g. one account for a demo.
+# Empty means Duo applies to every account it otherwise would.
+DUO_ONLY_USERS = {
+    u.strip().lower() for u in os.getenv("DUO_ONLY_USERS", "").split(",") if u.strip()
+}
 
 DUO_CLIENT_ID = os.getenv("DUO_CLIENT_ID", "")
 DUO_CLIENT_SECRET = os.getenv("DUO_CLIENT_SECRET", "")
@@ -45,6 +50,8 @@ COOKIE_SECURE = os.getenv("COOKIE_SECURE", "false").lower() == "true"
 def duo_applies_to(login) -> bool:
     """Whether this account must pass Duo after its password check."""
     if not DUO_ENABLED:
+        return False
+    if DUO_ONLY_USERS and login.username.lower() not in DUO_ONLY_USERS:
         return False
     return login.staff is not None or DUO_INCLUDE_PATIENTS
 
