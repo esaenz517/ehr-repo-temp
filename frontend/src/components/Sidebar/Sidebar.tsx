@@ -64,7 +64,7 @@ const NAV_ITEMS: { view: View; label: string; group: NavGroup }[] = [
   { view: "staff", label: "Staff", group: "Records" },
   { view: "courses", label: "Courses", group: "Records" },
 
-  { view: "noteAccessLog", label: "Note Access Log", group: "Admin" },
+  { view: "auditLog", label: "Audit Log", group: "Admin" },
 
   { view: "assignments", label: "My Assignments", group: "Coursework" },
   { view: "grades", label: "My Grades", group: "Coursework" },
@@ -170,7 +170,7 @@ export function Sidebar({
                       )}
                       
                       {/* Red flags on the note access log */}
-                      {view === "noteAccessLog" && redFlagCount > 0 && (
+                      {view === "auditLog" && redFlagCount > 0 && (
                         <span
                           className="sidebar-progress-count sidebar-flag-count"
                           aria-label={`${redFlagCount} red flags this week`}

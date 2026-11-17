@@ -126,3 +126,52 @@ def record_request(**fields) -> None:
         logger.exception("Failed to write deletion audit row: %s", fields)
     finally:
         db.close()
+
+def search(
+    db: Session,
+    *,
+    resource: str | None = None,
+    resource_id: str | None = None,
+    actor_user_id: int | None = None,
+    outcome: str | None = None,
+    since: datetime | None = None,
+    until: datetime | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> tuple[int, list[DeletionAuditLog]]:
+    """Log rows matching every filter given, newest first, and the total count."""
+    query = db.query(DeletionAuditLog)
+    if resource:
+        query = query.filter(DeletionAuditLog.resource == resource)
+    if resource_id:
+        query = query.filter(DeletionAuditLog.resource_id == resource_id)
+    if actor_user_id is not None:
+        query = query.filter(DeletionAuditLog.actor_user_id == actor_user_id)
+    if outcome:
+        query = query.filter(DeletionAuditLog.outcome == outcome)
+    if since is not None:
+        query = query.filter(DeletionAuditLog.occurred_at >= since)
+    if until is not None:
+        query = query.filter(DeletionAuditLog.occurred_at <= until)
+
+    total = query.count()
+    rows = (
+        query.order_by(
+            DeletionAuditLog.occurred_at.desc(),
+            DeletionAuditLog.deletion_audit_id.desc(),
+        )
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+    return total, rows
+
+def resources(db: Session) -> list[str]:
+    """Every kind of record the log has a row for (e.g. "patients", "cases"),
+    for the page's filter."""
+    return [
+        name
+        for (name,) in db.query(DeletionAuditLog.resource)
+        .distinct()
+        .order_by(DeletionAuditLog.resource)
+    ]

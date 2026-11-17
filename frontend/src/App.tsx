@@ -19,7 +19,7 @@ import { StudentGradesPage } from "./components/Grades/StudentGradesPage";
 import { InstructorProgressPage } from "./components/Progress/InstructorProgressPage";
 import { gradesApi } from "./api/grades";
 import { noteAccessLogApi } from "./api/noteAccessLog";
-import { NoteAccessLogPage } from "./components/Audit/NoteAccessLogPage";
+import { AuditLogPage } from "./components/Audit/AuditLogPage";
 import { AboutPage } from "./components/About/AboutPage";
 import { PatientPortal } from "./components/Portal/PatientPortal";
 
@@ -217,7 +217,7 @@ function App() {
           canView("progress") && (
             <InstructorProgressPage />
           )}
-        {view === "noteAccessLog" && canView("noteAccessLog") && <NoteAccessLogPage />}
+        {view === "auditLog" && canView("auditLog") && <AuditLogPage />}
         {view === "about" && <AboutPage />}
       </main>
     </div>
