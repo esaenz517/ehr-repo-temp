@@ -9,6 +9,7 @@ import { useNoteTemplates } from "../../hooks/useNoteTemplates";
 import type { NoteTemplate } from "../../api/noteTemplates";
 import "../ClinicalNotes/clinicalNotes.css";
 import { PageHeader } from "../PageHeader";
+import { AllergyBanner } from "../AllergyBanner";
 import { StatusBadge } from "../StatusBadge";
 import "./assignmentNote.css";
 
@@ -84,6 +85,7 @@ export function StudentNoteView({ assignment, studentName, actions, review, onRe
 
       {!loading && note && chart && (
         <>
+          <AllergyBanner allergies={chart.allergies} />
           <p className="assignment-note-banner">Read-only: this is the student's latest saved draft.</p>
           <div className="clinical-notes">
           <NoteBody

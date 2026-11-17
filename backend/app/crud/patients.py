@@ -6,6 +6,7 @@ DB access functions for patients - list, get, create, update, delete.
 from sqlalchemy.orm import Session
 
 from app.crud.drugs import get_or_create_drug_by_name
+from app.crud.portal_accounts import add_default_account
 from app.models.drugs import Drug as DrugModel
 from app.models.patients import Patient as PatientModel
 from app.models.users import User
@@ -56,8 +57,17 @@ def create_patient(db: Session, patient: PatientCreate):
         db_patient.drugs = _resolve_drugs(db, patient.drug_ids, patient.drug_names)
     
     db.add(db_patient)
+
+    # Portal login (username and password = the patient's name), saved in the
+    # same transaction so a patient is never left half-created.
+    portal_username = None
+    if patient.create_portal_account:
+        db.flush()
+        portal_username = add_default_account(db, db_patient)
+
     db.commit()
     db.refresh(db_patient)
+    db_patient.portal_username = portal_username  # returned once, not stored on the patient
     return db_patient
 
 

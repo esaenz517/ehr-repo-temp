@@ -8,6 +8,7 @@ import { AssignmentNote } from "./AssignmentNote";
 import { MedicalHistoryPanel } from "../MedicalHistory/MedicalHistoryPanel";
 import { Section } from "../Section";
 import { PageHeader } from "../PageHeader";
+import { AllergyBanner } from "../AllergyBanner";
 import { useNoteTemplates } from "../../hooks/useNoteTemplates";
 
 function Detail({ label, value }: { label: string; value: ReactNode }) {
@@ -106,6 +107,8 @@ export function CaseWorkspacePage({ assignment, onBack, backLabel = "My Assignme
 
         {caseInfo && (
           <>
+            {chart && <AllergyBanner allergies={chart.allergies} />}
+
             <div className="ui-columns">
             <Section title="Patient demographics">
               {patient ? (

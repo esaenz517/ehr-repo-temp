@@ -7,7 +7,9 @@ login page and lands in the patient portal.
 Disabling or re-enabling the account uses the users API (PATCH /users/{id}/status).
 """
 
+import re
 import secrets
+import unicodedata
 from datetime import datetime, timezone
 
 from sqlalchemy import func
@@ -77,6 +79,18 @@ def create_account(db: Session, patient: Patient, data: PortalAccountCreate) -> 
         temporary_password = secrets.token_urlsafe(12)
         password = temporary_password
 
+    user, login = _add_account(db, patient, email, username, password)
+    db.commit()
+    db.refresh(user)
+
+    account = _to_account(user, login)
+    account["temporary_password"] = temporary_password
+    return account
+
+
+# Adds the account, login, and patient link without committing, so the caller
+# can save them in the same transaction as the patient.
+def _add_account(db: Session, patient: Patient, email: str, username: str, password: str):
     user = User(
         email=email,
         password_hash=None,  # the password lives in dbo.T_Login, like staff accounts
@@ -90,9 +104,37 @@ def create_account(db: Session, patient: Patient, data: PortalAccountCreate) -> 
     db.add(login)
 
     patient.user_id = user.user_id
-    db.commit()
-    db.refresh(user)
+    return user, login
 
-    account = _to_account(user, login)
-    account["temporary_password"] = temporary_password
-    return account
+
+# Placeholder email domain for accounts made automatically (dbo.Users.Email is required).
+AUTO_EMAIL_DOMAIN = "patients.example.local"
+
+
+def _username_taken(db: Session, username: str) -> bool:
+    email = f"{username}@{AUTO_EMAIL_DOMAIN}"
+    return (
+        db.query(Login.username).filter(func.lower(Login.username) == username).first() is not None
+        or db.query(User.user_id).filter(func.lower(User.email) == email).first() is not None
+    )
+
+
+# The patient's name as a username: first + last name, lowercase, letters and
+# digits only (accents removed), e.g. "Maria José Núñez" -> "mariajosenunez".
+# A number is added when the name is already taken: mariagonzalez2, ...
+def default_username(db: Session, first_name: str, last_name: str) -> str:
+    plain = unicodedata.normalize("NFKD", f"{first_name}{last_name}")
+    base = re.sub(r"[^a-z0-9]", "", plain.encode("ascii", "ignore").decode().lower()) or "patient"
+    username, n = base, 1
+    while _username_taken(db, username):
+        n += 1
+        username = f"{base}{n}"
+    return username
+
+
+def add_default_account(db: Session, patient: Patient) -> str:
+    """Gives a new patient a portal login whose username and password are both
+    their name (see default_username). Doesn't commit. Returns the username."""
+    username = default_username(db, patient.first_name, patient.last_name)
+    _add_account(db, patient, f"{username}@{AUTO_EMAIL_DOMAIN}", username, username)
+    return username

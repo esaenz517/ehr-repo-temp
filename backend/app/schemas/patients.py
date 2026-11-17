@@ -33,6 +33,9 @@ class PatientBase(BaseModel):
 class PatientCreate(PatientBase):
     drug_ids: list[int] = []
     drug_names: list[str] = []
+    # Also give the patient a portal login; its username and password are both
+    # their name (returned as portal_username). Used by Create Case.
+    create_portal_account: bool = False
 
 
 # Partial update - only the fields the client sends are changed.
@@ -58,6 +61,7 @@ class Patient(PatientBase):
     patient_id: int
     provider: Provider | None = None
     drugs: list[Drug] = []
+    portal_username: str | None = None  # set only in the response that created the login
 
     class Config:
         from_attributes = True
