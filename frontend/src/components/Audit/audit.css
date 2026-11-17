@@ -70,4 +70,13 @@
   .audit-row--flagged td:first-child {
     box-shadow: inset 4px 0 0 var(--color-error);
   }
+
+/* Audit Log page: tabs and the line under them */
+.audit-tabs {
+  margin-bottom: 0;
+}
+
+.audit-intro {
+  margin: 0 0 var(--space-3);
+}
   

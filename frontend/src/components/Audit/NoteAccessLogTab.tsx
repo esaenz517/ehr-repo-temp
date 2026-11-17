@@ -3,7 +3,6 @@ import { formatUtc } from "../../api/clinicalNotes";
 import { noteAccessLogApi, type NoteAccessEntry, type NoteAccessOutcome } from "../../api/noteAccessLog";
 import { roleName } from "../../access";
 import { useNoteTemplates } from "../../hooks/useNoteTemplates";
-import { PageHeader } from "../PageHeader";
 import { Panel } from "../Panel";
 import "./audit.css";
 
@@ -53,9 +52,10 @@ const label = (list: { value: string; label: string }[], value: string) =>
 // "12" -> 12, anything else -> undefined (an empty or invalid filter)
 const asId = (text: string) => (/^\d+$/.test(text.trim()) ? Number(text.trim()) : undefined);
 
-// Admin only: every clinical note view and change, and every refused attempt.
-// Refused attempts on psychiatry, psychotherapy and SUD notes are red-flagged.
-export function NoteAccessLogPage() {
+// The Note access tab of the Audit Log page (admin only): every clinical note
+// view and change, and every refused attempt. Refused attempts on psychiatry,
+// psychotherapy and SUD notes are red-flagged.
+export function NoteAccessLogTab() {
   const { templates } = useNoteTemplates();
   const typeLabel = (id: string) => templates.find((t) => t.id === id)?.label ?? id;
 
@@ -109,11 +109,10 @@ export function NoteAccessLogPage() {
   const lastPage = Math.max(0, Math.ceil(total / PAGE_SIZE) - 1);
 
   return (
-    <div className="ui-page">
-      <PageHeader
-        title="Note access log"
-        description="Every clinical note view and change, and every refused or failed attempt. Newest first. Entries cannot be edited or deleted."
-      />
+    <>
+      <p className="ui-muted audit-intro">
+        Every clinical note view and change, and every refused or failed attempt.
+      </p>
 
       {error && <p className="ui-error">{error}</p>}
 
@@ -301,6 +300,6 @@ export function NoteAccessLogPage() {
           </div>
         )}
       </Panel>
-    </div>
+    </>
   );
 }
