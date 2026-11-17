@@ -29,6 +29,7 @@ import type { LoginResponse } from "../../types";
 import { useNoteTemplates } from "../../hooks/useNoteTemplates";
 
 import { PageHeader } from "../PageHeader";
+import { AllergyBanner } from "../AllergyBanner";
 import "./clinicalNotes.css";
 
 interface ClinicalNotesPageProps {
@@ -598,6 +599,12 @@ export function ClinicalNotesPage({ initialPatientId, user }: ClinicalNotesPageP
             )}
 
             {context && (
+                <AllergyBanner
+                    allergies={context.allergies}
+                />
+            )}
+
+            {context && (
                 <div className="notes-layout">
                     <aside className="note-list">
                         <h2>Patient notes</h2>
@@ -930,4 +937,4 @@ export function ClinicalNotesPage({ initialPatientId, user }: ClinicalNotesPageP
             )}
         </div>
     );
-}
+}

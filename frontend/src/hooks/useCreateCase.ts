@@ -39,6 +39,8 @@ export function useCreateCase() {
   const [submitting, setSubmitting] = useState(false); // true while saving
   const [error, setError] = useState<string | null>(null); // error from the backend
   const [created, setCreated] = useState<Case | null>(null); // the case we just saved
+  // Portal login made for a new patient (the password is the same as the username)
+  const [portalUsername, setPortalUsername] = useState<string | null>(null);
 
   // Existing patients used by the Start Form selector.
   const {
@@ -237,6 +239,7 @@ export function useCreateCase() {
   // staffId is the logged-in instructor, SAVED as the case's creator.
   const submit = async (staffId: number) => {
     setCreated(null);
+    setPortalUsername(null);
     setError(null);
 
     if (loadingPatient) {
@@ -273,9 +276,14 @@ export function useCreateCase() {
           // Medications are saved with the case below so dose,
           // route, and frequency can also be stored.
           drug_ids: [],
+
+          // Give the new patient a patient portal login. Its username and
+          // password are both the patient's name (e.g. "mariagonzalez").
+          create_portal_account: true,
         });
 
         patientId = patient.patient_id;
+        setPortalUsername(patient.portal_username ?? null);
 
         // Refresh the selector so the new patient will immediately be
         // available if another case is created for them.
@@ -388,6 +396,7 @@ export function useCreateCase() {
     submitting,
     error,
     created,
+    portalUsername,
     updateDemographics,
     updateCaseContent,
     updateAssignment,

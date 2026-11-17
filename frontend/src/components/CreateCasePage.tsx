@@ -49,6 +49,12 @@ export function CreateCasePage({ staffId }: CreateCasePageProps) {
             {createCase.created.patient &&
               ` for ${createCase.created.patient.first_name} ${createCase.created.patient.last_name}`}
             .
+            {createCase.portalUsername && (
+              <>
+                {" "}Patient portal login: username <strong>{createCase.portalUsername}</strong>,
+                password <strong>{createCase.portalUsername}</strong>.
+              </>
+            )}
           </p>
         )}
         {createCase.error && <p className="form-message error">{createCase.error}</p>}

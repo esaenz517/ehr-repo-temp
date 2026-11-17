@@ -15,6 +15,7 @@ export interface CreatePatientInput {
   provider_id: number | null;
   drug_ids: number[];
   drug_names?: string[]; // typed medication names; new ones are added automatically
+  create_portal_account?: boolean; // also make a portal login: username and password = patient's name
 }
 
 // Partial update - only the fields included are changed on the backend.

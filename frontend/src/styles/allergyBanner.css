@@ -1,0 +1,43 @@
+/* Allergy banner at the top of a patient's chart */
+
+.allergy-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border: 1px solid;
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+
+.allergy-banner--alert {
+  border-color: var(--color-error-border);
+  border-left-color: var(--color-error);
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.allergy-banner--none {
+  border-color: var(--color-border-light);
+  border-left-color: var(--color-warning);
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.allergy-banner__label {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 12px;
+}
+
+.allergy-banner__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
