@@ -266,6 +266,39 @@ WHERE NOT EXISTS (
 )
 ORDER BY a.Seq;
 
+-- HELP DESK DEMO
+-- Two appointments today (El Paso time, so the demo matches the help desk's clock),
+-- one walk-in waiting for a room, and a check-in for each patient already in a room.
+INSERT INTO dbo.Appointments (PatientId, ProviderId, AppointmentDateTime, Location, Status)
+SELECT p.PatientId, pr.ProviderId, a.At, a.Location, 'scheduled'
+FROM (
+    VALUES
+        (1, 'MRN000003', 'mark.feldman@clinic.example', (now() AT TIME ZONE 'America/Denver')::date + TIME '10:30', 'Internal Medicine Clinic'),
+        (2, 'MRN000004', 'priya.rao@clinic.example',    (now() AT TIME ZONE 'America/Denver')::date + TIME '13:00', 'Pulmonary Function Lab')
+) AS a (Seq, Mrn, ProviderEmail, At, Location)
+JOIN dbo.Patients p   ON p.Mrn = a.Mrn
+JOIN dbo.Providers pr ON pr.Email = a.ProviderEmail
+WHERE NOT EXISTS (
+    SELECT 1 FROM dbo.Appointments x
+    WHERE x.PatientId = p.PatientId AND x.AppointmentDateTime = a.At
+)
+ORDER BY a.Seq;
+
+-- Patients in a room now were checked in when they got the room
+INSERT INTO dbo.CheckIns (PatientId, RoomAssignmentId, Status, CheckedInAt)
+SELECT ra.PatientId, ra.AssignmentId, 'roomed', ra.AssignedAt
+FROM dbo.RoomAssignments ra
+WHERE ra.DischargedAt IS NULL
+  AND NOT EXISTS (SELECT 1 FROM dbo.CheckIns c WHERE c.RoomAssignmentId = ra.AssignmentId)
+ORDER BY ra.AssignmentId;
+
+-- A walk-in waiting for a room
+INSERT INTO dbo.CheckIns (PatientId, Status)
+SELECT p.PatientId, 'waiting'
+FROM dbo.Patients p
+WHERE p.Mrn = 'MRN000006'
+  AND NOT EXISTS (SELECT 1 FROM dbo.CheckIns c WHERE c.PatientId = p.PatientId AND c.Status IN ('waiting', 'roomed'));
+
 -- BILLING CHARGES
 INSERT INTO dbo.BillingCharges (PatientId, ChargeSummary, ChargeAmount)
 SELECT p.PatientId, b.ChargeSummary, b.ChargeAmount

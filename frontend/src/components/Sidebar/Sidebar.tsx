@@ -61,6 +61,7 @@ const NAV_ITEMS: { view: View; label: string; group: NavGroup }[] = [
   { view: "clinicalNotes", label: "Clinical Notes", group: "Records" },
   { view: "providers", label: "Providers", group: "Records" },
   { view: "rooms", label: "Rooms", group: "Records" },
+  { view: "helpDesk", label: "Help Desk", group: "Records" }, // admins; the help desk role sees only this
   { view: "staff", label: "Staff", group: "Records" },
   { view: "courses", label: "Courses", group: "Records" },
 

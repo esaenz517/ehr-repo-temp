@@ -18,20 +18,12 @@ class RoomBase(BaseModel):
 
 class Room(RoomBase):
     room_id: int
+    # Who is in the room now (set by crud.rooms), None when it's free
+    occupant_name: str | None = None
+    occupant_mrn: str | None = None
     
     class Config:
         from_attributes = True
 
 class RoomCreate(RoomBase):
     pass
-
-
-
-#Assigning Rooms
-class AssignRoom(BaseModel):
-    patient_id: int
-
-
-    
-    
-    

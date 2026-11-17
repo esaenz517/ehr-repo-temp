@@ -12,6 +12,7 @@ Each role has a signed-in client, created once per run:
     pharmacy    Maria Alvarez     FACULTY_INSTRUCTOR, Pharmacy
     student     Sam Student       STUDENT, Nursing
     ana         Ana Torres        STUDENT, Pharmacy
+    helpdesk    Rosa Martinez     HELP_DESK
     james       James Carter      patient portal account (MRN000001), no staff role
 """
 
@@ -34,6 +35,7 @@ PASSWORDS = {
     "emmanuel": "emmanuel",
     "zachary": "zachary",
     "jacob": "jacob",
+    "helpdesk": "helpdesk",
 }
 
 
@@ -89,6 +91,12 @@ def student(api):
 @pytest.fixture(scope="session")
 def ana(api):
     return sign_in(api, "ana")
+
+
+@pytest.fixture(scope="session")
+def helpdesk(api):
+    """Help desk (role HELP_DESK): checks patients in and puts them in rooms."""
+    return sign_in(api, "helpdesk")
 
 
 @pytest.fixture(scope="session")

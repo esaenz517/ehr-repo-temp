@@ -1,0 +1,131 @@
+/* Help desk board. Shared look comes from common.css (ui-*); these are the
+   help-desk-only pieces, prefixed helpdesk-. Colors and spacing use theme.css tokens. */
+
+/* Check in and Waiting room side by side on wide screens, stacked on narrow ones */
+.helpdesk-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+/* Empty lists sit inside a panel, so they don't need their own border */
+.helpdesk-empty {
+  border: none;
+  border-radius: 0;
+}
+
+/* Appointment time block at the start of a row */
+.helpdesk-time {
+  flex: 0 0 auto;
+  min-width: 76px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  background: var(--color-primary-tint-soft);
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Walk-in picker in the Check in panel's footer */
+.helpdesk-walkin {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.helpdesk-walkin-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.helpdesk-walkin .ui-input {
+  flex: 1;
+  min-width: 0;
+  height: var(--control-height-sm);
+  font-size: var(--text-sm);
+}
+
+/* Room dropdown + buttons on a waiting row */
+.helpdesk-assign .ui-input {
+  width: 150px;
+  height: var(--control-height-sm);
+  font-size: var(--text-sm);
+}
+
+/* Room cards: as many 200px+ columns as fit */
+.helpdesk-rooms {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.helpdesk-room {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-light);
+  border-top: 3px solid var(--color-success);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.helpdesk-room--occupied {
+  border-top-color: var(--color-primary);
+  background: var(--color-primary-tint-soft);
+}
+
+.helpdesk-room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.helpdesk-room-number {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.helpdesk-room-unit {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.helpdesk-room-patient {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.helpdesk-room-name {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.helpdesk-room-meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.helpdesk-room-discharge {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 480px) {
+  .helpdesk-walkin {
+    flex-wrap: wrap;
+  }
+}

@@ -60,16 +60,18 @@
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
-.rooms-card-assign {
-  display: flex;
-  flex: 1 1 100%;
-  gap: var(--space-2);
+/* Who is in the room */
+.rooms-card-occupant {
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
 }
 
-.rooms-card-assign .ui-input {
-  flex: 1;
-  height: var(--control-height-sm);
-  font-size: var(--text-sm);
+.rooms-card-mrn {
+  font-weight: 400;
+  color: var(--color-text-muted);
 }
 
 /* Delete sits at the right end of the controls */

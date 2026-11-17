@@ -21,6 +21,7 @@ from app.models.roles import Role
 ADMIN = "ADMIN"
 FACULTY_INSTRUCTOR = "FACULTY_INSTRUCTOR"
 STUDENT = "STUDENT"
+HELP_DESK = "HELP_DESK"
 
 
 class Staff(Base):

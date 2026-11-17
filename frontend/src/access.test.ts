@@ -1,6 +1,6 @@
 // Unit tests for the page-access rules in access.ts. Run with: npm test
 import { describe, expect, it } from "vitest";
-import { can, isPatient, PATIENT_VIEWS, roleLabel, roleName, STUDENT_VIEWS, viewsFor } from "./access";
+import { can, HELP_DESK_VIEWS, isHelpDesk, isPatient, PATIENT_VIEWS, roleLabel, roleName, STUDENT_VIEWS, viewsFor } from "./access";
 import type { LoginResponse } from "./types";
 
 type Who = Pick<LoginResponse, "role" | "permissions" | "department_name">;
@@ -26,6 +26,15 @@ const STUDENT: Who = {
   role: "STUDENT",
   department_name: "Pharmacy",
   permissions: ["assignment.read", "assignment.update", "case.read", "note.read.general", "patient.read"],
+};
+
+const HELP_DESK: Who = {
+  role: "HELP_DESK",
+  department_name: null,
+  permissions: [
+    "appointment.read", "checkin.create", "checkin.read", "checkin.update", "drug.read",
+    "patient.create", "patient.read", "provider.read", "room.read",
+  ],
 };
 
 // A patient portal account: no role permissions (see backend routers/login.py)
@@ -63,6 +72,19 @@ describe("viewsFor", () => {
   it("hides a page when the permission is missing", () => {
     const noStaff = { ...INSTRUCTOR, permissions: INSTRUCTOR.permissions.filter((p) => p !== "staff.read") };
     expect(viewsFor(noStaff)).not.toContain("staff");
+  });
+
+  it("gives the help desk only the help desk board, even with read permissions", () => {
+    expect(viewsFor(HELP_DESK)).toEqual(HELP_DESK_VIEWS);
+    expect(viewsFor(HELP_DESK)).not.toContain("patients");
+    expect(viewsFor(HELP_DESK)).not.toContain("home");
+    expect(isHelpDesk(HELP_DESK)).toBe(true);
+    expect(isHelpDesk(ADMIN)).toBe(false);
+  });
+
+  it("shows admins the help desk board, but not instructors", () => {
+    expect(viewsFor({ ...ADMIN, permissions: [...ADMIN.permissions, "checkin.read"] })).toContain("helpDesk");
+    expect(viewsFor(INSTRUCTOR)).not.toContain("helpDesk");
   });
 
   it("always includes the dashboard", () => {

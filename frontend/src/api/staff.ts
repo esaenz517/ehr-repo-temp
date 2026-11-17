@@ -16,7 +16,7 @@ export interface UpdateStaffInput {
 
 // Optional filters for the list
 export interface StaffFilter {
-  role?: string; // "ADMIN" | "FACULTY_INSTRUCTOR" | "STUDENT"
+  role?: string; // "ADMIN" | "FACULTY_INSTRUCTOR" | "STUDENT" | "HELP_DESK"
   department_id?: number;
 }
 

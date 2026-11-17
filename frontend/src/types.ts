@@ -1,6 +1,6 @@
 // The three staff roles. Every person (Staff) has exactly one.
 // PATIENT is reported by /auth/me for a patient portal account; it has no permissions.
-export type RoleName = "ADMIN" | "FACULTY_INSTRUCTOR" | "STUDENT" | "PATIENT";
+export type RoleName = "ADMIN" | "FACULTY_INSTRUCTOR" | "STUDENT" | "HELP_DESK" | "PATIENT";
 
 export interface Role {
   role_id: number;
@@ -150,6 +150,38 @@ export interface Room {
   room_number: number;
   unit: string;
   status: string;
+  occupant_name: string | null; // who is in the room now
+  occupant_mrn: string | null;
+}
+
+// Help desk queue (backend /help-desk). Status: waiting -> roomed -> done, or cancelled.
+export type CheckInStatus = "waiting" | "roomed" | "done" | "cancelled";
+
+export interface CheckIn {
+  check_in_id: number;
+  patient_id: number;
+  patient_name: string;
+  mrn: string | null;
+  appointment_id: number | null; // null for walk-ins
+  appointment_time: string | null; // clinic-local time
+  location: string | null;
+  room_id: number | null;
+  room_number: number | null;
+  status: CheckInStatus;
+  checked_in_at: string | null; // UTC
+  roomed_at: string | null; // UTC
+  checked_out_at: string | null; // UTC
+}
+
+// A scheduled appointment on the help desk's day that isn't checked in yet
+export interface DeskAppointment {
+  appointment_id: number;
+  patient_id: number;
+  patient_name: string;
+  mrn: string | null;
+  appointment_time: string; // clinic-local time
+  location: string;
+  provider_name: string | null;
 }
 
 export interface Appointment {

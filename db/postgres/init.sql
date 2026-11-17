@@ -59,6 +59,7 @@ CREATE SCHEMA IF NOT EXISTS dbo;
 \ir tables/PatientLabResults.sql
 \ir tables/ClinicalNotes.sql
 \ir tables/Appointments.sql
+\ir tables/CheckIns.sql
 \ir tables/NoteVersions.sql
 \ir tables/NoteAddenda.sql
 \ir tables/NoteAuditEvents.sql

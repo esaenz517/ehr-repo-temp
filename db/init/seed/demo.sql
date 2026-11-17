@@ -303,6 +303,40 @@ WHERE NOT EXISTS (
 );
 GO
 
+-- HELP DESK DEMO
+-- Two appointments today (El Paso time, so the demo matches the help desk's clock),
+-- one walk-in waiting for a room, and a check-in for each patient already in a room.
+DECLARE @today DATETIME2 = CAST(CAST(SYSDATETIMEOFFSET() AT TIME ZONE 'Mountain Standard Time' AS DATE) AS DATETIME2);
+
+INSERT INTO dbo.Appointments (PatientId, ProviderId, AppointmentDateTime, Location, Status)
+SELECT p.PatientId, pr.ProviderId, DATEADD(MINUTE, a.MinutesIntoDay, @today), a.Location, 'scheduled'
+FROM (
+    VALUES
+        ('MRN000003', 'mark.feldman@clinic.example', 630, N'Internal Medicine Clinic'),
+        ('MRN000004', 'priya.rao@clinic.example',    780, N'Pulmonary Function Lab')
+) AS a (Mrn, ProviderEmail, MinutesIntoDay, Location)
+JOIN dbo.Patients p   ON p.Mrn = a.Mrn
+JOIN dbo.Providers pr ON pr.Email = a.ProviderEmail
+WHERE NOT EXISTS (
+    SELECT 1 FROM dbo.Appointments x
+    WHERE x.PatientId = p.PatientId AND x.AppointmentDateTime = DATEADD(MINUTE, a.MinutesIntoDay, @today)
+);
+
+-- Patients in a room now were checked in when they got the room
+INSERT INTO dbo.CheckIns (PatientId, RoomAssignmentId, Status, CheckedInAt)
+SELECT ra.PatientId, ra.AssignmentId, 'roomed', ra.AssignedAt
+FROM dbo.RoomAssignments ra
+WHERE ra.DischargedAt IS NULL
+  AND NOT EXISTS (SELECT 1 FROM dbo.CheckIns c WHERE c.RoomAssignmentId = ra.AssignmentId);
+
+-- A walk-in waiting for a room
+INSERT INTO dbo.CheckIns (PatientId, Status)
+SELECT p.PatientId, 'waiting'
+FROM dbo.Patients p
+WHERE p.Mrn = 'MRN000006'
+  AND NOT EXISTS (SELECT 1 FROM dbo.CheckIns c WHERE c.PatientId = p.PatientId AND c.Status IN ('waiting', 'roomed'));
+GO
+
 -- BILLING CHARGES
 INSERT INTO dbo.BillingCharges (PatientId, ChargeSummary, ChargeAmount)
 SELECT p.PatientId, b.ChargeSummary, b.ChargeAmount
