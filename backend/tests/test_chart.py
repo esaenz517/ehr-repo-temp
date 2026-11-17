@@ -75,16 +75,21 @@ def test_medical_and_family_history(student, instructor, admin, patient):
     assert admin.delete(f"/patients/{pid}/medical-history/{history_id}").status_code == 204
 
 
-def test_rooms(instructor, student, patient, unique):
+def test_rooms(instructor, admin, student, patient, unique):
     number = 9000 + int(unique[:3], 16) % 999
     room = instructor.post("/rooms", json={"room_number": number, "unit": "Test Unit"})
     assert room.status_code in (200, 201), room.text
     room_id = room.json()["room_id"]
 
     assert student.get("/rooms").status_code == 403
-    assert instructor.post(f"/rooms/{room_id}/assign/", json={"patient_id": patient["patient_id"]}).status_code in (200, 201)
-    assert instructor.get(f"/rooms/{room_id}").json()["status"] == "occupied"
-    assert instructor.post(f"/rooms/{room_id}/unassign/").status_code in (200, 204)
+    # Patients are put in rooms from the front desk queue, not from /rooms
+    assert instructor.post(f"/rooms/{room_id}/assign/", json={"patient_id": patient["patient_id"]}).status_code in (404, 405)
+    check_in = admin.post("/front-desk/check-ins", json={"patient_id": patient["patient_id"]}).json()
+    assert admin.post(f"/front-desk/check-ins/{check_in['check_in_id']}/room", json={"room_id": room_id}).status_code == 200
+    occupied = instructor.get(f"/rooms/{room_id}").json()
+    assert occupied["status"] == "occupied"
+    assert occupied["occupant_name"] == "Testy Patient"
+    assert admin.post(f"/front-desk/check-ins/{check_in['check_in_id']}/discharge").status_code == 200
     assert instructor.get(f"/rooms/{room_id}").json()["status"] == "available"
     # The assignment history keeps the room
     assert instructor.delete(f"/rooms/{room_id}").status_code == 409

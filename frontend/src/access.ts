@@ -1,7 +1,7 @@
 // Who can see which page. Kept free of React so it can be unit-tested.
 //
 // Patients (portal accounts) see only the patient portal pages. Students see
-// their own pages only. Everyone else sees a page when their role
+// their own pages only. The front desk sees only the front desk portal. Everyone else sees a page when their role
 // has the permission the page needs (the backend checks the same permissions on
 // every request, so hiding a page is for convenience, not security).
 import type { LoginResponse, RoleName } from "./types";
@@ -13,6 +13,7 @@ export type View =
   | "staff"
   | "providers"
   | "rooms"
+  | "frontDesk"
   | "courses"
   | "createCase"
   | "assignments"
@@ -32,6 +33,9 @@ export type View =
 
 // Students can access their dashboard, assignments, and published grades.
 export const STUDENT_VIEWS: View[] = ["home", "assignments", "grades"];
+
+// The front desk checks patients in and puts them in rooms; that's its whole app.
+export const FRONT_DESK_VIEWS: View[] = ["frontDesk"];
 
 // Patients see their own record and nothing else. The backend enforces this too:
 // patient accounts can only call /portal, which always returns their own data.
@@ -53,6 +57,8 @@ export const VIEW_PERMISSIONS: Partial<Record<View, string>> = {
   clinicalNotes: "note.read.general",
   providers: "provider.read",
   rooms: "room.read",
+  // Admins open the front desk board from the staff app (the front desk role gets its own portal)
+  frontDesk: "checkin.read",
   staff: "staff.read",
   courses: "course.read",
   // Admin only: audit.read is granted to the ADMIN role alone
@@ -63,6 +69,7 @@ export const ROLE_LABELS: Record<RoleName, string> = {
   ADMIN: "Administrator",
   FACULTY_INSTRUCTOR: "Instructor",
   STUDENT: "Student",
+  FRONT_DESK: "Front Desk",
   PATIENT: "Patient",
 };
 
@@ -86,10 +93,15 @@ export function isPatient(user: Pick<LoginResponse, "role">): boolean {
   return user.role === "PATIENT";
 }
 
+export function isFrontDesk(user: Pick<LoginResponse, "role">): boolean {
+  return user.role === "FRONT_DESK";
+}
+
 // The pages a person may open, in sidebar order.
 export function viewsFor(user: Who): View[] {
   if (isPatient(user)) return [...PATIENT_VIEWS];
   if (isStudent(user)) return [...STUDENT_VIEWS];
+  if (isFrontDesk(user)) return [...FRONT_DESK_VIEWS];
 
   const views: View[] = ["home"];
   for (const [view, permission] of Object.entries(VIEW_PERMISSIONS) as [View, string][]) {

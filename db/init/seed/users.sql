@@ -11,6 +11,7 @@
 --   admin      / admin123        Administrator
 --   student    / student123      Nursing student
 --   emmanuel, daniel, jacob, kinley, zachary, ana, luis: password is the username
+--   frontdesk  / frontdesk       Front desk (checks patients in, assigns rooms)
 --   james      / james           Patient portal (James Carter, MRN000001)
 
 IF OBJECT_ID('tempdb..#People') IS NOT NULL DROP TABLE #People;
@@ -41,7 +42,9 @@ INSERT INTO #People VALUES
     (N'kinley',     N'$2b$12$2IuPgPE7VvZF7tpa0vGgfuOSPxuOfnAtdgPEsy7HPgY84qeaEKc.a', N'ktwangyel@miners.utep.edu',         N'Kinley',   N'Wangyel',  N'STUDENT',            N'PSYCHIATRY',       N'IHS'),
     (N'zachary',    N'$2b$12$Ie/ipuMHu4WiPnO9T8Mnxud/AxGNKMwjdKS3B1IZGVpEkAa9uCGfq', N'zawittmann@miners.utep.edu',        N'Zachary',  N'Wittmann', N'STUDENT',            N'NURSE',            N'NURS'),
     (N'ana',        N'$2b$12$rZpJGhONrwWM67Dp5u5VC.eh.yBMpP2aZjjYYWr2bzwAL3/RuByXe', N'ana.torres@example.local',          N'Ana',      N'Torres',   N'STUDENT',            N'PHARMACY',         N'PHAR'),
-    (N'luis',       N'$2b$12$kgokr/bw6xqHzVoxCOaGueUXnJD8jC8m87MkiZFumsovdAI5BKI.u', N'luis.herrera@example.local',        N'Luis',     N'Herrera',  N'STUDENT',            N'PHARMACY',         N'PHAR');
+    (N'luis',       N'$2b$12$kgokr/bw6xqHzVoxCOaGueUXnJD8jC8m87MkiZFumsovdAI5BKI.u', N'luis.herrera@example.local',        N'Luis',     N'Herrera',  N'STUDENT',            N'PHARMACY',         N'PHAR'),
+    -- Front desk (no discipline or department)
+    (N'frontdesk',  N'$2b$12$hwl1bgaflTCDiLzJ5XiSUu5rp7ls9bDQS4x8sRkQG80wtj1pvdXNG', N'frontdesk@example.local',           N'Rosa',     N'Martinez', N'FRONT_DESK',         NULL,               NULL);
 
 -- ACCOUNTS
 INSERT INTO dbo.Users (Email, PasswordHash, AccountStatus)

@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.routers import (
     appointments,
+    check_ins,
     drugs,
     login,
     medical_history,
@@ -93,6 +94,8 @@ app.include_router(grades_progress.router, dependencies=STAFF_ONLY)
 app.include_router(login.router)
 app.include_router(medical_history.router, dependencies=STAFF_ONLY)
 app.include_router(rooms.router, dependencies=STAFF_ONLY)
+# Front desk: check-in queue and putting patients in rooms
+app.include_router(check_ins.router, dependencies=STAFF_ONLY)
 app.include_router(appointments.router, dependencies=STAFF_ONLY)
 app.include_router(billing.router, dependencies=STAFF_ONLY)
 app.include_router(insurance.router, dependencies=STAFF_ONLY)

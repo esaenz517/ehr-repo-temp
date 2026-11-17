@@ -86,7 +86,19 @@ FROM (
         ('STUDENT', 'assignment.update'),
         ('STUDENT', 'patient.read'),
         ('STUDENT', 'case.read'),
-        ('STUDENT', 'drug.read')
+        ('STUDENT', 'drug.read'),
+
+        -- Front desk: check patients in (and register new ones), put them in rooms.
+        -- provider.read and drug.read fill the new-patient form's dropdowns.
+        ('FRONT_DESK', 'patient.read'),
+        ('FRONT_DESK', 'patient.create'),
+        ('FRONT_DESK', 'provider.read'),
+        ('FRONT_DESK', 'drug.read'),
+        ('FRONT_DESK', 'appointment.read'),
+        ('FRONT_DESK', 'room.read'),
+        ('FRONT_DESK', 'checkin.read'),
+        ('FRONT_DESK', 'checkin.create'),
+        ('FRONT_DESK', 'checkin.update')
 ) AS grants (RoleName, PermissionCode)
 JOIN dbo.Roles r ON r.RoleName = grants.RoleName
 JOIN dbo.Permissions p ON p.PermissionCode = grants.PermissionCode

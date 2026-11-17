@@ -75,6 +75,7 @@ GO
 :r /init/tables/PatientLabResults.sql
 :r /init/tables/ClinicalNotes.sql
 :r /init/tables/Appointments.sql
+:r /init/tables/CheckIns.sql
 :r /init/tables/NoteVersions.sql
 :r /init/tables/NoteAddenda.sql
 :r /init/tables/NoteAuditEvents.sql

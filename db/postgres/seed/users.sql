@@ -12,6 +12,7 @@
 --   admin      / admin123        Administrator
 --   student    / student123      Nursing student
 --   emmanuel, daniel, jacob, kinley, zachary, ana, luis: password is the username
+--   frontdesk  / frontdesk       Front desk (checks patients in, assigns rooms)
 --   james      / james           Patient portal (James Carter, MRN000001)
 
 DROP TABLE IF EXISTS pg_temp.people;
@@ -43,7 +44,9 @@ INSERT INTO people VALUES
     (9,  'kinley',     '$2b$12$2IuPgPE7VvZF7tpa0vGgfuOSPxuOfnAtdgPEsy7HPgY84qeaEKc.a', 'ktwangyel@miners.utep.edu',         'Kinley',   'Wangyel',  'STUDENT',            'PSYCHIATRY',       'IHS'),
     (10, 'zachary',    '$2b$12$Ie/ipuMHu4WiPnO9T8Mnxud/AxGNKMwjdKS3B1IZGVpEkAa9uCGfq', 'zawittmann@miners.utep.edu',        'Zachary',  'Wittmann', 'STUDENT',            'NURSE',            'NURS'),
     (11, 'ana',        '$2b$12$rZpJGhONrwWM67Dp5u5VC.eh.yBMpP2aZjjYYWr2bzwAL3/RuByXe', 'ana.torres@example.local',          'Ana',      'Torres',   'STUDENT',            'PHARMACY',         'PHAR'),
-    (12, 'luis',       '$2b$12$kgokr/bw6xqHzVoxCOaGueUXnJD8jC8m87MkiZFumsovdAI5BKI.u', 'luis.herrera@example.local',        'Luis',     'Herrera',  'STUDENT',            'PHARMACY',         'PHAR');
+    (12, 'luis',       '$2b$12$kgokr/bw6xqHzVoxCOaGueUXnJD8jC8m87MkiZFumsovdAI5BKI.u', 'luis.herrera@example.local',        'Luis',     'Herrera',  'STUDENT',            'PHARMACY',         'PHAR'),
+    -- Front desk (no discipline or department)
+    (13, 'frontdesk',  '$2b$12$hwl1bgaflTCDiLzJ5XiSUu5rp7ls9bDQS4x8sRkQG80wtj1pvdXNG', 'frontdesk@example.local',           'Rosa',     'Martinez', 'FRONT_DESK',         NULL,               NULL);
 
 -- ACCOUNTS
 INSERT INTO dbo.Users (Email, PasswordHash, AccountStatus)

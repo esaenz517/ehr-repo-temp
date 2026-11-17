@@ -1,28 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
 import { CreateRoomInput, roomsApi } from "../api/rooms";
-import type { Patient, Room } from "../types";
+import type { Room } from "../types";
 
 // All the state + actions RoomsPage needs. Keeps data-fetching out of the components.
+// Patients are put in rooms from the front desk (hooks/useFrontDesk.ts), not here.
 export function useRooms() {
   const [rooms, setRooms] = useState<Room[]>([]);
-  // The patient dropdown options for assigning - kept alongside rooms since
-  // it needs to refresh every time rooms do (e.g. after an assign/unassign).
-  const [availablePatients, setAvailablePatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetches rooms and available patients together and stores them in state.
-  // Called once on mount, and again after every create/delete/assign/unassign
-  // so the UI always reflects the latest backend data.
+  // Fetches the rooms (with who is in each). Called once on mount, and again
+  // after every create/delete so the UI always reflects the latest backend data.
   const load = useCallback(async () => {
     try {
       setLoading(true);
-      const [roomsData, patientsData] = await Promise.all([
-        roomsApi.list(),
-        roomsApi.availablePatients(),
-      ]);
-      setRooms(roomsData);
-      setAvailablePatients(patientsData);
+      setRooms(await roomsApi.list());
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load rooms");
@@ -54,28 +46,5 @@ export function useRooms() {
     }
   };
 
-  // Assign a patient to a room, then reload so the room's status (now
-  // "occupied") and the available-patients list (now missing this patient)
-  // both update.
-  const assign = async (roomId: number, patientId: number) => {
-    try {
-      await roomsApi.assign(roomId, patientId);
-      await load();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to assign patient");
-    }
-  };
-
-  // Discharge whoever's in a room, then reload so it flips back to
-  // "available" and its patient reappears in the dropdown.
-  const unassign = async (roomId: number) => {
-    try {
-      await roomsApi.unassign(roomId);
-      await load();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to unassign patient");
-    }
-  };
-
-  return { rooms, availablePatients, loading, error, create, remove, assign, unassign };
+  return { rooms, loading, error, create, remove };
 }

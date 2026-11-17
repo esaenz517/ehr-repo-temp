@@ -14,6 +14,7 @@ READ_MATRIX = [
     ("/drugs",                  200, 200, 200),
     ("/providers",              200, 200, 403),
     ("/rooms",                  200, 200, 403),
+    ("/front-desk/queue",        200, 403, 403),
     ("/staff",                  200, 200, 403),
     ("/courses",                200, 200, 403),
     ("/courses/mine",           200, 200, 200),

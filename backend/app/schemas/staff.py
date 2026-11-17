@@ -3,7 +3,7 @@ Staff Schemas
 Request/response shapes for the staff API - separate from the DB model (models.py)
 because what a client sends/receives doesn't always match what's stored.
 
-A staff row is a person: name, role (ADMIN, FACULTY_INSTRUCTOR, STUDENT),
+A staff row is a person: name, role (ADMIN, FACULTY_INSTRUCTOR, STUDENT, FRONT_DESK),
 discipline, and department.
 '''
 

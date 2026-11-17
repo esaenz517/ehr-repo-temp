@@ -53,6 +53,11 @@ USING (
         ('room.update', 'room',   'update'),
         ('room.delete', 'room',   'delete'),
 
+        -- Front desk queue: check patients in, put them in rooms, discharge them
+        ('checkin.read',   'checkin', 'read'),
+        ('checkin.create', 'checkin', 'create'),
+        ('checkin.update', 'checkin', 'update'),
+
         ('appointment.read',   'appointment', 'read'),
         ('appointment.create', 'appointment', 'create'),
         ('appointment.update', 'appointment', 'update'),

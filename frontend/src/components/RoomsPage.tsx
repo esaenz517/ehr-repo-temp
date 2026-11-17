@@ -7,7 +7,7 @@ import "./Rooms/rooms.css";
 
 // Pulls all rooms and their state
 export function RoomsPage() {
-  const { rooms, availablePatients, loading, error, create, remove, assign, unassign } = useRooms();
+  const { rooms, loading, error, create, remove } = useRooms();
   const [adding, setAdding] = useState(false); // the New room form is open
 
   const occupied = rooms.filter((r) => r.status !== "available").length;
@@ -18,7 +18,7 @@ export function RoomsPage() {
         title="Rooms"
         description={
           loading
-            ? "Assign patients to rooms and free them up again."
+            ? "Set up rooms. Patients are put in rooms from the Front Desk."
             : `${rooms.length - occupied} of ${rooms.length} room${rooms.length === 1 ? "" : "s"} available.`
         }
         actions={
@@ -36,10 +36,7 @@ export function RoomsPage() {
       ) : (
         <RoomList
           rooms={rooms}
-          availablePatients={availablePatients}
           onDelete={remove}
-          onAssign={assign}
-          onUnassign={unassign}
         />
       )}
     </div>

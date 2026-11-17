@@ -1,5 +1,6 @@
 -- ROLES
 -- What a person can do. Every person (dbo.Staff.RoleId) has exactly one role.
+-- FRONT_DESK checks patients in and puts them in rooms (the Front Desk portal).
 -- Clinical specialties are not roles: they live in dbo.Disciplines.
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Roles')
 BEGIN
@@ -17,7 +18,8 @@ USING (
     VALUES
         ('ADMIN',              'Admin'),
         ('FACULTY_INSTRUCTOR', 'Faculty / Instructor'),
-        ('STUDENT',            'Student')
+        ('STUDENT',            'Student'),
+        ('FRONT_DESK',         'Front Desk')
 ) AS source (RoleName, DisplayName)
 ON target.RoleName = source.RoleName
 WHEN NOT MATCHED THEN
@@ -28,5 +30,5 @@ GO
 -- foreign keys but switched off; disciplines moved to dbo.Disciplines.
 UPDATE dbo.Roles
 SET IsActive = 0
-WHERE RoleName NOT IN ('ADMIN', 'FACULTY_INSTRUCTOR', 'STUDENT') AND IsActive = 1;
+WHERE RoleName NOT IN ('ADMIN', 'FACULTY_INSTRUCTOR', 'STUDENT', 'FRONT_DESK') AND IsActive = 1;
 GO
