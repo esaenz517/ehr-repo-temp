@@ -7,7 +7,7 @@ import io
 def test_every_person_has_one_of_the_roles(admin):
     people = admin.get("/staff").json()
     assert people
-    assert {p["role_name"] for p in people} <= {"ADMIN", "FACULTY_INSTRUCTOR", "STUDENT", "HELP_DESK"}
+    assert {p["role_name"] for p in people} <= {"ADMIN", "FACULTY_INSTRUCTOR", "STUDENT", "FRONT_DESK"}
 
 
 def test_staff_shows_names_next_to_ids(admin):
@@ -29,7 +29,7 @@ def test_filter_staff_by_role_and_department(instructor, lookup):
 
 def test_only_four_active_roles(admin):
     active = {r["role_name"] for r in admin.get("/roles").json() if r["is_active"]}
-    assert active == {"ADMIN", "FACULTY_INSTRUCTOR", "STUDENT", "HELP_DESK"}
+    assert active == {"ADMIN", "FACULTY_INSTRUCTOR", "STUDENT", "FRONT_DESK"}
 
 
 def test_create_update_and_delete_a_person(admin, lookup):

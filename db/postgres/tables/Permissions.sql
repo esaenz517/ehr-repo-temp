@@ -47,7 +47,7 @@ INSERT INTO dbo.Permissions (PermissionCode, ResourceType, Action) VALUES
     ('room.update', 'room',   'update'),
     ('room.delete', 'room',   'delete'),
 
-    -- Help desk queue: check patients in, put them in rooms, discharge them
+    -- Front desk queue: check patients in, put them in rooms, discharge them
     ('checkin.read',   'checkin', 'read'),
     ('checkin.create', 'checkin', 'create'),
     ('checkin.update', 'checkin', 'update'),

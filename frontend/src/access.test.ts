@@ -1,6 +1,6 @@
 // Unit tests for the page-access rules in access.ts. Run with: npm test
 import { describe, expect, it } from "vitest";
-import { can, HELP_DESK_VIEWS, isHelpDesk, isPatient, PATIENT_VIEWS, roleLabel, roleName, STUDENT_VIEWS, viewsFor } from "./access";
+import { can, FRONT_DESK_VIEWS, isFrontDesk, isPatient, PATIENT_VIEWS, roleLabel, roleName, STUDENT_VIEWS, viewsFor } from "./access";
 import type { LoginResponse } from "./types";
 
 type Who = Pick<LoginResponse, "role" | "permissions" | "department_name">;
@@ -28,8 +28,8 @@ const STUDENT: Who = {
   permissions: ["assignment.read", "assignment.update", "case.read", "note.read.general", "patient.read"],
 };
 
-const HELP_DESK: Who = {
-  role: "HELP_DESK",
+const FRONT_DESK: Who = {
+  role: "FRONT_DESK",
   department_name: null,
   permissions: [
     "appointment.read", "checkin.create", "checkin.read", "checkin.update", "drug.read",
@@ -74,17 +74,17 @@ describe("viewsFor", () => {
     expect(viewsFor(noStaff)).not.toContain("staff");
   });
 
-  it("gives the help desk only the help desk board, even with read permissions", () => {
-    expect(viewsFor(HELP_DESK)).toEqual(HELP_DESK_VIEWS);
-    expect(viewsFor(HELP_DESK)).not.toContain("patients");
-    expect(viewsFor(HELP_DESK)).not.toContain("home");
-    expect(isHelpDesk(HELP_DESK)).toBe(true);
-    expect(isHelpDesk(ADMIN)).toBe(false);
+  it("gives the front desk only the front desk board, even with read permissions", () => {
+    expect(viewsFor(FRONT_DESK)).toEqual(FRONT_DESK_VIEWS);
+    expect(viewsFor(FRONT_DESK)).not.toContain("patients");
+    expect(viewsFor(FRONT_DESK)).not.toContain("home");
+    expect(isFrontDesk(FRONT_DESK)).toBe(true);
+    expect(isFrontDesk(ADMIN)).toBe(false);
   });
 
-  it("shows admins the help desk board, but not instructors", () => {
-    expect(viewsFor({ ...ADMIN, permissions: [...ADMIN.permissions, "checkin.read"] })).toContain("helpDesk");
-    expect(viewsFor(INSTRUCTOR)).not.toContain("helpDesk");
+  it("shows admins the front desk board, but not instructors", () => {
+    expect(viewsFor({ ...ADMIN, permissions: [...ADMIN.permissions, "checkin.read"] })).toContain("frontDesk");
+    expect(viewsFor(INSTRUCTOR)).not.toContain("frontDesk");
   });
 
   it("always includes the dashboard", () => {

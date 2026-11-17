@@ -1,5 +1,5 @@
 -- CHECK-INS
--- The help desk queue. A patient is checked in (for one of today's appointments,
+-- The front desk queue. A patient is checked in (for one of today's appointments,
 -- or as a walk-in / newly registered patient with no appointment), waits, is put
 -- in a room, and is discharged. Only a 'waiting' check-in can be given a room.
 --   waiting   -> checked in, no room yet

@@ -43,7 +43,7 @@ const ROLE_BADGES: Record<string, string> = {
   ADMIN: "ui-badge ui-badge--solid",
   FACULTY_INSTRUCTOR: "ui-badge ui-badge--muted",
   STUDENT: "ui-badge",
-  HELP_DESK: "ui-badge ui-badge--success",
+  FRONT_DESK: "ui-badge ui-badge--success",
 };
 
 // Displays every person as a table row: name, role, department, discipline.

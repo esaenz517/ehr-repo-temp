@@ -7,7 +7,7 @@ interface RoomListProps {
 }
 
 // Displays every room as a card with its status and who is in it.
-// Patients are assigned to rooms from the Help Desk page, not here.
+// Patients are assigned to rooms from the Front Desk page, not here.
 export function RoomList({ rooms, onDelete }: RoomListProps) {
   if (rooms.length === 0) {
     return <p className="ui-row-empty">No rooms yet.</p>;
@@ -30,7 +30,7 @@ export function RoomList({ rooms, onDelete }: RoomListProps) {
               </span>
             </div>
 
-            {/* Who is in the room. Patients are put in rooms (and discharged) from the Help Desk. */}
+            {/* Who is in the room. Patients are put in rooms (and discharged) from the Front Desk. */}
             <p className="rooms-card-occupant">
               {isAvailable ? "No patient" : room.occupant_name ?? "Occupied"}
               {!isAvailable && room.occupant_mrn && <span className="rooms-card-mrn"> · {room.occupant_mrn}</span>}

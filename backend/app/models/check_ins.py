@@ -1,6 +1,6 @@
 """
 Check-ins Model
-SQLAlchemy ORM class mapped to the dbo.CheckIns table (the help desk queue).
+SQLAlchemy ORM class mapped to the dbo.CheckIns table (the front desk queue).
 Status goes waiting -> roomed -> done, or waiting -> cancelled.
 """
 

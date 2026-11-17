@@ -30,7 +30,7 @@ export function WaitingPanel({ waiting, rooms, onAssign, onCancel }: WaitingPane
       flush
     >
       {waiting.length === 0 ? (
-        <p className="ui-row-empty helpdesk-empty">Nobody is waiting.</p>
+        <p className="ui-row-empty frontdesk-empty">Nobody is waiting.</p>
       ) : (
         <ul className="ui-row-list">
           {waiting.map((c) => (
@@ -49,7 +49,7 @@ export function WaitingPanel({ waiting, rooms, onAssign, onCancel }: WaitingPane
                   </div>
                 )}
               </div>
-              <div className="ui-row-actions helpdesk-assign">
+              <div className="ui-row-actions frontdesk-assign">
                 <select
                   className="ui-input"
                   aria-label={`Room for ${c.patient_name}`}

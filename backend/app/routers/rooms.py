@@ -1,7 +1,7 @@
 """
 Rooms Router
 This file defines API endpoints for managing rooms. It includes routes for listing, retrieving, creating, and deleting rooms.
-Patients are put in rooms (and discharged) from the help desk queue: routers/check_ins.py.
+Patients are put in rooms (and discharged) from the front desk queue: routers/check_ins.py.
 """
 
 from fastapi import APIRouter, Depends, HTTPException

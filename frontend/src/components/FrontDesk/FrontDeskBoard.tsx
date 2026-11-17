@@ -1,18 +1,18 @@
 import { useState } from "react";
-import { useHelpDesk } from "../../hooks/useHelpDesk";
+import { useFrontDesk } from "../../hooks/useFrontDesk";
 import { useProviders } from "../../hooks/useProviders";
 import { PageHeader } from "../PageHeader";
 import { PatientForm } from "../Patients/PatientForm";
 import { CheckInPanel } from "./CheckInPanel";
 import { RoomBoard } from "./RoomBoard";
 import { WaitingPanel } from "./WaitingPanel";
-import "./helpdesk.css";
+import "./frontdesk.css";
 
-// The help desk's page: check patients in (from today's appointments, as
+// The front desk's page: check patients in (from today's appointments, as
 // walk-ins, or by registering them), put waiting patients in rooms, and
-// discharge them. Used by the help desk portal and by admins in the staff app.
-export function HelpDeskBoard() {
-  const desk = useHelpDesk();
+// discharge them. Used by the front desk portal and by admins in the staff app.
+export function FrontDeskBoard() {
+  const desk = useFrontDesk();
   const { providers } = useProviders();
   const [registering, setRegistering] = useState(false); // the New patient form is open
 
@@ -21,9 +21,9 @@ export function HelpDeskBoard() {
   const freeRooms = desk.rooms.filter((r) => r.status === "available").length;
 
   return (
-    <div className="ui-page helpdesk-page">
+    <div className="ui-page frontdesk-page">
       <PageHeader
-        title="Help Desk"
+        title="Front Desk"
         description={`${new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })} · Check patients in and put them in rooms.`}
         actions={
           <button className="ui-button" aria-expanded={registering} onClick={() => setRegistering((open) => !open)}>
@@ -66,10 +66,10 @@ export function HelpDeskBoard() {
       </section>
 
       {desk.loading ? (
-        <p className="ui-row-empty">Loading the help desk…</p>
+        <p className="ui-row-empty">Loading the front desk…</p>
       ) : (
         <>
-          <div className="helpdesk-columns">
+          <div className="frontdesk-columns">
             <CheckInPanel
               appointments={desk.appointments}
               patients={desk.patients}

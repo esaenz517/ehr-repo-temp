@@ -1,6 +1,6 @@
 """
 Check-ins CRUD
-The help desk queue: check a patient in, put them in a room, discharge them.
+The front desk queue: check a patient in, put them in a room, discharge them.
 
 A patient can only be given a room through a 'waiting' check-in, so this is the
 one place patients are assigned to rooms. Each function raises CheckInError with

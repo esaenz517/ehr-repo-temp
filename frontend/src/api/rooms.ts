@@ -10,7 +10,7 @@ export interface CreateRoomInput {
 
 // One function per backend endpoint under /rooms. Each just calls apiFetch
 // with the right path/method - no business logic lives here.
-// Patients are put in rooms from the help desk queue (api/helpDesk.ts).
+// Patients are put in rooms from the front desk queue (api/frontDesk.ts).
 export const roomsApi = {
   list: () => apiFetch<Room[]>("/rooms"),
   create: (input: CreateRoomInput) =>

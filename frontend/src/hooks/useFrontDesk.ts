@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { helpDeskApi } from "../api/helpDesk";
+import { frontDeskApi } from "../api/frontDesk";
 import { CreatePatientInput, patientsApi } from "../api/patients";
 import { roomsApi } from "../api/rooms";
 import type { CheckIn, DeskAppointment, Patient, Room } from "../types";
@@ -12,9 +12,9 @@ export function localToday(now = new Date()): string {
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
 
-// State + actions for the help desk board: today's appointments, the queue,
+// State + actions for the front desk board: today's appointments, the queue,
 // the rooms, and the patient list for walk-ins. Every action reloads all of it.
-export function useHelpDesk() {
+export function useFrontDesk() {
   const [appointments, setAppointments] = useState<DeskAppointment[]>([]);
   const [queue, setQueue] = useState<CheckIn[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -26,8 +26,8 @@ export function useHelpDesk() {
   const load = useCallback(async () => {
     try {
       const [appointmentData, queueData, roomData, patientData] = await Promise.all([
-        helpDeskApi.appointments(localToday()),
-        helpDeskApi.queue(),
+        frontDeskApi.appointments(localToday()),
+        frontDeskApi.queue(),
         roomsApi.list(),
         patientsApi.list(),
       ]);
@@ -37,7 +37,7 @@ export function useHelpDesk() {
       setPatients(patientData);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load the help desk");
+      setError(err instanceof Error ? err.message : "Failed to load the front desk");
     } finally {
       setLoading(false);
     }
@@ -65,7 +65,7 @@ export function useHelpDesk() {
 
   const checkIn = (patientId: number, appointmentId: number | null = null) =>
     run(async () => {
-      const row = await helpDeskApi.checkIn(patientId, appointmentId);
+      const row = await frontDeskApi.checkIn(patientId, appointmentId);
       return `${row.patient_name} is checked in and waiting for a room.`;
     }, "Failed to check the patient in");
 
@@ -73,25 +73,25 @@ export function useHelpDesk() {
   const registerAndCheckIn = (input: CreatePatientInput) =>
     run(async () => {
       const patient = await patientsApi.create(input);
-      const row = await helpDeskApi.checkIn(patient.patient_id);
+      const row = await frontDeskApi.checkIn(patient.patient_id);
       return `${row.patient_name} is registered and waiting for a room.`;
     }, "Failed to register the patient");
 
   const assignRoom = (checkInId: number, roomId: number) =>
     run(async () => {
-      const row = await helpDeskApi.assignRoom(checkInId, roomId);
+      const row = await frontDeskApi.assignRoom(checkInId, roomId);
       return `${row.patient_name} is in room ${row.room_number}.`;
     }, "Failed to assign the room");
 
   const discharge = (checkInId: number) =>
     run(async () => {
-      const row = await helpDeskApi.discharge(checkInId);
+      const row = await frontDeskApi.discharge(checkInId);
       return `${row.patient_name} was discharged; the room is free.`;
     }, "Failed to discharge the patient");
 
   const cancel = (checkInId: number) =>
     run(async () => {
-      const row = await helpDeskApi.cancel(checkInId);
+      const row = await frontDeskApi.cancel(checkInId);
       return `${row.patient_name}'s check-in was cancelled.`;
     }, "Failed to cancel the check-in");
 

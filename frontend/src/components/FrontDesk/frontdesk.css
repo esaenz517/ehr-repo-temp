@@ -1,8 +1,8 @@
-/* Help desk board. Shared look comes from common.css (ui-*); these are the
-   help-desk-only pieces, prefixed helpdesk-. Colors and spacing use theme.css tokens. */
+/* Front desk board. Shared look comes from common.css (ui-*); these are the
+   front-desk-only pieces, prefixed frontdesk-. Colors and spacing use theme.css tokens. */
 
 /* Check in and Waiting room side by side on wide screens, stacked on narrow ones */
-.helpdesk-columns {
+.frontdesk-columns {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
   gap: var(--space-4);
@@ -10,13 +10,13 @@
 }
 
 /* Empty lists sit inside a panel, so they don't need their own border */
-.helpdesk-empty {
+.frontdesk-empty {
   border: none;
   border-radius: 0;
 }
 
 /* Appointment time block at the start of a row */
-.helpdesk-time {
+.frontdesk-time {
   flex: 0 0 auto;
   min-width: 76px;
   padding: var(--space-1) var(--space-2);
@@ -29,20 +29,20 @@
 }
 
 /* Walk-in picker in the Check in panel's footer */
-.helpdesk-walkin {
+.frontdesk-walkin {
   display: flex;
   flex: 1;
   align-items: center;
   gap: var(--space-2);
 }
 
-.helpdesk-walkin-label {
+.frontdesk-walkin-label {
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text);
 }
 
-.helpdesk-walkin .ui-input {
+.frontdesk-walkin .ui-input {
   flex: 1;
   min-width: 0;
   height: var(--control-height-sm);
@@ -50,14 +50,14 @@
 }
 
 /* Room dropdown + buttons on a waiting row */
-.helpdesk-assign .ui-input {
+.frontdesk-assign .ui-input {
   width: 150px;
   height: var(--control-height-sm);
   font-size: var(--text-sm);
 }
 
 /* Room cards: as many 200px+ columns as fit */
-.helpdesk-rooms {
+.frontdesk-rooms {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: var(--space-3);
@@ -66,7 +66,7 @@
   list-style: none;
 }
 
-.helpdesk-room {
+.frontdesk-room {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -77,30 +77,30 @@
   background: var(--color-surface);
 }
 
-.helpdesk-room--occupied {
+.frontdesk-room--occupied {
   border-top-color: var(--color-primary);
   background: var(--color-primary-tint-soft);
 }
 
-.helpdesk-room-header {
+.frontdesk-room-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: var(--space-2);
 }
 
-.helpdesk-room-number {
+.frontdesk-room-number {
   font-weight: 600;
   color: var(--color-primary);
 }
 
-.helpdesk-room-unit {
+.frontdesk-room-unit {
   margin: 0;
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
 
-.helpdesk-room-patient {
+.frontdesk-room-patient {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -109,23 +109,23 @@
   border-top: 1px solid var(--color-border-light);
 }
 
-.helpdesk-room-name {
+.frontdesk-room-name {
   font-weight: 600;
   color: var(--color-text);
 }
 
-.helpdesk-room-meta {
+.frontdesk-room-meta {
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
 
-.helpdesk-room-discharge {
+.frontdesk-room-discharge {
   align-self: flex-start;
   margin-top: var(--space-2);
 }
 
 @media (max-width: 480px) {
-  .helpdesk-walkin {
+  .frontdesk-walkin {
     flex-wrap: wrap;
   }
 }

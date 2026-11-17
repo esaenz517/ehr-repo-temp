@@ -3,7 +3,7 @@ import { CreateRoomInput, roomsApi } from "../api/rooms";
 import type { Room } from "../types";
 
 // All the state + actions RoomsPage needs. Keeps data-fetching out of the components.
-// Patients are put in rooms from the help desk (hooks/useHelpDesk.ts), not here.
+// Patients are put in rooms from the front desk (hooks/useFrontDesk.ts), not here.
 export function useRooms() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);

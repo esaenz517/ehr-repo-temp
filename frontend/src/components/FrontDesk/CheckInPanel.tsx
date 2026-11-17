@@ -40,10 +40,10 @@ export function CheckInPanel({ appointments, patients, queue, onCheckIn }: Check
       description="Today's appointments that haven't arrived yet."
       flush
       footer={
-        <div className="helpdesk-walkin">
-          <label className="helpdesk-walkin-label" htmlFor="helpdesk-walkin">Walk-in</label>
+        <div className="frontdesk-walkin">
+          <label className="frontdesk-walkin-label" htmlFor="frontdesk-walkin">Walk-in</label>
           <select
-            id="helpdesk-walkin"
+            id="frontdesk-walkin"
             className="ui-input"
             value={walkIn}
             onChange={(e) => setWalkIn(e.target.value)}
@@ -66,12 +66,12 @@ export function CheckInPanel({ appointments, patients, queue, onCheckIn }: Check
       }
     >
       {appointments.length === 0 ? (
-        <p className="ui-row-empty helpdesk-empty">No more appointments today.</p>
+        <p className="ui-row-empty frontdesk-empty">No more appointments today.</p>
       ) : (
         <ul className="ui-row-list">
           {appointments.map((a) => (
             <li key={a.appointment_id} className="ui-row">
-              <span className="helpdesk-time">{formatClock(a.appointment_time)}</span>
+              <span className="frontdesk-time">{formatClock(a.appointment_time)}</span>
               <div className="ui-row-main">
                 <div className="ui-row-title">{a.patient_name}</div>
                 <div className="ui-row-subtitle">

@@ -1,7 +1,7 @@
 """
 Roles Model
 SQLAlchemy ORM class mapped to the dbo.Roles table.
-Active roles: ADMIN, FACULTY_INSTRUCTOR, STUDENT, HELP_DESK. Each person (dbo.Staff) has one.
+Active roles: ADMIN, FACULTY_INSTRUCTOR, STUDENT, FRONT_DESK. Each person (dbo.Staff) has one.
 """
 
 from sqlalchemy import Boolean, Column, Integer, String

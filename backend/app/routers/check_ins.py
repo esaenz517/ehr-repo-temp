@@ -1,9 +1,9 @@
 """
-Help Desk Router (/help-desk)
-Endpoints for the help desk portal: today's appointments, the check-in queue,
+Front Desk Router (/front-desk)
+Endpoints for the front desk portal: today's appointments, the check-in queue,
 and moving a checked-in patient into a room and back out.
 
-Patients are only put in rooms here (POST /help-desk/check-ins/{id}/room); the
+Patients are only put in rooms here (POST /front-desk/check-ins/{id}/room); the
 Rooms page manages the rooms themselves.
 """
 
@@ -20,7 +20,7 @@ from app.schemas.check_ins import CheckIn, CheckInCreate, CheckInRoom, DeskAppoi
 from app.security.authorization import require_permission
 from app.security.current_user import get_current_login
 
-router = APIRouter(prefix="/help-desk", tags=["help desk"])
+router = APIRouter(prefix="/front-desk", tags=["front desk"])
 
 
 def _run(action):
@@ -31,7 +31,7 @@ def _run(action):
 
 
 # Scheduled appointments on a day (default today) that haven't been checked in.
-# The frontend sends its own local date so "today" matches the help desk's clock.
+# The frontend sends its own local date so "today" matches the front desk's clock.
 @router.get("/appointments", response_model=list[DeskAppointment])
 def list_appointments(
     day: date | None = Query(default=None),

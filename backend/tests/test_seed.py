@@ -8,7 +8,7 @@ from tests.conftest import PASSWORDS, sign_in
 @pytest.mark.parametrize("username", sorted(PASSWORDS))
 def test_every_demo_login_works(api, username):
     client = sign_in(api, username)
-    assert client.me["role"] in ("ADMIN", "FACULTY_INSTRUCTOR", "STUDENT", "HELP_DESK")
+    assert client.me["role"] in ("ADMIN", "FACULTY_INSTRUCTOR", "STUDENT", "FRONT_DESK")
     assert client.me["staffid"] is not None
 
 
@@ -52,7 +52,7 @@ def test_cases_have_rubrics(instructor):
 
 def test_departments_are_populated(admin):
     people = admin.get("/staff").json()
-    # Admins and the help desk work across departments
-    non_admins = [p for p in people if p["role_name"] not in ("ADMIN", "HELP_DESK")]
+    # Admins and the front desk work across departments
+    non_admins = [p for p in people if p["role_name"] not in ("ADMIN", "FRONT_DESK")]
     assert all(p["department_id"] is not None for p in non_admins)
     assert {p["department_name"] for p in non_admins} >= {"Nursing", "Pharmacy", "Physical Therapy", "Interprofessional Health Sciences"}

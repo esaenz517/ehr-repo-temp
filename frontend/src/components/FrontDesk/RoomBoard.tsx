@@ -25,37 +25,37 @@ export function RoomBoard({ rooms, roomed, onDischarge }: RoomBoardProps) {
       {rooms.length === 0 ? (
         <p className="ui-muted ui-flush">No rooms have been set up yet.</p>
       ) : (
-        <ul className="helpdesk-rooms">
+        <ul className="frontdesk-rooms">
           {rooms.map((room) => {
             const stay = byRoom.get(room.room_id);
             const free = room.status === "available";
             return (
-              <li key={room.room_id} className={`helpdesk-room${free ? "" : " helpdesk-room--occupied"}`}>
-                <div className="helpdesk-room-header">
-                  <span className="helpdesk-room-number">Room {room.room_number}</span>
+              <li key={room.room_id} className={`frontdesk-room${free ? "" : " frontdesk-room--occupied"}`}>
+                <div className="frontdesk-room-header">
+                  <span className="frontdesk-room-number">Room {room.room_number}</span>
                   <span className={free ? "ui-badge ui-badge--success" : "ui-badge ui-badge--solid"}>
                     {free ? "Available" : "Occupied"}
                   </span>
                 </div>
-                <p className="helpdesk-room-unit">{room.unit || "No unit"}</p>
+                <p className="frontdesk-room-unit">{room.unit || "No unit"}</p>
                 {!free && (
-                  <div className="helpdesk-room-patient">
-                    <span className="helpdesk-room-name">{stay?.patient_name ?? room.occupant_name ?? "Unknown patient"}</span>
+                  <div className="frontdesk-room-patient">
+                    <span className="frontdesk-room-name">{stay?.patient_name ?? room.occupant_name ?? "Unknown patient"}</span>
                     {stay?.roomed_at && (
-                      <span className="helpdesk-room-meta">
+                      <span className="frontdesk-room-meta">
                         Since {formatUtcClock(stay.roomed_at)} · {since(stay.roomed_at)}
                       </span>
                     )}
                     {stay ? (
                       <button
-                        className="ui-button ui-button--secondary ui-button--small helpdesk-room-discharge"
+                        className="ui-button ui-button--secondary ui-button--small frontdesk-room-discharge"
                         disabled={busy !== null}
                         onClick={() => discharge(stay.check_in_id)}
                       >
                         Discharge
                       </button>
                     ) : (
-                      <span className="helpdesk-room-meta">Not from a check-in</span>
+                      <span className="frontdesk-room-meta">Not from a check-in</span>
                     )}
                   </div>
                 )}

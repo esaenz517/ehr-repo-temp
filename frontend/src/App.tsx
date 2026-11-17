@@ -7,7 +7,7 @@ import { ProvidersPage } from "./components/ProvidersPage";
 import { RoomsPage } from "./components/RoomsPage";
 import { CoursesPage } from "./components/CoursesPage";
 import { Sidebar } from "./components/Sidebar/Sidebar";
-import { can, isHelpDesk, isPatient, isStudent, roleLabel, viewsFor, type View } from "./access";
+import { can, isFrontDesk, isPatient, isStudent, roleLabel, viewsFor, type View } from "./access";
 import { LoginPage } from "./components/Login/LoginPage";
 import { loginApi } from "./api/login";
 import type { Assignment, LoginResponse } from "./types";
@@ -22,8 +22,8 @@ import { noteAccessLogApi } from "./api/noteAccessLog";
 import { AuditLogPage } from "./components/Audit/AuditLogPage";
 import { AboutPage } from "./components/About/AboutPage";
 import { PatientPortal } from "./components/Portal/PatientPortal";
-import { HelpDeskPortal } from "./components/HelpDesk/HelpDeskPortal";
-import { HelpDeskBoard } from "./components/HelpDesk/HelpDeskBoard";
+import { FrontDeskPortal } from "./components/FrontDesk/FrontDeskPortal";
+import { FrontDeskBoard } from "./components/FrontDesk/FrontDeskBoard";
 
 function App() {
   const [view, setView] = useState<View>("home");
@@ -130,9 +130,9 @@ function App() {
   if (isPatient(user)) {
     return <PatientPortal user={user} onLogout={logout} />;
   }
-  // The help desk gets its own portal: check-in and rooms only
-  if (isHelpDesk(user)) {
-    return <HelpDeskPortal user={user} onLogout={logout} />;
+  // The front desk gets its own portal: check-in and rooms only
+  if (isFrontDesk(user)) {
+    return <FrontDeskPortal user={user} onLogout={logout} />;
   }
   // Every login belongs to a person; without one there is nothing to show.
   if (user.staffid === null) {
@@ -190,7 +190,7 @@ function App() {
         )}
         {view === "providers" && canView("providers") && <ProvidersPage />}
         {view === "rooms" && canView("rooms") && <RoomsPage />}
-        {view === "helpDesk" && canView("helpDesk") && <HelpDeskBoard />}
+        {view === "frontDesk" && canView("frontDesk") && <FrontDeskBoard />}
         {view === "courses" && canView("courses") && <CoursesPage permissions={user.permissions} />}
         {view === "createCase" && canView("createCase") && <CreateCasePage staffId={staffId} />}
         {view === "assignments" &&

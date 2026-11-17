@@ -1,6 +1,6 @@
 // The three staff roles. Every person (Staff) has exactly one.
 // PATIENT is reported by /auth/me for a patient portal account; it has no permissions.
-export type RoleName = "ADMIN" | "FACULTY_INSTRUCTOR" | "STUDENT" | "HELP_DESK" | "PATIENT";
+export type RoleName = "ADMIN" | "FACULTY_INSTRUCTOR" | "STUDENT" | "FRONT_DESK" | "PATIENT";
 
 export interface Role {
   role_id: number;
@@ -154,7 +154,7 @@ export interface Room {
   occupant_mrn: string | null;
 }
 
-// Help desk queue (backend /help-desk). Status: waiting -> roomed -> done, or cancelled.
+// Front desk queue (backend /front-desk). Status: waiting -> roomed -> done, or cancelled.
 export type CheckInStatus = "waiting" | "roomed" | "done" | "cancelled";
 
 export interface CheckIn {
@@ -173,7 +173,7 @@ export interface CheckIn {
   checked_out_at: string | null; // UTC
 }
 
-// A scheduled appointment on the help desk's day that isn't checked in yet
+// A scheduled appointment on the front desk's day that isn't checked in yet
 export interface DeskAppointment {
   appointment_id: number;
   patient_id: number;

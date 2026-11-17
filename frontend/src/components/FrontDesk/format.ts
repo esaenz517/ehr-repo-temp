@@ -1,4 +1,4 @@
-// Time formatting for the help desk board.
+// Time formatting for the front desk board.
 
 // Appointment times are clinic-local (no time zone), so they parse as local time.
 export const formatClock = (value: string) =>

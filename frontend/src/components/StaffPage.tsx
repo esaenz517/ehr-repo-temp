@@ -20,7 +20,7 @@ const ROLE_FILTERS: { value: "all" | RoleName; label: string }[] = [
   { value: "ADMIN", label: "Administrators" },
   { value: "FACULTY_INSTRUCTOR", label: "Instructors" },
   { value: "STUDENT", label: "Students" },
-  { value: "HELP_DESK", label: "Help desk" },
+  { value: "FRONT_DESK", label: "Front desk" },
 ];
 
 
@@ -95,7 +95,7 @@ export function StaffPage({ permissions }: StaffPageProps) {
     <div className="ui-page">
       <PageHeader
         title="Staff"
-        description="Instructors, administrators, students, and help desk staff, with their role, department, and discipline."
+        description="Instructors, administrators, students, and front desk staff, with their role, department, and discipline."
         actions={
           <>
             {canCreateStudents && formButton("import", "Import students")}

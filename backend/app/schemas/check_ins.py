@@ -1,7 +1,7 @@
 """
 Check-ins Schemas
-Request/response shapes for the help desk API (/help-desk). Responses carry the
-patient's name, MRN, and room number so the help desk board needs no extra lookups.
+Request/response shapes for the front desk API (/front-desk). Responses carry the
+patient's name, MRN, and room number so the front desk board needs no extra lookups.
 """
 
 from datetime import datetime

@@ -266,8 +266,8 @@ WHERE NOT EXISTS (
 )
 ORDER BY a.Seq;
 
--- HELP DESK DEMO
--- Two appointments today (El Paso time, so the demo matches the help desk's clock),
+-- FRONT DESK DEMO
+-- Two appointments today (El Paso time, so the demo matches the front desk's clock),
 -- one walk-in waiting for a room, and a check-in for each patient already in a room.
 INSERT INTO dbo.Appointments (PatientId, ProviderId, AppointmentDateTime, Location, Status)
 SELECT p.PatientId, pr.ProviderId, a.At, a.Location, 'scheduled'

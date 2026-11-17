@@ -303,8 +303,8 @@ WHERE NOT EXISTS (
 );
 GO
 
--- HELP DESK DEMO
--- Two appointments today (El Paso time, so the demo matches the help desk's clock),
+-- FRONT DESK DEMO
+-- Two appointments today (El Paso time, so the demo matches the front desk's clock),
 -- one walk-in waiting for a room, and a check-in for each patient already in a room.
 DECLARE @today DATETIME2 = CAST(CAST(SYSDATETIMEOFFSET() AT TIME ZONE 'Mountain Standard Time' AS DATE) AS DATETIME2);
 

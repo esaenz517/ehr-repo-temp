@@ -18,7 +18,7 @@ export function RoomsPage() {
         title="Rooms"
         description={
           loading
-            ? "Set up rooms. Patients are put in rooms from the Help Desk."
+            ? "Set up rooms. Patients are put in rooms from the Front Desk."
             : `${rooms.length - occupied} of ${rooms.length} room${rooms.length === 1 ? "" : "s"} available.`
         }
         actions={

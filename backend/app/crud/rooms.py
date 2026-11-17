@@ -1,7 +1,7 @@
 '''
 Rooms CRUD
 DB access functions for rooms - list, get, create, delete.
-Patients are put in rooms through the help desk queue (crud/check_ins.py).
+Patients are put in rooms through the front desk queue (crud/check_ins.py).
 '''
 
 from sqlalchemy.orm import Session
